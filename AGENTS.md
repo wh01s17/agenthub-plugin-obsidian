@@ -1,9 +1,8 @@
 # AgentHub — instrucciones para agentes
 
-**Lee `plan.md` antes de hacer nada.** Es el punto de entrada del plan (el resto está en `docs/plan/`):
-la §0 dice el estado actual, la próxima tarea y el protocolo para retomar y cerrar el trabajo (marcar
-tareas, actualizar §0.1, añadir una entrada a `docs/plan/bitacora.md`, registrar ADR en
-`docs/plan/07-decisiones-adr.md`).
+**Lee `plan.md` antes de hacer nada.** Es la fuente de verdad: la §0 dice el estado actual, la
+próxima tarea y el protocolo para retomar y cerrar el trabajo (marcar tareas, actualizar §0.1,
+añadir una entrada a la bitácora §17, registrar ADR en §12).
 
 ## Comandos
 
@@ -21,7 +20,6 @@ Todo debe estar en verde antes de empezar y antes de cada commit.
 ## Reglas rápidas
 
 - `src/core/` y `src/adapters/` no importan `obsidian` (ver plan §4.2).
-- Ningún archivo debe superar 1000 líneas salvo justificación (generados, fixtures).
 - Sin `innerHTML`; estilos solo en `styles.css` con prefijo `agenthub-` y variables CSS de Obsidian.
 - Textos de UI vía `t()` (`src/i18n/`), con las mismas claves en `en.ts` y `es.ts`.
 - Commits: Conventional Commits con el ID de tarea, p. ej. `feat(ui): permission card [T2.8]`.
