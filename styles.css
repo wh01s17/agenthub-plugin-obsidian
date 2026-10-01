@@ -1,0 +1,36 @@
+/* AgentHub — usar solo variables CSS de Obsidian para respetar los temas. */
+
+.agenthub-view {
+  padding: 0;
+}
+
+.agenthub-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.agenthub-header {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  padding: var(--size-4-2) var(--size-4-3);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+}
+
+.agenthub-header-title {
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+}
+
+.agenthub-empty {
+  margin: auto;
+  padding: var(--size-4-6);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.agenthub-empty-title {
+  font-weight: var(--font-semibold);
+  color: var(--text-normal);
+}
