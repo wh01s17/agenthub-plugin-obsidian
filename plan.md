@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 3 — Integración con Obsidian** (Fase 2 cerrada y verificada en Obsidian por el usuario) |
-| Próxima tarea | **T3.3** (sugeridor `@`) y **T3.4** (sugeridor `/`) |
+| Fase actual | **Fase 3 completa en código** (verificación manual en Obsidian pendiente). Siguiente: **Fase 4 — Persistencia e historial** |
+| Próxima tarea | Verificar Fase 3 en Obsidian → **T4.1** (`SessionStore`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1201,11 +1201,12 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T3.1** `PromptBuilder` (§4.8) + tests (ACP y texto). *CA:* RF-08 (lógica).
 - [x] **T3.2** Chips de contexto: nota activa (toggle, sigue a la hoja activa), selección. *CA:* RF-08 (UI).
-- [ ] **T3.3** Sugeridor `@` de archivos (fuzzy con `prepareFuzzySearch`, carpetas incluidas).
-- [ ] **T3.4** Sugeridor `/` alimentado por `available_commands_update`. *CA:* RF-09.
+- [x] **T3.3** Sugeridor `@` de archivos (fuzzy con `prepareFuzzySearch`, carpetas incluidas).
+- [x] **T3.4** Sugeridor `/` alimentado por `available_commands_update`. *CA:* RF-09.
 - [x] **T3.5** Comandos (§4.13) + entrada en menú contextual del editor ("Enviar selección a AgentHub"). *CA:* RF-14.
 - [x] **T3.6** Rutas y wikilinks clicables en mensajes y tool cards. *CA:* RF-17.
-- [ ] **T3.7** Modos de directorio de trabajo + instrucciones del vault configurables. *CA:* RF-16.
+- [x] **T3.7** Modos de directorio de trabajo + instrucciones del vault configurables. *(Hecho: raíz del vault / carpeta
+  personalizada + instrucciones con `{{configDir}}`. Pendiente menor: modo "carpeta de la nota activa".)* *CA:* RF-16.
 
 ### Fase 4 — Persistencia e historial
 
@@ -1460,3 +1461,8 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   adjuntos visibles en los mensajes del usuario, rutas de herramientas clicables. Ajuste `includeActiveNote`.
   Comandos: enviar selección (también en el menú contextual del editor), preguntar sobre la nota actual, nueva sesión,
   detener. 115 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — **T3.3, T3.4** hechos: `src/core/suggest.ts` (disparadores `@nota` y `/comando`,
+  puntuación por prefijo de nombre > subcadena > subsecuencia, inserción de `@[[ruta]]`/`/comando`) y `Composer` con lista
+  de sugerencias (flechas, Intro/Tab, Escape, ratón sin perder el foco; `textarea` nativo con `aria-autocomplete`,
+  `aria-controls` y `aria-activedescendant`, `listbox`/`option`). Los comandos `/` salen de `available_commands_update`.
+  **Fase 3 completa en código** (T3.7 sin el modo "carpeta de la nota activa"). 120 tests; falta verificación manual.

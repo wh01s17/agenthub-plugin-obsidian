@@ -80,3 +80,30 @@ describe('context in prompts (Fase 3)', () => {
     expect(onClearSelection).toHaveBeenCalled();
   });
 });
+
+describe('composer suggestions (T3.3/T3.4)', () => {
+  it('completes @ with vault notes using the keyboard', async () => {
+    const { host, sessions } = makeViewHost(() => 'end_turn');
+    host.notes.listNotes = () => ['Notas/Ideas.md', 'Bienvenida.md'];
+    render(
+      <App
+        host={host}
+        session={sessions.create('claude-acp') ?? null}
+        onAgentChange={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    const input = screen.getByRole<HTMLTextAreaElement>('textbox', {
+      name: 'Message to the agent',
+    });
+    input.value = 'mira @ide';
+    input.setSelectionRange(9, 9);
+    fireEvent.input(input);
+    const option = await screen.findByRole('option', { name: 'Notas/Ideas.md' });
+    expect(option.getAttribute('aria-selected')).toBe('true');
+    expect(input.getAttribute('aria-activedescendant')).toBe(option.id);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(input.value).toBe('mira @[[Notas/Ideas.md]] '));
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+});

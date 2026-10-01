@@ -133,6 +133,8 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         busy={busy}
         disabled={state.status === 'closed'}
         sendWith={host.settings.sendWith}
+        notes={() => host.notes.listNotes()}
+        commands={state.commands}
         onSend={onSend}
         onStop={() => void session.cancel()}
       />
