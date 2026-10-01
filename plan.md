@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
-| Próxima tarea | **T2.2** (`ShellEnv` + `BinaryResolver`, según ADR-017) y **T2.3** (`ProcessRunner`) |
+| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅, T2.2 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
+| Próxima tarea | **T2.3** (`ProcessRunner` + `ProcessRegistry` + `LineDecoder`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1172,7 +1172,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 ### Fase 2 — Núcleo + ACP (MVP)
 
 - [x] **T2.1** `core/types.ts` y `core/AgentAdapter.ts` según §4.3–4.4. *CA:* compila; sin `any`.
-- [ ] **T2.2** `ShellEnv` + `BinaryResolver` + tests. *Dep:* S1. *CA:* resuelve `claude`, `codex`,
+- [x] **T2.2** `ShellEnv` + `BinaryResolver` + tests. *Dep:* S1. *CA:* resuelve `claude`, `codex`,
   `gemini`, `opencode`, `npx` en este equipo lanzando Obsidian desde el lanzador gráfico.
 - [ ] **T2.3** `ProcessRunner` + `ProcessRegistry` + `LineDecoder` + tests (con scripts de prueba que
   emiten JSONL partido, UTF-8 multibyte, líneas enormes, y que ignoran SIGTERM).
@@ -1394,3 +1394,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   Siguiente: T2.2 y T2.3.
 - **2026-10-01 · usuario + Claude (Opus 5.5)** — **T0.5** verificada: tras reiniciar Obsidian la vista AgentHub sigue
   abierta en el panel derecho. **Fase 0 cerrada.**
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.2** hecho: `src/process/ShellEnv.ts` (`LoginShellEnv` asíncrono y
+  cacheado con `invalidate()`, parseo de `env -0` entre marcadores, `mergePath`) y `src/process/BinaryResolver.ts`
+  (`which` con PATHEXT en Windows, `CommandResolver`: `process.env` → shell de login solo si falta el comando,
+  rutas del shell añadidas al final, `extraPath` primero). 16 tests nuevos (28 en total). La comprobación real en
+  Obsidian queda cubierta por S1 y se repetirá al conectar la detección de agentes (T2.7).
