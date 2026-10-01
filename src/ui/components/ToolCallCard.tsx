@@ -68,7 +68,14 @@ function Content({ item }: { item: ToolContent }) {
   }
 }
 
-export function ToolCallCard({ call, expanded = false }: { call: ToolCall; expanded?: boolean }) {
+interface ToolCallCardProps {
+  call: ToolCall;
+  expanded?: boolean;
+  /** Opens a path in Obsidian; returns false when it is outside the vault. */
+  onOpenPath?: (path: string) => boolean;
+}
+
+export function ToolCallCard({ call, expanded = false, onOpenPath }: ToolCallCardProps) {
   const status = t(STATUS_TEXT[call.status]);
   return (
     <details class={`agenthub-tool agenthub-tool-${call.status}`} open={expanded}>
@@ -85,7 +92,21 @@ export function ToolCallCard({ call, expanded = false }: { call: ToolCall; expan
           <ul class="agenthub-tool-locations">
             {call.locations.map((location) => (
               <li key={`${location.path}:${location.line ?? ''}`}>
-                {location.path}
+                {onOpenPath ? (
+                  <a
+                    href="#"
+                    class="agenthub-path-link"
+                    title={t('openFile', { path: location.path })}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      onOpenPath(location.path);
+                    }}
+                  >
+                    {location.path}
+                  </a>
+                ) : (
+                  location.path
+                )}
                 {location.line !== undefined ? `:${location.line}` : ''}
               </li>
             ))}

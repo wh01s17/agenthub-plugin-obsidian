@@ -110,4 +110,22 @@ export const es: Messages = {
   debugTitle: 'Salida de depuración',
   debugEmpty: 'Todavía no hay salida.',
   configLabel: '{name}',
+
+  // Obsidian context (Fase 3)
+  settingsIncludeActive: 'Incluir la nota actual',
+  settingsIncludeActiveDesc: 'Adjunta por defecto la nota en la que trabajas a cada mensaje.',
+  chipActiveNote: 'Nota actual: {name}',
+  chipActiveNoteOff: 'Nota actual no incluida: {name}',
+  chipToggleActive: 'Incluir la nota actual',
+  chipSelection: 'Selección: {name} (líneas {from}–{to})',
+  chipRemove: 'Quitar',
+  attachedNote: 'Nota: {path}',
+  attachedSelection: 'Selección: {path} ({from}–{to})',
+  cmdSendSelection: 'Enviar la selección a AgentHub',
+  cmdAskAboutNote: 'Preguntar a AgentHub sobre la nota actual',
+  cmdNewSession: 'Empezar una sesión nueva de AgentHub',
+  cmdStop: 'Detener el turno actual de AgentHub',
+  suggestNotes: 'Notas',
+  suggestCommands: 'Comandos del agente',
+  openFile: 'Abrir {path}',
 };

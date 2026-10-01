@@ -13,6 +13,8 @@ interface MessageListProps {
   items: readonly TranscriptItem[];
   showThoughts: boolean;
   onPermission: (id: string, outcome: PermissionOutcome) => void;
+  /** Opens a vault path; returns false when it cannot be opened. */
+  onOpenPath: (path: string) => boolean;
 }
 
 /** How close to the bottom (px) still counts as "following" the conversation. */
@@ -22,11 +24,30 @@ function userText(blocks: readonly PromptBlock[]): string {
   return blocks.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('\n\n');
 }
 
+function Attachments({ blocks }: { blocks: readonly PromptBlock[] }) {
+  const labels = blocks.flatMap((block) => {
+    if (block.type === 'file') return [t('attachedNote', { path: block.path })];
+    if (block.type === 'selection') {
+      return [t('attachedSelection', { path: block.path, from: block.fromLine, to: block.toLine })];
+    }
+    return [];
+  });
+  if (labels.length === 0) return null;
+  return (
+    <ul class="agenthub-attachments">
+      {labels.map((label) => (
+        <li key={label}>{label}</li>
+      ))}
+    </ul>
+  );
+}
+
 function Item({
   app,
   item,
   showThoughts,
   onPermission,
+  onOpenPath,
 }: Omit<MessageListProps, 'items'> & { item: TranscriptItem }) {
   switch (item.kind) {
     case 'user':
@@ -34,6 +55,7 @@ function Item({
         <div class="agenthub-message is-user">
           <div class="agenthub-message-author">{t('you')}</div>
           <div class="agenthub-message-text">{userText(item.blocks)}</div>
+          <Attachments blocks={item.blocks} />
         </div>
       );
     case 'assistant':
@@ -50,7 +72,7 @@ function Item({
         </details>
       );
     case 'tool':
-      return <ToolCallCard call={item.call} />;
+      return <ToolCallCard call={item.call} onOpenPath={onOpenPath} />;
     case 'plan':
       return <PlanView entries={item.entries} />;
     case 'permission':
@@ -79,7 +101,13 @@ function itemKey(item: TranscriptItem, index: number): string {
   }
 }
 
-export function MessageList({ app, items, showThoughts, onPermission }: MessageListProps) {
+export function MessageList({
+  app,
+  items,
+  showThoughts,
+  onPermission,
+  onOpenPath,
+}: MessageListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const following = useRef(true);
 
@@ -104,6 +132,7 @@ export function MessageList({ app, items, showThoughts, onPermission }: MessageL
           item={item}
           showThoughts={showThoughts}
           onPermission={onPermission}
+          onOpenPath={onOpenPath}
         />
       ))}
     </div>

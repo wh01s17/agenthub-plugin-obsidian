@@ -109,6 +109,24 @@ export const en = {
   debugTitle: 'Debug output',
   debugEmpty: 'No output yet.',
   configLabel: '{name}',
+
+  // Obsidian context (Fase 3)
+  settingsIncludeActive: 'Include the current note',
+  settingsIncludeActiveDesc: 'Attach the note you are working on to each message by default.',
+  chipActiveNote: 'Current note: {name}',
+  chipActiveNoteOff: 'Current note not included: {name}',
+  chipToggleActive: 'Include the current note',
+  chipSelection: 'Selection: {name} (lines {from}–{to})',
+  chipRemove: 'Remove',
+  attachedNote: 'Note: {path}',
+  attachedSelection: 'Selection: {path} ({from}–{to})',
+  cmdSendSelection: 'Send selection to AgentHub',
+  cmdAskAboutNote: 'Ask AgentHub about the current note',
+  cmdNewSession: 'Start a new AgentHub session',
+  cmdStop: 'Stop the current AgentHub turn',
+  suggestNotes: 'Notes',
+  suggestCommands: 'Agent commands',
+  openFile: 'Open {path}',
 };
 
 export type Messages = typeof en;

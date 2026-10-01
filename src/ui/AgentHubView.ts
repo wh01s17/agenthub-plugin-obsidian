@@ -2,6 +2,7 @@ import { ItemView, type ViewStateResult, type WorkspaceLeaf } from 'obsidian';
 import { h, render } from 'preact';
 import { AGENTHUB_ICON, VIEW_TYPE_AGENTHUB } from '../constants';
 import type { ChatSession } from '../core/ChatSession';
+import type { SelectionRef } from '../core/PromptBuilder';
 import { t } from '../i18n';
 import { App } from './App';
 import type { ViewHost } from './ViewHost';
@@ -22,6 +23,7 @@ export function parseViewState(state: unknown): AgentHubViewState {
 export class AgentHubView extends ItemView {
   private session: ChatSession | null = null;
   private restoredId: string | null = null;
+  private selection: SelectionRef | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -83,6 +85,22 @@ export class AgentHubView extends ItemView {
     this.host.app.workspace.requestSaveLayout();
   }
 
+  /** Attaches an editor selection to the next message (command "Send selection"). */
+  attachSelection(selection: SelectionRef): void {
+    this.selection = selection;
+    this.renderApp();
+    this.focusComposer();
+  }
+
+  focusComposer(): void {
+    this.contentEl.querySelector<HTMLTextAreaElement>('.agenthub-composer-input')?.focus();
+  }
+
+  /** Stops the running turn, if any. */
+  stop(): void {
+    void this.session?.cancel();
+  }
+
   private ensureSession(preferredAgent?: string): void {
     if (this.session) return;
     const { agents, settings, sessions } = this.host;
@@ -108,6 +126,11 @@ export class AgentHubView extends ItemView {
         session: this.session,
         onAgentChange: (agentId: string) => this.startNewSession(agentId),
         onNewSession: () => this.startNewSession(),
+        selection: this.selection,
+        onClearSelection: () => {
+          this.selection = null;
+          this.renderApp();
+        },
       }),
       this.contentEl,
     );

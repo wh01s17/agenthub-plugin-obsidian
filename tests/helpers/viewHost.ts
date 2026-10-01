@@ -30,6 +30,13 @@ export function makeViewHost(script: StubScript, settings: Partial<AgentHubSetti
     settings: merged,
     agents,
     sessions,
+    notes: {
+      activeNotePath: () => null,
+      onActiveNoteChange: () => () => {},
+      readNote: () => Promise.resolve(null),
+      listNotes: () => [],
+      openPath: () => false,
+    },
     openSettings: vi.fn(),
     workingDirectory: () => '/vault',
   };

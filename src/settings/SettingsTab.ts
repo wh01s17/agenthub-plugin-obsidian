@@ -263,6 +263,17 @@ export class AgentHubSettingTab extends PluginSettingTab {
         );
       });
 
+    new Setting(el)
+      .setName(t('settingsIncludeActive'))
+      .setDesc(t('settingsIncludeActiveDesc'))
+      .addToggle((toggle) =>
+        toggle.setValue(settings.includeActiveNote).onChange((value) =>
+          this.save((s) => {
+            s.includeActiveNote = value;
+          }),
+        ),
+      );
+
     new Setting(el).setName(t('settingsSendWith')).addDropdown((dropdown) =>
       dropdown
         .addOption('enter', t('settingsSendEnter'))

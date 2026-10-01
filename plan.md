@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 3 — Integración con Obsidian** (Fase 2 cerrada y verificada en Obsidian por el usuario) |
-| Próxima tarea | **T3.1** (`PromptBuilder`) |
+| Próxima tarea | **T3.3** (sugeridor `@`) y **T3.4** (sugeridor `/`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1199,12 +1199,12 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 ### Fase 3 — Integración con Obsidian (contexto)
 
-- [ ] **T3.1** `PromptBuilder` (§4.8) + tests (ACP y texto). *CA:* RF-08 (lógica).
-- [ ] **T3.2** Chips de contexto: nota activa (toggle, sigue a la hoja activa), selección. *CA:* RF-08 (UI).
+- [x] **T3.1** `PromptBuilder` (§4.8) + tests (ACP y texto). *CA:* RF-08 (lógica).
+- [x] **T3.2** Chips de contexto: nota activa (toggle, sigue a la hoja activa), selección. *CA:* RF-08 (UI).
 - [ ] **T3.3** Sugeridor `@` de archivos (fuzzy con `prepareFuzzySearch`, carpetas incluidas).
 - [ ] **T3.4** Sugeridor `/` alimentado por `available_commands_update`. *CA:* RF-09.
-- [ ] **T3.5** Comandos (§4.13) + entrada en menú contextual del editor ("Enviar selección a AgentHub"). *CA:* RF-14.
-- [ ] **T3.6** Rutas y wikilinks clicables en mensajes y tool cards. *CA:* RF-17.
+- [x] **T3.5** Comandos (§4.13) + entrada en menú contextual del editor ("Enviar selección a AgentHub"). *CA:* RF-14.
+- [x] **T3.6** Rutas y wikilinks clicables en mensajes y tool cards. *CA:* RF-17.
 - [ ] **T3.7** Modos de directorio de trabajo + instrucciones del vault configurables. *CA:* RF-16.
 
 ### Fase 4 — Persistencia e historial
@@ -1453,3 +1453,10 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   Regla añadida en §15 y `AGENTS.md`. Además se verificó **en Obsidian real** (vía CDP, agente simulado): chat con
   streaming, tarjetas de herramientas, flujo de permisos (Allow), Detener y limpieza de procesos al cerrar la sesión.
 - **2026-10-01 · usuario** — Verificación manual de la Fase 2 en Obsidian: ajustes con los tres agentes detectados y vista lista. **Fase 2 cerrada.**
+- **2026-10-01 · Claude (Opus 5.5)** — **T3.1, T3.2, T3.5, T3.6** hechos: `src/core/PromptBuilder.ts` (mensaje + selección
+  + menciones `@[[ruta]]` + nota activa, sin duplicados, presupuesto de 200 000 caracteres embebidos),
+  `src/host/NoteContext.ts` (nota activa vía `file-open`, lectura con `cachedRead`, resolución por ruta o enlace,
+  abrir rutas del vault), `ContextChips` (nota actual activable con `aria-pressed`, selección capturada con quitar),
+  adjuntos visibles en los mensajes del usuario, rutas de herramientas clicables. Ajuste `includeActiveNote`.
+  Comandos: enviar selección (también en el menú contextual del editor), preguntar sobre la nota actual, nueva sesión,
+  detener. 115 tests.

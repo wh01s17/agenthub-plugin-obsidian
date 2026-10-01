@@ -1,6 +1,14 @@
+import { useEffect, useState } from 'preact/hooks';
 import type { ChatSession } from '../core/ChatSession';
+import {
+  buildPrompt,
+  extractMentions,
+  type NoteRef,
+  type SelectionRef,
+} from '../core/PromptBuilder';
 import { t } from '../i18n';
 import { Composer } from './components/Composer';
+import { ContextChips } from './components/ContextChips';
 import { DebugPanel } from './components/DebugPanel';
 import { Header } from './components/Header';
 import { MessageList } from './components/MessageList';
@@ -14,9 +22,13 @@ export interface AppProps {
   session: ChatSession | null;
   onAgentChange: (agentId: string) => void;
   onNewSession: () => void;
+  /** Selection captured by the "Send selection" command, attached to the next message. */
+  selection?: SelectionRef | null;
+  onClearSelection?: () => void;
 }
 
-export function App({ host, session, onAgentChange, onNewSession }: AppProps) {
+export function App(props: AppProps) {
+  const { host, session } = props;
   if (!session) {
     return (
       <div class="agenthub-app">
@@ -30,26 +42,54 @@ export function App({ host, session, onAgentChange, onNewSession }: AppProps) {
       </div>
     );
   }
-  return (
-    <ChatView
-      key={session.localId}
-      host={host}
-      session={session}
-      onAgentChange={onAgentChange}
-      onNewSession={onNewSession}
-    />
+  return <ChatView key={session.localId} {...props} session={session} />;
+}
+
+/** Resolves the context for one message and sends it (plan §4.8). */
+async function sendWithContext(
+  host: ViewHost,
+  session: ChatSession,
+  text: string,
+  context: { activeNotePath: string | null; selection: SelectionRef | null },
+): Promise<void> {
+  const read = (path: string) => host.notes.readNote(path);
+  const isNote = (note: NoteRef | null): note is NoteRef => note !== null;
+  const [mentions, activeNote] = await Promise.all([
+    Promise.all(extractMentions(text).map(read)).then((notes) => notes.filter(isNote)),
+    context.activeNotePath ? read(context.activeNotePath) : Promise.resolve(null),
+  ]);
+  await session.send(
+    buildPrompt({
+      text,
+      mentions,
+      activeNote: activeNote ?? undefined,
+      selection: context.selection ?? undefined,
+    }),
   );
 }
 
-function ChatView({
-  host,
-  session,
-  onAgentChange,
-  onNewSession,
-}: AppProps & { session: ChatSession }) {
+function useActiveNotePath(host: ViewHost): string | null {
+  const [path, setPath] = useState(() => host.notes.activeNotePath());
+  useEffect(
+    () => host.notes.onActiveNoteChange(() => setPath(host.notes.activeNotePath())),
+    [host],
+  );
+  return path;
+}
+
+function ChatView(props: AppProps & { session: ChatSession }) {
+  const { host, session, onAgentChange, onNewSession, selection = null } = props;
   const state = useSessionState(session);
   const agentLabel = host.agents.config(state.agentId)?.label ?? state.agentId;
   const busy = session.busy;
+  const activeNotePath = useActiveNotePath(host);
+  const [includeActive, setIncludeActive] = useState(host.settings.includeActiveNote);
+
+  const onSend = (text: string) => {
+    const context = { activeNotePath: includeActive ? activeNotePath : null, selection };
+    props.onClearSelection?.();
+    void sendWithContext(host, session, text, context);
+  };
 
   return (
     <div class="agenthub-app" data-session-id={state.localId}>
@@ -76,16 +116,24 @@ function ChatView({
           items={state.items}
           showThoughts={host.settings.showThoughts}
           onPermission={(id, outcome) => session.resolvePermission(id, outcome)}
+          onOpenPath={(path) => host.notes.openPath(path)}
         />
       )}
       {host.settings.debugPanel && <DebugPanel lines={session.debugLog()} />}
       <StatusBar status={state.status} usage={state.usage} />
+      <ContextChips
+        activeNotePath={activeNotePath}
+        includeActive={includeActive}
+        selection={selection}
+        onToggleActive={() => setIncludeActive((value) => !value)}
+        onRemoveSelection={() => props.onClearSelection?.()}
+      />
       <Composer
         agentLabel={agentLabel}
         busy={busy}
         disabled={state.status === 'closed'}
         sendWith={host.settings.sendWith}
-        onSend={(text) => void session.send([{ type: 'text', text }])}
+        onSend={onSend}
         onStop={() => void session.cancel()}
       />
     </div>

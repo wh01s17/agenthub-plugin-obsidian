@@ -368,3 +368,50 @@
   padding-left: var(--size-4-3);
   border-left: 2px solid var(--background-modifier-border);
 }
+
+/* ── Context (Fase 3) ───────────────────────────────────────────────────── */
+
+.agenthub-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-1);
+  padding: 0 var(--size-4-3);
+}
+
+.agenthub-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  min-height: 24px;
+  padding: 0 var(--size-4-2);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-l);
+  background: var(--background-secondary);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-chip.is-on {
+  color: var(--text-normal);
+  border-color: var(--interactive-accent);
+}
+
+.agenthub-chip.is-off {
+  text-decoration: line-through;
+}
+
+.agenthub-chip-remove {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.agenthub-attachments {
+  margin: var(--size-4-1) 0 0;
+  padding-left: var(--size-4-4);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-path-link {
+  color: var(--link-color);
+}
