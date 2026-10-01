@@ -7,7 +7,19 @@ const LEVEL_ICONS = { info: 'info', warning: 'alert-triangle', error: 'alert-oct
 export function noticeText(notice: Notice): string {
   switch (notice.key) {
     case 'agentError':
-      return notice.message;
+      switch (notice.kind) {
+        case 'missing-binary':
+          return t('errorMissingBinary');
+        case 'auth':
+          return t('errorAuth');
+        case 'startup':
+          return t('errorStartup');
+        case 'crash':
+          return t('errorCrash');
+        default:
+          // Protocol errors carry the agent's own message, which we cannot translate.
+          return notice.message;
+      }
     case 'permissionDenied':
       return t('noticePermissionDenied', { tool: notice.toolName });
     case 'contextNotRestored':

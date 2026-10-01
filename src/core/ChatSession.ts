@@ -286,6 +286,7 @@ export class ChatSession {
             message: error.message,
             hint: error.hint,
             detail: error.detail,
+            kind: error.kind,
           }
         : {
             key: 'agentError' as const,

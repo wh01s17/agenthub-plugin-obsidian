@@ -168,6 +168,12 @@ export const en = {
   // Diffs (T6.1)
   diffAdded: 'Added: ',
   diffRemoved: 'Removed: ',
+
+  // Agent errors (T6.2)
+  errorMissingBinary: 'The agent command was not found.',
+  errorAuth: 'The agent needs you to log in.',
+  errorStartup: 'The agent did not respond in time.',
+  errorCrash: 'The agent process stopped unexpectedly.',
 };
 
 export type Messages = typeof en;

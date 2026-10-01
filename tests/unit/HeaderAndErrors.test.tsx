@@ -81,3 +81,18 @@ describe('NoticeItem (T2.10)', () => {
     expect(screen.getByText('Write was not allowed to run.')).toBeTruthy();
   });
 });
+
+describe('agent errors are explained by kind (T6.2)', () => {
+  it('uses translated text for known kinds and the agent message otherwise', () => {
+    render(
+      <NoticeItem
+        level="error"
+        notice={{ key: 'agentError', kind: 'crash', message: 'raw english text' }}
+      />,
+    );
+    expect(screen.getByRole('alert').textContent).toContain(
+      'The agent process stopped unexpectedly.',
+    );
+    expect(screen.queryByText('raw english text')).toBeNull();
+  });
+});

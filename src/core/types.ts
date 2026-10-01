@@ -4,6 +4,9 @@
 
 export type AgentId = string;
 
+/** Why an agent failed, so the UI can explain it in the user's language. */
+export type AgentErrorKind = 'missing-binary' | 'auth' | 'startup' | 'crash' | 'protocol';
+
 export type ToolKind =
   'read' | 'edit' | 'delete' | 'move' | 'search' | 'execute' | 'think' | 'fetch' | 'other';
 
@@ -97,7 +100,7 @@ export type AgentEvent =
   /** Direct mode without interactive prompts: a tool call the agent was not allowed to run. */
   | { type: 'permission.denied'; toolName: string; toolCallId?: string; input?: unknown }
   | { type: 'turn.end'; stopReason: StopReason }
-  | { type: 'error'; message: string; recoverable: boolean; detail?: string }
+  | { type: 'error'; message: string; recoverable: boolean; detail?: string; kind?: AgentErrorKind }
   | { type: 'debug'; source: 'stdout' | 'stderr' | 'rpc'; line: string };
 
 export type AgentEventType = AgentEvent['type'];
@@ -143,7 +146,7 @@ export type PermissionOutcome =
 
 /** What a notice says, as data: the UI turns it into localized text (`t()`), the core never does. */
 export type Notice =
-  | { key: 'agentError'; message: string; hint?: string; detail?: string }
+  | { key: 'agentError'; message: string; hint?: string; detail?: string; kind?: AgentErrorKind }
   | { key: 'permissionDenied'; toolName: string }
   /** A stored session was reopened but the agent could not continue its previous context. */
   | { key: 'contextNotRestored' }

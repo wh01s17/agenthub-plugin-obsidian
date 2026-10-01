@@ -115,6 +115,7 @@ export function reduce(state: SessionViewState, action: SessionAction): SessionV
         key: 'agentError',
         message: action.message,
         detail: action.detail,
+        kind: action.kind,
       });
       return action.recoverable ? next : { ...next, status: 'error' };
     }

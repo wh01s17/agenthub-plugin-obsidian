@@ -133,6 +133,7 @@ export class AcpSession implements AgentSession {
       type: 'error',
       message: error.message,
       recoverable: !crashed,
+      kind: error.kind,
       detail: error.detail ?? error.hint,
     });
     this.emit({ type: 'turn.end', stopReason: 'error' });
@@ -254,6 +255,7 @@ export class AcpSession implements AgentSession {
           type: 'error',
           message: error.message,
           recoverable: false,
+          kind: 'crash',
           detail: error.detail,
         });
       }, 0);

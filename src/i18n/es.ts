@@ -169,4 +169,10 @@ export const es: Messages = {
   // Diffs (T6.1)
   diffAdded: 'Añadido: ',
   diffRemoved: 'Eliminado: ',
+
+  // Agent errors (T6.2)
+  errorMissingBinary: 'No se encontró el comando del agente.',
+  errorAuth: 'El agente necesita que inicies sesión.',
+  errorStartup: 'El agente no respondió a tiempo.',
+  errorCrash: 'El proceso del agente se detuvo inesperadamente.',
 };

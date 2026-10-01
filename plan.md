@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
-| Próxima tarea | **T6.5** (README completo) → T6.2/T6.3 (i18n y accesibilidad) → T6.6 (release) |
+| Próxima tarea | **T6.5** (README completo) → T6.3 (accesibilidad) → T6.6 (release) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1240,7 +1240,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 ### Fase 6 — Pulido y publicación
 
 - [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
-- [ ] **T6.2** i18n es/en completo; textos en *sentence case*.
+- [x] **T6.2** i18n es/en completo; textos en *sentence case*.
 - [ ] **T6.3** Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
   orden de foco, tamaño de objetivos).
@@ -1536,3 +1536,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   coste en la barra de estado). **T6.1** hecho: `src/ui/diffLines.ts` (jsdiff 9, contexto de 2 líneas y tramos sin
   cambios colapsados) y `DiffView` en las tarjetas de edición (añadidos/eliminados con colores del tema, prefijos
   "Añadido/Eliminado" para lectores de pantalla, enlace para abrir el archivo). 160 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — **T6.2** hecho: los errores del agente llevan su tipo (`AgentErrorKind` en
+  `AgentEvent`/`Notice`) y la UI los traduce (`errorMissingBinary`, `errorAuth`, `errorStartup`, `errorCrash`); los
+  errores de protocolo muestran el mensaje del propio agente. Toda la UI pasa por `t()` con las mismas claves en/es
+  (comprobado por test). 161 tests.

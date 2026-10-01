@@ -1,6 +1,8 @@
-/** Failures the UI explains to the user, each with an actionable hint when possible (plan §4.14). */
-export type AgentErrorKind = 'missing-binary' | 'auth' | 'startup' | 'crash' | 'protocol';
+import type { AgentErrorKind } from './types';
 
+export type { AgentErrorKind };
+
+/** Failures the UI explains to the user, each with an actionable hint when possible (plan §4.14). */
 export class AgentError extends Error {
   constructor(
     readonly kind: AgentErrorKind,
