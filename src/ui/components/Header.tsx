@@ -72,23 +72,31 @@ export function Header(props: HeaderProps) {
         </button>
       </div>
       {configOptions.length > 0 && (
-        <div class="agenthub-header-row agenthub-config">
+        <div class="agenthub-config">
           {configOptions.map((option) => (
-            <select
+            // The visible name tells what each value means ("Off" alone is ambiguous).
+            <div
               key={option.id}
-              class="dropdown agenthub-config-select"
-              aria-label={option.name}
+              class="agenthub-config-item"
               title={option.description ?? option.name}
-              value={option.currentValue}
-              disabled={busy}
-              onChange={(event) => props.onConfigChange(option.id, event.currentTarget.value)}
             >
-              {option.options.map((choice) => (
-                <option key={choice.value} value={choice.value} title={choice.description}>
-                  {choice.name}
-                </option>
-              ))}
-            </select>
+              <span class="agenthub-config-label" aria-hidden="true">
+                {option.name}
+              </span>
+              <select
+                class="dropdown agenthub-config-select"
+                aria-label={option.name}
+                value={option.currentValue}
+                disabled={busy}
+                onChange={(event) => props.onConfigChange(option.id, event.currentTarget.value)}
+              >
+                {option.options.map((choice) => (
+                  <option key={choice.value} value={choice.value} title={choice.description}>
+                    {choice.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           ))}
         </div>
       )}

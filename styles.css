@@ -34,25 +34,43 @@
 }
 
 .agenthub-config {
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: var(--size-4-1) var(--size-4-2);
+}
+
+.agenthub-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.agenthub-config-label {
+  overflow: hidden;
+  padding-left: 2px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .agenthub-config-select {
-  flex: 0 1 auto;
+  width: 100%;
   min-width: 0;
-  max-width: 100%;
-  height: auto;
-  padding-block: 2px;
+  height: 26px;
+  padding-block: 0;
   padding-inline: var(--size-4-2) var(--size-4-6);
   border: var(--border-width) solid var(--background-modifier-border);
   background-color: transparent;
   box-shadow: none;
-  color: var(--text-muted);
+  color: var(--text-normal);
   font-size: var(--font-ui-smaller);
+  text-overflow: ellipsis;
 }
 
 .agenthub-config-select:hover {
-  color: var(--text-normal);
+  border-color: var(--background-modifier-border-hover);
 }
 
 .agenthub-icon-button {
