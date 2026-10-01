@@ -5,6 +5,7 @@ allowBuilds:
 # eslint-plugin-obsidianmd declara obsidian@1.8.7 como peer exacto; usamos tipos más nuevos.
 strictPeerDependencies: false
 
-# vite 8.3.2 es más reciente que la antigüedad mínima de publicación configurada.
+# Versiones más recientes que la antigüedad mínima de publicación configurada en pnpm.
 minimumReleaseAgeExclude:
   - vite@8.3.2
+  - '@agentclientprotocol/sdk@1.6.0'
