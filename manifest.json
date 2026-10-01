@@ -1,0 +1,9 @@
+{
+  "id": "agenthub",
+  "name": "AgentHub",
+  "version": "0.0.1",
+  "minAppVersion": "1.8.7",
+  "description": "Use coding agents like Claude Code and Codex from a sidebar.",
+  "author": "AgentHub contributors",
+  "isDesktopOnly": true
+}

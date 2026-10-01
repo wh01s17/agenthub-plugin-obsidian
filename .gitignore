@@ -1,0 +1,14 @@
+node_modules/
+main.js
+*.js.map
+.DS_Store
+coverage/
+
+# Vault de pruebas: se versionan las notas, no el estado de Obsidian
+test-vault/.obsidian/*
+!test-vault/.obsidian/community-plugins.json
+
+# Skills locales de agentes (instaladas por autoskills; no se suben a GitHub)
+.agents/
+.claude/skills/
+skills-lock.json
