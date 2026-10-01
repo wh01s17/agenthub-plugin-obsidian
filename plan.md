@@ -40,9 +40,9 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 0 — Fundaciones** (casi cerrada: solo falta confirmar la restauración de la vista tras reiniciar Obsidian) |
-| Próxima tarea | Confirmar restauración tras reinicio (T0.5) → **Fase 1 (spikes S1–S4)** y **T2.1** |
-| Tareas en paralelo posibles | Spikes **S1–S4** (Fase 1) no dependen del scaffolding |
+| Fase actual | **Fase 1 — Spikes**: S2–S4 ✅ hechos; S1 y S5 pendientes (requieren Obsidian abierto). Fase 0 casi cerrada (falta confirmar restauración tras reinicio, T0.5). |
+| Próxima tarea | **T2.1** (tipos de dominio, ya ajustados con S2–S4) en paralelo con **S1** (consola de Obsidian, lo ejecuta el usuario) |
+| Tareas en paralelo posibles | S1, S5 y T0.5 (manuales, en Obsidian) ∥ T2.1, T2.3, T2.4 (código) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
 | Código existente | Scaffolding: build/lint/test en verde, vista lateral vacía con Preact, i18n es/en, vault de pruebas. Repo git en rama `main` con los commits de Fase 0 (sin remoto). |
@@ -225,7 +225,7 @@ Protocolo abierto (iniciado por Zed) para comunicar un **cliente** (editor) con 
 **JSON-RPC 2.0 sobre stdio** (NDJSON). Es exactamente el problema de este plugin. Sitio: `agentclientprotocol.com`.
 SDK TypeScript: `@agentclientprotocol/sdk` (1.6.0 ✅ en npm, 2026-10-01).
 
-Flujo esencial (⚠️ verificar nombres exactos contra el SDK instalado en el spike S2):
+Flujo esencial (✅ verificado en S2 con SDK 1.6.0 y 3 agentes reales; detalle en `docs/spikes/S2-acp.md`):
 
 1. Cliente lanza el agente y llama `initialize` con `protocolVersion`, `clientCapabilities`
    (`fs.readTextFile`, `fs.writeTextFile`, `terminal`) y `clientInfo`.
@@ -243,7 +243,26 @@ Flujo esencial (⚠️ verificar nombres exactos contra el SDK instalado en el s
    `terminal/*` (si se anunció la capacidad).
 7. Cancelar: notificación `session/cancel`; los permisos pendientes se responden con `cancelled`.
 8. Reanudar: `session/load` (si `loadSession`), que re-emite el historial como `session/update`.
-9. Modos: `session/set_mode`. Modelos: API marcada como inestable en algunas versiones ⚠️.
+9. Modos y modelos: **`configOptions`** en la respuesta de `session/new` (`category: 'mode'|'model'`,
+   `type: 'select'`, `currentValue`, `options[]`), cambiados con `session/set_config_option`. Algunos agentes
+   envían además `modes` (`session/set_mode`) y `models`. OpenCode solo usa `configOptions`.
+10. Otros métodos del agente (SDK 1.6.0): `session/{list,delete,fork,resume,close}`, `logout`, `providers/*`.
+    `sessionCapabilities` anuncia cuáles soporta cada agente.
+
+**API del SDK 1.6.0** ✅: `ClientSideConnection` está **deprecado**. Usar el builder:
+`acp.client({ name }).onRequest(acp.methods.client.session.requestPermission, (ctx) => …).connectWith(acp.ndJsonStream(input, output), async (ctx) => …)`;
+`ctx.request(acp.methods.agent.initialize, …)`; `ctx.buildSession(cwd).start()` → `ActiveSession`
+(`prompt()`, `nextUpdate()` → `session_update` | `stop`, `dispose()`).
+
+**Diferencias observadas respecto a la especificación base** ✅ (S2):
+- `sessionUpdate` adicionales: `usage_update` (`{used, size, cost?}` = uso de la ventana de contexto) y
+  `session_info_update` (Codex).
+- Los chunks traen `messageId` del agente.
+- Contenido de tool calls envuelto: `{type:'content', content:{type:'text', text}}`; diffs `{type:'diff', path, oldText, newText}`.
+- Claude crea el `tool_call` vacío (`rawInput: {}`) y lo completa con `tool_call_update`.
+- Con `terminal: false`, Codex envía igualmente contenido `{type:'terminal', terminalId}` y la salida en
+  `_meta.terminal_output_delta` / `_meta.terminal_exit`.
+- **Ningún agente probado usa `fs/read_text_file` ni `fs/write_text_file`**: escriben directamente en disco.
 
 `ContentBlock` del prompt: `text`, `resource_link` (uri a archivo), `resource` (contenido embebido,
 requiere `embeddedContext`), `image`, `audio`.
@@ -256,10 +275,10 @@ Agentes con ACP ✅ (2026-10-01):
 
 | Agente | Comando ACP | Notas |
 |---|---|---|
-| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp` (0.85.0) | Adaptador sobre el Claude Agent SDK. ⚠️ confirmar que reutiliza la sesión/login existente de Claude. |
-| Codex | `npx -y @agentclientprotocol/codex-acp` (2.1.1) | Adaptador oficial del ecosistema ACP. |
-| Gemini CLI | `gemini --acp` | Nativo (`--experimental-acp` está deprecado). |
-| OpenCode | `opencode acp` | Nativo. |
+| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0` | ✅ Reutiliza el login existente (sin API key). Pide permisos (`allow_once`, `allow_always`, `reject_once`). Modo por defecto `default` (Manual). ~20 s para la tarea de prueba. |
+| Codex | `npx -y @agentclientprotocol/codex-acp@2.1.1` | ✅ Reutiliza el login de ChatGPT. Modo por defecto `agent` (*Auto review*: no pidió permisos para escribir). ~45 s. |
+| Gemini CLI | `gemini --acp` | ⚠️ Handshake OK, pero con la cuenta personal de este equipo la sesión falla: *"no longer supported for Gemini Code Assist for individuals… migrate to Antigravity"*. Preset deshabilitado por defecto. |
+| OpenCode | `opencode acp` | ✅ Nativo. No pidió permisos para escribir. Modelo vía `configOptions`. ~19 s. |
 
 > Los paquetes antiguos `@zed-industries/claude-code-acp` y `@zed-industries/codex-acp` están
 > **deprecados** ✅; no usarlos.
@@ -269,7 +288,7 @@ Agentes con ACP ✅ (2026-10-01):
 - Modo no interactivo: `-p/--print`.
 - `--output-format text|json|stream-json`; `--input-format text|stream-json` (streaming bidireccional por stdin).
 - `--include-partial-messages` (deltas de texto; requiere `--print` + `stream-json`); `--verbose`
-  (⚠️ históricamente requerido para `stream-json`; verificar).
+  ✅ **obligatorio** con `stream-json` (S3). El prompt puede ir por **stdin** ✅.
 - Sesiones: `--session-id <uuid>` (fijar id al crear), `-r/--resume <id>`, `-c/--continue`, `--fork-session`.
 - Permisos: `--permission-mode` ∈ `acceptEdits`, `auto`, `bypassPermissions`, `manual`, `dontAsk`, `plan`.
   `--permission-prompts host|none` (con `--print`: `host` = el host del SDK o `--permission-prompt-tool`
@@ -280,7 +299,8 @@ Agentes con ACP ✅ (2026-10-01):
   `--settings`, `--setting-sources`, `--model`, `--effort low|medium|high|xhigh|max`.
 - Otros útiles: `--bare` (sin hooks/plugins), `--safe-mode`, `--replay-user-messages`, `--json-schema`.
 
-Eventos de `stream-json` (⚠️ estructura a confirmar con fixtures en S3): `system/init`
+Eventos de `stream-json` (✅ confirmados en S3, ver `docs/spikes/S3-claude-native.md`; además hay `system/hook_*`,
+`system/commands_changed`, `system/status`, `system/thinking_tokens`, `system/permission_denied` en vivo y `rate_limit_event`): `system/init`
 (session_id, model, tools, slash_commands, permissionMode, cwd), `assistant` (bloques `text`,
 `thinking`, `tool_use`), `user` (bloques `tool_result`), `stream_event` (eventos crudos de la API
 con `--include-partial-messages`), `result` (subtype, `is_error`, `result`, `session_id`,
@@ -296,10 +316,11 @@ con `--include-partial-messages`), `result` (subtype, `is_error`, `result`, `ses
 - Sandbox: `-s/--sandbox read-only|workspace-write|danger-full-access`.
   `--approve-for-me` (aprobaciones revisadas automáticamente dentro de workspace-write),
   `--dangerously-bypass-approvals-and-sandbox`.
-- Reanudar: `codex exec resume [OPTIONS] [SESSION_ID] [PROMPT]` (o `--last`).
+- Reanudar: `codex exec [--json -s … --skip-git-repo-check] resume <SESSION_ID> -` ✅. **Las opciones de sandbox van antes de
+  `resume`** (después no las acepta) y el directorio de trabajo es el `cwd` del proceso.
 - `codex app-server` [experimental]: servidor JSON-RPC (`--listen stdio://` por defecto) usado por
   integraciones de IDE; soporta aprobaciones interactivas. `codex app-server generate-ts` genera los tipos TS.
-- Eventos `--json` (⚠️ confirmar con fixtures en S4): `thread.started{thread_id}`, `turn.started`,
+- Eventos `--json` (✅ confirmados en S4 salvo `reasoning`/`todo_list`/`mcp_tool_call`/`web_search`, que no aparecieron): `thread.started{thread_id}`, `turn.started`,
   `item.started|item.updated|item.completed{item}` con `item.type` ∈ `agent_message`, `reasoning`,
   `command_execution`, `file_change`, `mcp_tool_call`, `web_search`, `todo_list`, `error`;
   `turn.completed{usage}`, `turn.failed{error}`, `error`.
@@ -412,11 +433,22 @@ export interface PlanEntry { content: string; status: 'pending' | 'in_progress' 
 export interface SlashCommand { name: string; description?: string; inputHint?: string }
 export interface ModeInfo { id: string; name: string; description?: string }
 export interface ModelInfo { id: string; name: string }
-export interface Usage { inputTokens?: number; outputTokens?: number; cachedInputTokens?: number; costUsd?: number }
+export interface Usage {
+  inputTokens?: number; outputTokens?: number; cachedInputTokens?: number;
+  costUsd?: number;
+  contextUsed?: number; contextSize?: number;          // ACP usage_update {used, size}
+}
+export interface ConfigOption {                         // ACP configOptions (modo, modelo, …)
+  id: string; name: string; description?: string;
+  category?: 'mode' | 'model' | string;
+  currentValue: string;
+  options: { value: string; name: string; description?: string }[];
+}
 
 export type AgentEvent =
-  | { type: 'session.ready'; nativeSessionId: string; modes?: ModeInfo[]; currentModeId?: string; models?: ModelInfo[]; currentModelId?: string }
-  | { type: 'message.chunk'; role: 'assistant' | 'user'; messageId: string; text: string }
+  | { type: 'session.ready'; nativeSessionId: string; configOptions?: ConfigOption[]; modes?: ModeInfo[]; currentModeId?: string; models?: ModelInfo[]; currentModelId?: string }
+  | { type: 'config'; configOptions: ConfigOption[] }
+  | { type: 'message.chunk'; role: 'assistant' | 'user'; messageId: string; text: string } // messageId del agente si lo envía
   | { type: 'thought.chunk'; messageId: string; text: string }
   | { type: 'message.end'; messageId: string }
   | { type: 'tool.call'; call: ToolCall }
@@ -521,6 +553,7 @@ export interface AgentSession {
   cancel(): Promise<void>;
   setMode?(modeId: string): Promise<void>;
   setModel?(modelId: string): Promise<void>;
+  setConfigOption?(id: string, value: string): Promise<void>; // preferido sobre setMode/setModel si existe
   dispose(): Promise<void>;        // mata el proceso, libera recursos
 }
 
@@ -790,11 +823,11 @@ Sin hotkeys por defecto (guía de Obsidian); los usuarios las asignan.
    adaptador — p. ej. `claude-agent-acp` ⚠️ nombre del bin —, preferirlo por velocidad). Versión vía
    `--version` cuando aplique.
 2. `createSession()`:
-   - spawn → `ClientSideConnection(clientImpl, ndJsonStream(...))`.
+   - spawn → `acp.client({ name: 'agenthub' }).onRequest(…).connectWith(ndJsonStream(...), …)` (`ClientSideConnection` está deprecado).
    - `initialize({ protocolVersion, clientCapabilities: { fs: { readTextFile: true, writeTextFile: true }, terminal: false }, clientInfo: { name: 'agenthub', version } })`.
    - Guardar `agentCapabilities` → mapear a `AgentCapabilities`.
    - `session/new({ cwd, mcpServers: [] })` (en Fase 5, añadir el servidor MCP del plugin si `mcpCapabilities.http`).
-   - Emitir `session.ready` con modos/modelos.
+   - Emitir `session.ready` con `configOptions` (y `modes`/`models` si llegan).
 3. `clientImpl`:
    - `sessionUpdate(n)` → mapear (tabla abajo) y emitir.
    - `requestPermission(p)` → `host.requestPermission()`; responder `{ outcome }`.
@@ -819,9 +852,12 @@ Mapeo `session/update` → `AgentEvent`:
 | `plan` | `plan` |
 | `available_commands_update` | `commands` |
 | `current_mode_update` | `mode` |
+| `usage_update` | `usage` (`contextUsed`, `contextSize`, `costUsd` si `cost.currency` = USD) |
+| `session_info_update` | `debug` (estado del hilo; sin UI por ahora) |
+| `_meta.terminal_output_delta` / `terminal_exit` en `tool_call_update` | `tool.update` con `content: [{type:'terminal', output, exitCode}]` acumulado |
 | desconocido | `debug` |
 
-El `messageId` se genera en el cliente: un mensaje del asistente termina (`message.end`) cuando llega
+El `messageId` se toma del chunk si viene (todos los agentes probados lo envían); si no, se genera. Un mensaje del asistente termina (`message.end`) cuando llega
 un evento de otro tipo (tool_call, plan…) o `turn.end`.
 
 ### 5.2 `ClaudeNativeAdapter` (modo directo, Fase 5)
@@ -833,13 +869,13 @@ Un proceso **por turno** (simple y robusto); la continuidad la da `--session-id`
 claude -p --output-format stream-json --verbose --include-partial-messages \
   --session-id <uuid> --permission-mode <modo> --permission-prompts none \
   [--model <m>] [--append-system-prompt "<instrucciones vault>"] [--add-dir ...] [extraArgs]
-# prompt por stdin (evita límites/escapado de argumentos) ⚠️ confirmar que -p lee stdin si no hay argumento
+# prompt por stdin ✅ (evita límites/escapado de argumentos); --verbose es obligatorio ✅
 
 # turnos siguientes
 claude -p ... --resume <uuid>
 ```
 
-Mapeo (⚠️ confirmar con fixtures S3):
+Mapeo (✅ fixtures en `tests/fixtures/claude/`):
 
 | stream-json | Evento de dominio |
 |---|---|
@@ -849,7 +885,8 @@ Mapeo (⚠️ confirmar con fixtures S3):
 | `assistant` bloque `text` | si no hubo parciales: `message.chunk` completo; luego `message.end` |
 | `assistant` bloque `tool_use` | `tool.call` (`kind` por nombre: `Read`→read; `Edit`/`Write`/`MultiEdit`/`NotebookEdit`→edit; `Bash`→execute; `Grep`/`Glob`→search; `WebFetch`/`WebSearch`→fetch; `TodoWrite`→**plan**; `Task`/`mcp__*`→other) |
 | `user` bloque `tool_result` | `tool.update` (status completed/failed según `is_error`, contenido) |
-| `result` | `usage` (`total_cost_usd`, `usage`) + `permission.denied` por cada denegación + `turn.end` (`success`→`end_turn`; `error_max_turns`→`max_turn_requests`; otros errores→`error`) |
+| `system` / `permission_denied` (en vivo) | `permission.denied` |
+| `result` | `usage` (`total_cost_usd`, `usage`) + `turn.end` (`success`→`end_turn`; `error_max_turns`→`max_turn_requests`; otros errores→`error`) |
 
 Mejora posible (evaluar): proceso persistente con `--input-format stream-json` (menos latencia por turno).
 
@@ -857,10 +894,10 @@ Mejora posible (evaluar): proceso persistente con `--input-format stream-json` (
 
 ```bash
 codex exec --json --skip-git-repo-check -C <cwd> -s <sandbox> [-m <modelo>] [--add-dir ...] -   # prompt por stdin
-codex exec resume <thread_id> --json --skip-git-repo-check ... -   # ⚠️ confirmar orden/aceptación de flags tras `resume`
+cd <cwd> && codex exec --json --skip-git-repo-check -s <sandbox> resume <thread_id> -   # ✅ opciones ANTES de `resume`
 ```
 
-Mapeo (⚠️ confirmar con fixtures S4):
+Mapeo (✅ fixtures en `tests/fixtures/codex/`):
 
 | Evento `--json` | Evento de dominio |
 |---|---|
@@ -883,7 +920,7 @@ Nota: `exec` no emite deltas de texto → la respuesta aparece completa (capacid
 |---|---|---|---|---|
 | `claude-acp` | Claude Code | acp | `npx` | `-y @agentclientprotocol/claude-agent-acp` |
 | `codex-acp` | Codex | acp | `npx` | `-y @agentclientprotocol/codex-acp` |
-| `gemini` | Gemini CLI | acp | `gemini` | `--acp` |
+| `gemini` | Gemini CLI (deshabilitado por defecto, ver §3.3) | acp | `gemini` | `--acp` |
 | `opencode` | OpenCode | acp | `opencode` | `acp` |
 | `claude-native` | Claude Code (directo) | claude-native | `claude` | — |
 | `codex-native` | Codex (directo) | codex-native | `codex` | — |
@@ -1107,16 +1144,16 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   Hyprland: `require('child_process').spawnSync('claude',['--version'])` con `process.env` vs con el
   entorno de `$SHELL -ilc 'env -0'`. Medir el tiempo del shell de login. Revisar variables `ELECTRON_*`.
   *CA:* estrategia de §4.7 confirmada o ajustada.
-- [ ] **S2 ACP** — Script Node mínimo con `@agentclientprotocol/sdk` que haga `initialize` →
+- [x] **S2 ACP** — Script Node mínimo con `@agentclientprotocol/sdk` que haga `initialize` →
   `session/new` → `prompt` ("lee README.md y crea notas/prueba.md") contra `gemini --acp`,
   `opencode acp`, `claude-agent-acp` y `codex-acp`. Grabar todo el tráfico JSON-RPC en
   `tests/fixtures/acp/<agente>/`. Confirmar: capacidades, `authMethods`, uso de `fs/*` del cliente,
   forma de `request_permission`, `loadSession`, modos/modelos, y que Claude/Codex reutilizan el login
   existente (suscripción) sin API key. *CA:* §3.3 y §5.1 actualizados sin ⚠️ críticos.
-- [ ] **S3 Claude directo** — Grabar fixtures `stream-json`: texto simple, con `Read`, con edición
+- [x] **S3 Claude directo** — Grabar fixtures `stream-json`: texto simple, con `Read`, con edición
   denegada (`--permission-prompts none`), con `--resume`, con `--include-partial-messages`.
   Confirmar si `-p` lee el prompt de stdin y si `--verbose` es obligatorio. *CA:* §3.4/§5.2 confirmados.
-- [ ] **S4 Codex directo** — Grabar fixtures `exec --json` fuera de un repo git
+- [x] **S4 Codex directo** — Grabar fixtures `exec --json` fuera de un repo git
   (`--skip-git-repo-check`), con comando, con `file_change`, y `exec resume` con prompt por stdin.
   *CA:* §3.5/§5.3 confirmados.
 - [ ] **S5 Render** — En el vault de pruebas, medir `MarkdownRenderer.render` re-renderizando un
@@ -1210,6 +1247,9 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-009 | Las escrituras `fs/write_text_file` de ACP pasan por la Vault API con guardia de rutas. | Obsidian refresca editores abiertos; control de `.obsidian/`. | Escritura directa con `fs` (desincroniza editores). | Aceptada |
 | ADR-010 | Fijar versiones de adaptadores ACP en los presets. | Los adaptadores evolucionan rápido (p. ej. renombres de paquetes). | `@latest` (roturas silenciosas). | Aceptada |
 | ADR-011 | `minAppVersion` 1.8.7 (antes 1.7.2). | `getLanguage()` (i18n) existe desde 1.8.7; el entorno usa 1.13.7. | Leer el idioma de `localStorage` (no documentado). | Aceptada |
+| ADR-014 | Los agentes escriben directamente en disco (S2); el refresco de editores depende del watcher de Obsidian. Se siguen anunciando y sirviendo `fs/*` (con guardia), pero la protección real del vault es el **modo de permisos** del agente. | Ningún agente probado usa `fs/*` del cliente. | Forzar escrituras por `fs/*` (no está en nuestra mano). | Aceptada (matiza ADR-009) |
+| ADR-015 | Modo y modelo se exponen en la UI a partir de `configOptions` (`session/set_config_option`); `modes`/`models` solo como respaldo. | Es lo único común a Claude, Codex y OpenCode. | Selectores separados por `modes`/`models` (OpenCode quedaría sin selector). | Aceptada |
+| ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1221,6 +1261,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 |---|---|---|---|
 | ACP y sus adaptadores cambian rápido (SDK 1.x, adaptadores renombrados en 2026) | Alta | Medio | Versiones fijadas (ADR-010), tests de contrato con fixtures, negociación de `protocolVersion`, mapeo tolerante. |
 | Formatos `stream-json`/`--json` de los CLIs cambian | Alta | Medio | Parsers tolerantes, fixtures por versión, adaptadores directos como vía secundaria. |
+| Agentes que escriben sin pedir permiso en su modo por defecto (Codex `agent`, OpenCode) | Alta | Alto | Mostrar el modo activo siempre; Q8; recomendar git/backup. |
 | PATH/entorno en apps GUI (mise/nvm/asdf) | Alta (en este equipo, segura) | Alto | §4.7 desde el MVP + ruta manual + botón re-detectar. |
 | Obsidian en Flatpak/Snap | Media | Alto | Documentar no soportado; investigar `flatpak-spawn --host` más adelante. |
 | Agente modifica una nota que el usuario está editando | Media | Medio | Escrituras ACP vía Vault API; aviso si el archivo está abierto con cambios sin guardar. |
@@ -1243,6 +1284,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | Q4 | ¿Prioridad de agentes para el MVP? | Claude Code y Codex (vía ACP); Gemini/OpenCode "gratis" por ACP. |
 | Q5 | ¿Idioma principal de la UI? | Inglés por defecto + español completo (sigue el idioma de Obsidian). |
 | Q6 | ¿Se requiere el modo directo si ACP funciona bien en S2? | Sí, pero en Fase 5 y re-evaluable tras S2. |
+| Q8 | Codex por ACP arranca en modo `agent` (*Auto review*) y escribe sin pedir permiso; OpenCode tampoco pide. ¿AgentHub debe forzar un modo más conservador al crear la sesión (p. ej. `read-only` / `workspace-write` en Codex)? | Respetar el modo por defecto del agente pero mostrarlo siempre en la cabecera; decidir antes de T2.9. |
 | Q7 | ¿Ofrecer instalación automática de adaptadores (`npm i -g …`) desde ajustes? | No en MVP; solo instrucciones y botón copiar comando. |
 
 ---
@@ -1323,3 +1365,12 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   el plugin aparece en *Installed plugins* (v0.0.1), se activa, el icono de cinta funciona y la vista se
   abre en el panel derecho mostrando "No session yet". T0.4 cerrada. **Pendiente de T0.5:** reiniciar
   Obsidian y confirmar que la vista AgentHub sigue abierta.
+- **2026-10-01 · Claude (Opus 5.5)** — Spikes **S2, S3 y S4** completados (informes en `docs/spikes/`, fixtures en
+  `tests/fixtures/{acp,claude,codex}/`, scripts en `scripts/spikes/`). ACP funciona de punta a punta con
+  Claude (adaptador 0.85.0), Codex (codex-acp 2.1.1) y OpenCode, todos con el login existente; Gemini falla
+  por la cuenta (Code Assist individual discontinuado). Hallazgos que cambian el diseño: SDK con API builder
+  (ADR-016), modos/modelos vía `configOptions` (ADR-015), `usage_update`, `messageId` del agente, ningún
+  agente usa `fs/*` (ADR-014), Codex/OpenCode escriben sin pedir permiso por defecto (Q8). Claude directo:
+  `--verbose` obligatorio, prompt por stdin, `permission_denied` en vivo. Codex directo:
+  `--skip-git-repo-check` obligatorio y opciones antes de `resume`. Se añadió `@agentclientprotocol/sdk@1.6.0`
+  como dependencia. **Pendiente:** S1 y S5 (en Obsidian), T0.5 (reinicio); siguiente tarea de código: T2.1.
