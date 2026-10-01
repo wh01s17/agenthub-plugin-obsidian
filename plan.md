@@ -1247,7 +1247,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
-- [ ] **T6.6** Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(workflow `release.yml` y pasos en el README listos; falta remoto en GitHub, BRAT y envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
 
@@ -1543,3 +1543,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **T6.5** hecho: README para usuarios (qué hace, requisitos y tabla de agentes
   con su comando y login, instalación manual, uso, comandos, ajustes, privacidad y seguridad, problemas comunes,
   desarrollo).
+- **2026-10-01 · Claude (Opus 5.5)** — **T6.6 (parcial):** `.github/workflows/release.yml` (en cada tag: lint, test,
+  build, comprobación tag = versión del manifest, borrador de release con `main.js`/`manifest.json`/`styles.css`) y
+  sección "Publicar una versión" en el README. Falta: crear el remoto en GitHub, probar con BRAT y el PR a
+  `obsidianmd/obsidian-releases`.

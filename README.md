@@ -124,6 +124,13 @@ activa los plugins de la comunidad y AgentHub. Con el plugin **Hot Reload** (pje
 vault, `pnpm dev` recarga AgentHub en cada cambio. La guía para agentes de código está en
 [`AGENTS.md`](AGENTS.md) y el plan completo en [`plan.md`](plan.md).
 
+## Publicar una versión
+
+1. `pnpm version patch` (o `minor`/`major`): actualiza `package.json`, `manifest.json` y `versions.json`.
+2. `git push && git push --tags`: el workflow `release.yml` valida, compila y crea un **borrador** de
+   release con `main.js`, `manifest.json` y `styles.css`. Revísalo y publícalo.
+3. Para probar versiones beta antes de la tienda, instala el plugin con **BRAT** apuntando al repositorio.
+
 ## Licencia
 
 MIT
