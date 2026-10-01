@@ -7,7 +7,8 @@ export default defineConfig({
       obsidian: fileURLToPath(new URL('./tests/__mocks__/obsidian.ts', import.meta.url)),
     },
   },
-  esbuild: { jsx: 'automatic', jsxImportSource: 'preact' },
+  // Vite 8 transforma con Oxc (la opción `esbuild` está deprecada).
+  oxc: { jsx: { runtime: 'automatic', importSource: 'preact' } },
   test: {
     environment: 'jsdom',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],

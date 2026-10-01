@@ -1328,9 +1328,10 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 ### 15.1 Notas del entorno de trabajo
 
 - Skills locales de agentes en `.agents/skills/` (enlazadas desde `.claude/skills/`) y `skills-lock.json`,
-  instaladas con autoskills: accessibility, frontend-design, nodejs-backend-patterns,
-  nodejs-best-practices, seo, typescript-advanced-types, vitest. **Están en `.gitignore`** (no se suben a GitHub).
-  Útiles aquí: `vitest`, `typescript-advanced-types`, `accessibility`, `frontend-design`, `nodejs-best-practices`.
+  instaladas con autoskills: accessibility, bash-defensive-patterns, frontend-design, nodejs-backend-patterns,
+  nodejs-best-practices, seo, typescript-advanced-types, vite, vitest. **Están en `.gitignore`** (no se suben a GitHub).
+  Útiles aquí: `vitest`, `vite` (Vitest 5 corre sobre Vite 8: config con `oxc`, no `esbuild`), `typescript-advanced-types`,
+  `accessibility`, `frontend-design`, `nodejs-best-practices`, `bash-defensive-patterns` (scripts de `scripts/spikes/`).
 - Lint: las reglas de `eslint-plugin-obsidianmd` no permiten `eslint-disable` en línea; las excepciones
   para `scripts/` y `tests/` se configuran en `eslint.config.mjs`.
 - El mock `tests/__mocks__/obsidian.ts` replica solo lo necesario (incluye `HTMLElement#addClass`); ampliarlo según haga falta.
@@ -1408,3 +1409,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   revirtió y el plan sigue en un único archivo.
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.3** hecho: `src/process/LineDecoder.ts` (JSONL seguro con UTF-8 partido, truncado de líneas largas, `RingBuffer`) y `src/process/ProcessRunner.ts` (`spawnProcess` con `cross-spawn`, grupo de procesos propio, `kill()` SIGTERM→SIGKILL del árbol completo, `taskkill /T` en Windows, cola de stderr, `ProcessRegistry.killAll()`). Tests de integración con procesos reales (`tests/integration/`, helper `tests/helpers/child-tree.mjs`). Lint: `prefer-window-timers` desactivada en `src/core|process|adapters` (código sin DOM probado en Node).
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.4** hecho: `scripts/fake-acp-agent.mjs` (SDK `acp.agent()`), escenarios `echo`, `stream-long`, `tools` (incl. terminal estilo Codex y diff), `permissions`, `plan`, `slow`, `crash`, `auth-required`; `configOptions` de modo/modelo con `session/set_config_option`; cancelación. El escenario también se elige por prompt (`/scenario tools`). Script `pnpm fake-agent`. Verificado con `acp-probe.mjs`.
+- **2026-10-01 · Claude (Opus 5.5)** — Nuevas skills locales cargadas: `vite` y `bash-defensive-patterns`. Aplicado: `vitest.config.ts` migra de `esbuild` (deprecado en Vite 8) a `oxc` para JSX; los scripts de spikes usan modo estricto y `trap` para borrar el vault temporal.

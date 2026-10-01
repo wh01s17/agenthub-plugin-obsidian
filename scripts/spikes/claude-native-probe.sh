@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Spike S3: graba la salida stream-json de Claude Code en modo directo.
 # Uso: bash scripts/spikes/claude-native-probe.sh   → tests/fixtures/claude/*.jsonl
-set -euo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd)"
+set -Eeuo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 out="$root/tests/fixtures/claude"
 mkdir -p "$out"
 vault="$(mktemp -d -t agenthub-s3-XXXXXX)"
+trap 'rm -rf -- "$vault"' EXIT
 rsync -a --exclude .obsidian "$root/test-vault/" "$vault/"
 sid="$(cat /proc/sys/kernel/random/uuid)"
 scrub() { sed -e "s#$vault#/VAULT#g" -e "s#${vault#/}#VAULT#g" -e "s#$HOME#~#g" -E -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<email>/g'; }
@@ -26,6 +27,5 @@ echo 'Ahora sí, crea resumen.md. Responde en una frase.' |
 echo 'Di hola' | claude -p --output-format stream-json >"$out/no-verbose.jsonl" 2>"$out/no-verbose.stderr" || echo "exit $? (no-verbose)"
 
 echo "resumen.md: $(cat "$vault/resumen.md" 2>/dev/null || echo '(no existe)')"
-rm -rf "$vault"
 
 python3 "$root/scripts/spikes/sanitize-claude-fixture.py" "$out"/*.jsonl

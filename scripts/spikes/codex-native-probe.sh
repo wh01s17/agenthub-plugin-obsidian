@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Spike S4: graba la salida `codex exec --json` en modo directo.
 # Uso: bash scripts/spikes/codex-native-probe.sh   → tests/fixtures/codex/*.jsonl
-set -uo pipefail
-root="$(cd "$(dirname "$0")/../.." && pwd)"
+# Sin -e: los casos que fallan a propósito (no-git) deben registrar su código de salida.
+set -Euo pipefail
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 out="$root/tests/fixtures/codex"
 mkdir -p "$out"
 vault="$(mktemp -d -t agenthub-s4-XXXXXX)"
+trap 'rm -rf -- "$vault"' EXIT
 rsync -a --exclude .obsidian "$root/test-vault/" "$vault/"
 scrub() { sed -e "s#$vault#/VAULT#g" -e "s#${vault#/}#VAULT#g" -e "s#$HOME#~#g" -E -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<email>/g'; }
 
@@ -27,4 +29,3 @@ echo 'Añade una segunda línea a resumen.md que diga "fin". Responde en una fra
 echo "exit $? (resume)"
 
 echo "resumen.md: $(cat "$vault/resumen.md" 2>/dev/null || echo '(no existe)')"
-rm -rf "$vault"
