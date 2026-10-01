@@ -157,6 +157,8 @@ export class AgentHubView extends ItemView {
   }
 
   private renderApp(): void {
+    // Start the agent in the background so its options (mode, model…) can be chosen first.
+    void this.session?.prepare();
     render(
       h(App, {
         host: this.host,

@@ -60,6 +60,16 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
     }),
     sessionOptions: (agentId) => this.sessionOptions(agentId),
     onCreate: (session) => this.sessionStore?.track(session),
+    knownConfigOptions: (agentId) => this.settings.knownConfigOptions[agentId],
+    rememberConfigOptions: (agentId, options) => {
+      if (JSON.stringify(this.settings.knownConfigOptions[agentId]) === JSON.stringify(options))
+        return;
+      this.run(
+        this.updateSettings((s) => {
+          s.knownConfigOptions[agentId] = options;
+        }),
+      );
+    },
   });
   readonly notes = createNoteContext(this.app);
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });

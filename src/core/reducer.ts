@@ -3,6 +3,7 @@
 import type {
   AgentEvent,
   AgentId,
+  ConfigOption,
   Notice,
   PlanEntry,
   PermissionOutcome,
@@ -34,6 +35,8 @@ export interface InitialSession {
   /** Transcript and native id of a stored session being reopened. */
   items?: TranscriptItem[];
   nativeSessionId?: string;
+  /** Options the agent announced last time, shown before it starts (it starts lazily). */
+  configOptions?: ConfigOption[];
 }
 
 export function createInitialState({
@@ -43,6 +46,7 @@ export function createInitialState({
   title = '',
   items = [],
   nativeSessionId,
+  configOptions = [],
 }: InitialSession): SessionViewState {
   return {
     localId,
@@ -52,7 +56,7 @@ export function createInitialState({
     nativeSessionId,
     status: 'idle',
     items,
-    configOptions: [],
+    configOptions,
     commands: [],
   };
 }

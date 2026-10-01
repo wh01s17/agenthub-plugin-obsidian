@@ -25,6 +25,17 @@ export const AgentConfigSchema = z.object({
 
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 
+const ConfigOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  currentValue: z.string(),
+  options: z.array(
+    z.object({ value: z.string(), name: z.string(), description: z.string().optional() }),
+  ),
+});
+
 const SettingsSchema = z.object({
   schemaVersion: z.literal(1),
   defaultAgentId: z.string(),
@@ -41,6 +52,8 @@ const SettingsSchema = z.object({
   maxSessions: z.number().int().min(1).max(10000),
   /** Vault folder for exported sessions. */
   exportFolder: z.string(),
+  /** Options each agent announced at start-up, shown before it starts again (not user-facing). */
+  knownConfigOptions: z.record(z.string(), z.array(ConfigOptionSchema)),
   /** Ask the login shell for PATH when a command is not found (ADR-017). */
   resolveLoginShell: z.boolean(),
   /** Directories put first in PATH for agent commands. */
@@ -133,6 +146,7 @@ export function defaultSettings(): AgentHubSettings {
     historyEnabled: true,
     maxSessions: 200,
     exportFolder: 'AgentHub',
+    knownConfigOptions: {},
     resolveLoginShell: true,
     extraPath: [],
   };
@@ -185,6 +199,7 @@ export function migrate(raw: unknown): AgentHubSettings {
     historyEnabled: field('historyEnabled'),
     maxSessions: field('maxSessions'),
     exportFolder: field('exportFolder'),
+    knownConfigOptions: field('knownConfigOptions'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),
   };

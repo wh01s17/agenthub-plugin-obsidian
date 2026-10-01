@@ -12,6 +12,7 @@ import { AgentError } from './errors';
 import { createInitialState, reduce, type SessionAction } from './reducer';
 import type {
   AgentEvent,
+  ConfigOption,
   PermissionOutcome,
   PermissionRequest,
   PromptBlock,
@@ -29,6 +30,10 @@ export interface ChatSessionInit {
   title?: string;
   /** Stored session being reopened: its transcript is shown and the agent is asked to continue it. */
   restore?: { items: TranscriptItem[]; nativeSessionId?: string };
+  /** Options the agent announced when it last started, shown until it starts again. */
+  initialConfigOptions?: ConfigOption[];
+  /** Called with the options an agent announces when it starts (to remember them). */
+  onAgentReady?: (configOptions: ConfigOption[]) => void;
   now?: () => number;
 }
 
@@ -43,6 +48,7 @@ export class ChatSession {
   private agent: AgentSession | null = null;
   private starting: Promise<AgentSession | null> | null = null;
   private turnCounter = 0;
+  private readonly pendingConfig: Record<string, string> = {};
   private agentStarts = 0;
   private disposed = false;
 
@@ -56,6 +62,7 @@ export class ChatSession {
       title: init.title,
       items: init.restore?.items,
       nativeSessionId: init.restore?.nativeSessionId,
+      configOptions: init.initialConfigOptions,
     });
   }
 
@@ -77,9 +84,10 @@ export class ChatSession {
     return this.debugLines;
   }
 
+  /** A turn is in progress. Starting the agent is not "busy": messages sent meanwhile wait for it. */
   get busy(): boolean {
     const { status } = this.state;
-    return status === 'starting' || status === 'running' || status === 'awaiting-permission';
+    return status === 'running' || status === 'awaiting-permission';
   }
 
   /** Sends one user message. Starts the agent on first use. Ignored while a turn is running. */
@@ -100,6 +108,11 @@ export class ChatSession {
     }
   }
 
+  /** Starts the agent ahead of the first message so its options can be set first. */
+  async prepare(): Promise<void> {
+    if (!this.disposed && !this.agent) await this.ensureAgent();
+  }
+
   async cancel(): Promise<void> {
     this.resolveAllPending({ outcome: 'cancelled' });
     await this.agent?.cancel();
@@ -114,9 +127,23 @@ export class ChatSession {
   }
 
   async setConfigOption(id: string, value: string): Promise<void> {
-    const agent = await this.ensureAgent();
+    if (!this.agent) {
+      this.dispatch({
+        type: 'config',
+        configOptions: this.state.configOptions.map((option) =>
+          option.id === id ? { ...option, currentValue: value } : option,
+        ),
+      });
+      // Not started: apply it at start-up. Starting: it began with the old value, so set it after.
+      if (!this.starting) {
+        this.pendingConfig[id] = value;
+        return;
+      }
+      await this.starting;
+      if (!this.agent) return;
+    }
     try {
-      await agent?.setConfigOption?.(id, value);
+      await this.agent.setConfigOption?.(id, value);
     } catch (error) {
       this.reportError(error);
     }
@@ -147,7 +174,11 @@ export class ChatSession {
       requestPermission: (request) => this.requestPermission(request),
     };
     try {
-      const { adapter, options } = this.init;
+      const { adapter } = this.init;
+      const options = {
+        ...this.init.options,
+        config: { ...this.init.options.config, ...this.pendingConfig },
+      };
       // Only the first agent of a reopened session resumes; after a crash we start fresh.
       const resumeId = this.agentStarts++ === 0 ? this.init.restore?.nativeSessionId : undefined;
       const agent =
@@ -178,6 +209,9 @@ export class ChatSession {
   }
 
   private onAgentEvent(event: AgentEvent): void {
+    if (event.type === 'session.ready' && event.configOptions && event.configOptions.length > 0) {
+      this.init.onAgentReady?.(event.configOptions);
+    }
     if (event.type === 'debug') {
       this.debugLines.push(`[${event.source}] ${event.line}`);
       if (this.debugLines.length > DEBUG_CAPACITY) this.debugLines.shift();

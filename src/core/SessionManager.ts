@@ -2,7 +2,7 @@
 
 import type { AgentAdapter, SessionOptions } from './AgentAdapter';
 import { ChatSession, type HostServices } from './ChatSession';
-import type { AgentId, TranscriptItem } from './types';
+import type { AgentId, ConfigOption, TranscriptItem } from './types';
 
 export interface SessionManagerDeps {
   getAdapter(agentId: AgentId): AgentAdapter | undefined;
@@ -11,6 +11,9 @@ export interface SessionManagerDeps {
   sessionOptions(agentId: AgentId): SessionOptions;
   newId?: () => string;
   onCreate?: (session: ChatSession) => void;
+  /** Options each agent announced when it last started (shown before it starts again). */
+  knownConfigOptions?: (agentId: AgentId) => ConfigOption[] | undefined;
+  rememberConfigOptions?: (agentId: AgentId, options: ConfigOption[]) => void;
 }
 
 export class SessionManager {
@@ -29,6 +32,7 @@ export class SessionManager {
       adapter,
       host: this.deps.host,
       options: this.deps.sessionOptions(agentId),
+      ...this.configHooks(agentId),
     });
     this.sessions.set(id, session);
     this.deps.onCreate?.(session);
@@ -54,10 +58,19 @@ export class SessionManager {
       options: this.deps.sessionOptions(stored.agentId),
       title: stored.title,
       restore: { items: stored.items, nativeSessionId: stored.nativeSessionId },
+      ...this.configHooks(stored.agentId),
     });
     this.sessions.set(stored.localId, session);
     this.deps.onCreate?.(session);
     return session;
+  }
+
+  private configHooks(agentId: AgentId) {
+    return {
+      initialConfigOptions: this.deps.knownConfigOptions?.(agentId),
+      onAgentReady: (options: ConfigOption[]) =>
+        this.deps.rememberConfigOptions?.(agentId, options),
+    };
   }
 
   get(localId: string): ChatSession | undefined {

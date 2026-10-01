@@ -176,3 +176,61 @@ describe('SessionManager', () => {
     expect(adapter.sessions[0]?.disposed).toBe(true);
   });
 });
+
+describe('options before the first message', () => {
+  const modeOption = {
+    id: 'mode',
+    name: 'Mode',
+    category: 'mode',
+    currentValue: 'default',
+    options: [
+      { value: 'default', name: 'Manual' },
+      { value: 'plan', name: 'Plan' },
+    ],
+  };
+
+  it('shows remembered options and applies a change made before start-up', async () => {
+    const adapter = new StubAdapter(say('ok'));
+    const session = new ChatSession({
+      localId: 'l1',
+      adapter,
+      host: hostServices,
+      options: { cwd: '/vault', config: { model: 'x' } },
+      initialConfigOptions: [modeOption],
+    });
+    expect(session.getState().configOptions).toEqual([modeOption]);
+
+    await session.setConfigOption('mode', 'plan');
+    expect(adapter.sessions).toHaveLength(0); // no process just to change an option
+    expect(session.getState().configOptions[0]?.currentValue).toBe('plan');
+
+    await session.send([{ type: 'text', text: 'hola' }]);
+    expect(adapter.options[0]?.config).toEqual({ model: 'x', mode: 'plan' });
+  });
+
+  it('prepare() starts the agent early and a message sent meanwhile waits for it', async () => {
+    let release!: () => void;
+    const adapter = new StubAdapter(say('ok'));
+    const create = adapter.createSession.bind(adapter);
+    adapter.createSession = (options, host) =>
+      new Promise((resolve) => {
+        release = () => resolve(create(options, host));
+      });
+    const session = new ChatSession({
+      localId: 'l1',
+      adapter,
+      host: hostServices,
+      options: { cwd: '/vault' },
+    });
+
+    const preparing = session.prepare();
+    expect(session.getState().status).toBe('starting');
+    expect(session.busy).toBe(false);
+    const sending = session.send([{ type: 'text', text: 'hola' }]);
+    release();
+    await Promise.all([preparing, sending]);
+
+    expect(adapter.sessions).toHaveLength(1);
+    expect(session.getState().items.map((i) => i.kind)).toEqual(['user', 'assistant']);
+  });
+});
