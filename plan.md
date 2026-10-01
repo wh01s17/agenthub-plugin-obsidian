@@ -1182,10 +1182,14 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   *Dep:* T2.1–T2.4. *CA:* todos los escenarios del fake pasan.
 - [ ] **T2.6** `reducer.ts` + `ChatSession` + `SessionManager` (sin persistencia aún) + tests con fixtures.
 - [ ] **T2.7** `AgentRegistry` + presets (§5.4) + `SettingsTab` (lista de agentes, estado de
-  detección, editar comando/args/env, agente por defecto, agentes personalizados). *CA:* RF-02, RF-15, RF-20.
+  detección, editar comando/args/env, agente por defecto, agentes personalizados). Los ajustes leídos de `data.json`
+  se validan con un esquema (Zod, ya incluido por el SDK de ACP, o Valibot) dentro de `migrate()`. *CA:* RF-02, RF-15, RF-20.
 - [ ] **T2.8** UI: `Header` (selector de agente + estado), `MessageList`, `AssistantMessage` +
   `Markdown` (throttle), `ToolCallCard`, `PermissionCard`, `PlanView`, `Composer` (enviar/detener),
-  `StatusBar`, `DebugPanel`. *CA:* RF-04, RF-05, RF-06 (ACP), RF-07, RF-19.
+  `StatusBar`, `DebugPanel`. `onunload` llama a `ProcessRegistry.killAll()` (con test). Accesibilidad (skill
+  `accessibility`): todo control es un `<button>`/`<select>`/`<textarea>` nativo con etiqueta, foco visible, objetivos
+  ≥ 24×24 px, operable solo con teclado, avisos de estado y streaming en región `aria-live="polite"`, sin animaciones
+  sin `prefers-reduced-motion`. Dirección visual según ADR-018. *CA:* RF-04, RF-05, RF-06 (ACP), RF-07, RF-19.
 - [ ] **T2.9** Selector de modo/modelo cuando el agente los expone. *CA:* RF-12 para ACP.
 - [ ] **T2.10** Manejo de errores de §4.14 (binario faltante, auth, crash, timeout).
 
@@ -1229,7 +1233,9 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [ ] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [ ] **T6.2** i18n es/en completo; textos en *sentence case*.
-- [ ] **T6.3** Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas.
+- [ ] **T6.3** Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
+  manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
+  orden de foco, tamaño de objetivos).
 - [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [ ] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.6** Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
@@ -1261,6 +1267,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-015 | Modo y modelo se exponen en la UI a partir de `configOptions` (`session/set_config_option`); `modes`/`models` solo como respaldo. | Es lo único común a Claude, Codex y OpenCode. | Selectores separados por `modes`/`models` (OpenCode quedaría sin selector). | Aceptada |
 | ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
 | ADR-017 | `PATH`: `process.env` primero; shell de login solo como respaldo asíncrono y cacheado, añadiendo rutas al final. | S1: en este equipo `process.env` ya encuentra todo; el shell cuesta ≈1,4 s y cambia el binario elegido. | Fusionar siempre el entorno del shell (lento y cambia binarios). | Aceptada (matiza ADR-006) |
+| ADR-018 | La skill `frontend-design` se aplica solo en su principio (dirección visual intencional y coherente), no en su estética "audaz" (fuentes propias, fondos con texturas, paletas propias). | Las guías de Obsidian exigen respetar el tema del usuario: solo variables CSS de Obsidian, sin fuentes impuestas. | Seguir la skill al pie de la letra (rompería temas y la revisión de la comunidad). | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1281,6 +1288,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | Coste/consumo de tokens inesperado | Media | Medio | Mostrar uso/coste; e2e reales fuera de CI. |
 | Revisión de la comunidad rechaza algo (procesos externos) | Baja | Medio | Cumplir guías, `isDesktopOnly`, divulgación en README; hay precedentes de plugins que lanzan procesos. |
 | Latencia de `npx` en el primer arranque | Alta | Bajo | Detectar binario global; mensaje "instalando adaptador…"; recomendar `npm i -g`. |
+| Vulnerabilidad moderada en `moment` (GHSA-4p3w-j4w9-5jqw), vía el paquete de tipos `obsidian` | Baja | Bajo | No se incluye en el bundle (`obsidian` es externo). Revisar al actualizar `obsidian`. |
 | Rendimiento con transcripts largos | Media | Medio | Throttle, items consolidados, virtualización (T6.4). |
 
 ---
@@ -1410,3 +1418,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.3** hecho: `src/process/LineDecoder.ts` (JSONL seguro con UTF-8 partido, truncado de líneas largas, `RingBuffer`) y `src/process/ProcessRunner.ts` (`spawnProcess` con `cross-spawn`, grupo de procesos propio, `kill()` SIGTERM→SIGKILL del árbol completo, `taskkill /T` en Windows, cola de stderr, `ProcessRegistry.killAll()`). Tests de integración con procesos reales (`tests/integration/`, helper `tests/helpers/child-tree.mjs`). Lint: `prefer-window-timers` desactivada en `src/core|process|adapters` (código sin DOM probado en Node).
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.4** hecho: `scripts/fake-acp-agent.mjs` (SDK `acp.agent()`), escenarios `echo`, `stream-long`, `tools` (incl. terminal estilo Codex y diff), `permissions`, `plan`, `slow`, `crash`, `auth-required`; `configOptions` de modo/modelo con `session/set_config_option`; cancelación. El escenario también se elige por prompt (`/scenario tools`). Script `pnpm fake-agent`. Verificado con `acp-probe.mjs`.
 - **2026-10-01 · Claude (Opus 5.5)** — Nuevas skills locales cargadas: `vite` y `bash-defensive-patterns`. Aplicado: `vitest.config.ts` migra de `esbuild` (deprecado en Vite 8) a `oxc` para JSX; los scripts de spikes usan modo estricto y `trap` para borrar el vault temporal.
+- **2026-10-01 · Claude (Opus 5.5)** — Auditoría frente a las skills locales y ajustes aplicados: Vitest con
+  `restoreMocks`/`unstubEnvs`/`unstubGlobals` y cobertura v8 (`pnpm test:coverage`, 58,8 % de sentencias);
+  `SessionViewState` inmutable (`readonly`); `main.ts` sin promesas sin manejar (helper `run()` con `Notice`); scripts de
+  spikes con `check_dependencies` y UUID portable. Criterios añadidos: validación de ajustes con esquema (T2.7),
+  checklist de accesibilidad y `killAll()` en `onunload` (T2.8, T6.3), ADR-018 (frontend-design dentro del tema de
+  Obsidian), riesgo `moment`. Las guardas de tipo en `mapping.ts`/`AcpSession.ts` se aplican con T2.5.

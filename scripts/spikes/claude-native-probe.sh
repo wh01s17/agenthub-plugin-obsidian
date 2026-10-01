@@ -2,13 +2,26 @@
 # Spike S3: graba la salida stream-json de Claude Code en modo directo.
 # Uso: bash scripts/spikes/claude-native-probe.sh   → tests/fixtures/claude/*.jsonl
 set -Eeuo pipefail
+check_dependencies() {
+  local -a missing=()
+  local cmd
+  for cmd in "$@"; do
+    command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
+  done
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    printf 'ERROR: faltan comandos: %s\n' "${missing[*]}" >&2
+    exit 1
+  fi
+}
+check_dependencies rsync claude node python3
+
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 out="$root/tests/fixtures/claude"
 mkdir -p "$out"
 vault="$(mktemp -d -t agenthub-s3-XXXXXX)"
 trap 'rm -rf -- "$vault"' EXIT
 rsync -a --exclude .obsidian "$root/test-vault/" "$vault/"
-sid="$(cat /proc/sys/kernel/random/uuid)"
+sid="$(node -e 'process.stdout.write(crypto.randomUUID())')"
 scrub() { sed -e "s#$vault#/VAULT#g" -e "s#${vault#/}#VAULT#g" -e "s#$HOME#~#g" -E -e 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/<email>/g'; }
 cd "$vault"
 

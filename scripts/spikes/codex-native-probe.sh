@@ -3,6 +3,19 @@
 # Uso: bash scripts/spikes/codex-native-probe.sh   → tests/fixtures/codex/*.jsonl
 # Sin -e: los casos que fallan a propósito (no-git) deben registrar su código de salida.
 set -Euo pipefail
+check_dependencies() {
+  local -a missing=()
+  local cmd
+  for cmd in "$@"; do
+    command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
+  done
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    printf 'ERROR: faltan comandos: %s\n' "${missing[*]}" >&2
+    exit 1
+  fi
+}
+check_dependencies rsync codex
+
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 out="$root/tests/fixtures/codex"
 mkdir -p "$out"

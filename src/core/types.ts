@@ -153,21 +153,22 @@ export type TranscriptItem =
 export type SessionStatus =
   'idle' | 'starting' | 'running' | 'awaiting-permission' | 'error' | 'closed';
 
+/** Immutable snapshot rendered by the UI; the reducer returns a new object on every change. */
 export interface SessionViewState {
   /** AgentHub's own id for the session. */
-  localId: string;
-  agentId: AgentId;
+  readonly localId: string;
+  readonly agentId: AgentId;
   /** The agent's id for the conversation, used to resume it. */
-  nativeSessionId?: string;
-  title: string;
-  cwd: string;
-  status: SessionStatus;
-  items: TranscriptItem[];
-  configOptions: ConfigOption[];
-  modes?: ModeInfo[];
-  currentModeId?: string;
-  models?: ModelInfo[];
-  currentModelId?: string;
-  commands: SlashCommand[];
-  usage?: Usage;
+  readonly nativeSessionId?: string;
+  readonly title: string;
+  readonly cwd: string;
+  readonly status: SessionStatus;
+  readonly items: readonly TranscriptItem[];
+  readonly configOptions: readonly ConfigOption[];
+  readonly modes?: readonly ModeInfo[];
+  readonly currentModeId?: string;
+  readonly models?: readonly ModelInfo[];
+  readonly currentModelId?: string;
+  readonly commands: readonly SlashCommand[];
+  readonly usage?: Usage;
 }
