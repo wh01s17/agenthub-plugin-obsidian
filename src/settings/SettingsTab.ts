@@ -251,6 +251,23 @@ export class AgentHubSettingTab extends PluginSettingTab {
       });
 
     new Setting(el)
+      .setName(t('settingsIdleTimeout'))
+      .setDesc(t('settingsIdleTimeoutDesc'))
+      .addText((text) => {
+        text.inputEl.type = 'number';
+        text.inputEl.min = '0';
+        text.inputEl.max = '1440';
+        text.setValue(String(settings.idleTimeoutMin)).onChange((value) => {
+          const minutes = Number(value);
+          if (Number.isInteger(minutes) && minutes >= 0 && minutes <= 1440) {
+            this.save((s) => {
+              s.idleTimeoutMin = minutes;
+            });
+          }
+        });
+      });
+
+    new Setting(el)
       .setName(t('settingsExportFolder'))
       .setDesc(t('settingsExportFolderDesc'))
       .addText((text) =>

@@ -52,6 +52,8 @@ const SettingsSchema = z.object({
   maxSessions: z.number().int().min(1).max(10000),
   /** Vault folder for exported sessions. */
   exportFolder: z.string(),
+  /** Minutes without activity before an agent process is stopped (0 = never). */
+  idleTimeoutMin: z.number().int().min(0).max(1440),
   /** Options each agent announced at start-up, shown before it starts again (not user-facing). */
   knownConfigOptions: z.record(z.string(), z.array(ConfigOptionSchema)),
   /** Ask the login shell for PATH when a command is not found (ADR-017). */
@@ -146,6 +148,7 @@ export function defaultSettings(): AgentHubSettings {
     historyEnabled: true,
     maxSessions: 200,
     exportFolder: 'AgentHub',
+    idleTimeoutMin: 15,
     knownConfigOptions: {},
     resolveLoginShell: true,
     extraPath: [],
@@ -199,6 +202,7 @@ export function migrate(raw: unknown): AgentHubSettings {
     historyEnabled: field('historyEnabled'),
     maxSessions: field('maxSessions'),
     exportFolder: field('exportFolder'),
+    idleTimeoutMin: field('idleTimeoutMin'),
     knownConfigOptions: field('knownConfigOptions'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),

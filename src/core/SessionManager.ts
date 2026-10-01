@@ -87,6 +87,15 @@ export class SessionManager {
     await session?.dispose();
   }
 
+  /** Stops agents idle for longer than `idleMs` (their sessions stay open). Returns how many. */
+  async reapIdle(idleMs: number, now = Date.now()): Promise<number> {
+    const idle = [...this.sessions.values()].filter(
+      (session) => session.hasAgent && !session.busy && now - session.lastActivity >= idleMs,
+    );
+    await Promise.all(idle.map((session) => session.suspend()));
+    return idle.length;
+  }
+
   async disposeAll(): Promise<void> {
     const sessions = [...this.sessions.values()];
     this.sessions.clear();

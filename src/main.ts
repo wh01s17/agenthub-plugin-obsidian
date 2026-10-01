@@ -99,6 +99,18 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       callback: () => this.run(this.activateView()),
     });
     this.addCommand({
+      id: 'open-new-view',
+      name: t('cmdOpenNewView'),
+      callback: () => this.run(this.openNewView()),
+    });
+    // Free idle agent processes (T4.5); the conversation resumes on the next message.
+    this.registerInterval(
+      window.setInterval(() => {
+        const minutes = this.settings.idleTimeoutMin;
+        if (minutes > 0) this.run(this.sessions.reapIdle(minutes * 60_000));
+      }, 60_000),
+    );
+    this.addCommand({
       id: 'send-selection',
       name: t('cmdSendSelection'),
       editorCheckCallback: (checking, editor, info) => {
@@ -140,6 +152,14 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
         });
       }),
     );
+  }
+
+  /** Opens an additional AgentHub view with its own session, split below the current one. */
+  private async openNewView(): Promise<void> {
+    const leaf = this.app.workspace.getRightLeaf(true);
+    if (!leaf) return;
+    await leaf.setViewState({ type: VIEW_TYPE_AGENTHUB, active: true });
+    await this.app.workspace.revealLeaf(leaf);
   }
 
   /** Opens (or reveals) the view and runs `action` on it. */

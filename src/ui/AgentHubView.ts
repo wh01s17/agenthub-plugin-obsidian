@@ -54,7 +54,7 @@ export class AgentHubView extends ItemView {
     render(null, this.contentEl);
     const session = this.session;
     this.session = null;
-    if (session) await this.host.sessions.close(session.localId);
+    if (session) await this.release(session.localId);
   }
 
   override getState(): Record<string, unknown> {
@@ -77,7 +77,7 @@ export class AgentHubView extends ItemView {
     const previous = this.session;
     this.session = null;
     this.ensureSession(agentId ?? previous?.getState().agentId);
-    if (previous) void this.host.sessions.close(previous.localId);
+    if (previous) void this.release(previous.localId);
     this.renderApp();
     this.host.app.workspace.requestSaveLayout();
   }
@@ -97,7 +97,7 @@ export class AgentHubView extends ItemView {
     }
     const previous = this.session;
     this.session = session;
-    if (previous) void this.host.sessions.close(previous.localId);
+    if (previous) void this.release(previous.localId);
     if (render) {
       this.renderApp();
       this.host.app.workspace.requestSaveLayout();
@@ -115,6 +115,21 @@ export class AgentHubView extends ItemView {
       await this.host.sessions.close(localId);
     }
     await this.host.history?.delete(localId);
+  }
+
+  /** Ends a session this view stops showing, unless another AgentHub view still shows it. */
+  private async release(localId: string): Promise<void> {
+    const shownElsewhere = this.host.app.workspace
+      .getLeavesOfType(VIEW_TYPE_AGENTHUB)
+      .some(
+        (leaf) =>
+          leaf.view !== this && leaf.view instanceof AgentHubView && leaf.view.shows(localId),
+      );
+    if (!shownElsewhere) await this.host.sessions.close(localId);
+  }
+
+  shows(localId: string): boolean {
+    return this.session?.localId === localId;
   }
 
   /** Attaches an editor selection to the next message (command "Send selection"). */

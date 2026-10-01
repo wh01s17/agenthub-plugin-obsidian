@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 4 — Persistencia e historial**: T4.1–T4.4 hechas; T4.2 verificada en Obsidian por el usuario (faltan T4.3 tras reinicio y T4.4 exportar) |
-| Próxima tarea | Verificar T4.2–T4.4 en Obsidian → **T4.5** (varias vistas + reaper de inactividad) |
+| Fase actual | **Fase 4 completa en código** (T4.1–T4.5; falta verificar T4.3–T4.5 en Obsidian). Siguiente: **Fase 5** o **Fase 6** (ver §11) |
+| Próxima tarea | **T5.1/T5.2** (adaptadores directos) o pulido de Fase 6 según prioridad del usuario |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1222,7 +1222,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   `loadSession` si existe; si no, modo lectura + "Continuar en sesión nueva". *CA:* RF-10.
 - [x] **T4.3** Restaurar la sesión mostrada en cada vista al reiniciar Obsidian (`getState/setState`). *CA:* RF-01.
 - [x] **T4.4** Export de sesión a nota (§4.10). *CA:* nota válida con callouts plegables.
-- [ ] **T4.5** Múltiples vistas/sesiones simultáneas + reaper de inactividad. *CA:* RF-11; procesos liberados tras `idleTimeoutMin`.
+- [x] **T4.5** Múltiples vistas/sesiones simultáneas + reaper de inactividad. *CA:* RF-11; procesos liberados tras `idleTimeoutMin`.
 
 ### Fase 5 — Adaptadores directos (sin adaptadores ACP)
 
@@ -1525,3 +1525,8 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `initialConfigOptions`/`onAgentReady` en `ChatSession` y `SessionManager`, `knownConfigOptions` en ajustes, cambios
   pendientes aplicados al arrancar, y el envío durante el arranque espera en vez de ignorarse (el test de historial lo
   destapó). 154 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — **T4.5** hecho: `ChatSession.suspend()` libera el proceso de un agente inactivo y
+  el siguiente mensaje continúa la misma conversación (resume con el `nativeSessionId` del propio agente);
+  `SessionManager.reapIdle()` cada minuto desde `main.ts` según `idleTimeoutMin` (15 por defecto, 0 = nunca), nunca a
+  mitad de un turno. Comando "Abrir AgentHub en un panel nuevo"; una vista no cierra una sesión que otra vista sigue
+  mostrando. 156 tests. **Fase 4 completa en código.**

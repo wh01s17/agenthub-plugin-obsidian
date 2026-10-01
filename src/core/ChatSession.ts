@@ -50,9 +50,13 @@ export class ChatSession {
   private turnCounter = 0;
   private readonly pendingConfig: Record<string, string> = {};
   private agentStarts = 0;
+  /** Set when the agent was stopped for being idle: the next start continues the same conversation. */
+  private resumeAfterIdle: string | undefined;
+  private lastActivityAt: number;
   private disposed = false;
 
   constructor(private readonly init: ChatSessionInit) {
+    this.lastActivityAt = this.now();
     // Keep local ids unique after reopening a stored transcript.
     this.turnCounter = init.restore?.items.filter((item) => item.kind === 'user').length ?? 0;
     this.state = createInitialState({
@@ -94,6 +98,7 @@ export class ChatSession {
   async send(blocks: PromptBlock[]): Promise<void> {
     if (this.disposed || this.busy || blocks.length === 0) return;
     const now = this.init.now?.() ?? Date.now();
+    this.touch();
     this.dispatch({ type: 'local.user', id: `user-${++this.turnCounter}`, blocks, at: now });
     if (!this.state.title) this.dispatch({ type: 'local.title', title: titleFrom(blocks) });
 
@@ -106,6 +111,36 @@ export class ChatSession {
       this.reportError(error);
       this.dispatch({ type: 'turn.end', stopReason: 'error' });
     }
+  }
+
+  /** When the session last did something (a message, an agent event). */
+  get lastActivity(): number {
+    return this.lastActivityAt;
+  }
+
+  /** Whether an agent process is running for this session. */
+  get hasAgent(): boolean {
+    return this.agent !== null;
+  }
+
+  /**
+   * Stops an idle agent to free its process (plan T4.5). The conversation stays: the next message
+   * starts the agent again and continues it (resume/load, ADR-022). No-op during a turn.
+   */
+  async suspend(): Promise<void> {
+    if (!this.agent || this.busy || this.disposed) return;
+    const agent = this.agent;
+    this.agent = null;
+    this.resumeAfterIdle = agent.nativeSessionId ?? this.state.nativeSessionId;
+    await agent.dispose();
+  }
+
+  private touch(): void {
+    this.lastActivityAt = this.now();
+  }
+
+  private now(): number {
+    return this.init.now?.() ?? Date.now();
   }
 
   /** Starts the agent ahead of the first message so its options can be set first. */
@@ -180,7 +215,10 @@ export class ChatSession {
         config: { ...this.init.options.config, ...this.pendingConfig },
       };
       // Only the first agent of a reopened session resumes; after a crash we start fresh.
-      const resumeId = this.agentStarts++ === 0 ? this.init.restore?.nativeSessionId : undefined;
+      const firstStart = this.agentStarts++ === 0;
+      const resumeId =
+        this.resumeAfterIdle ?? (firstStart ? this.init.restore?.nativeSessionId : undefined);
+      this.resumeAfterIdle = undefined;
       const agent =
         resumeId && adapter.loadSession
           ? await adapter.loadSession(resumeId, options, host)
@@ -209,6 +247,7 @@ export class ChatSession {
   }
 
   private onAgentEvent(event: AgentEvent): void {
+    this.touch();
     if (event.type === 'session.ready' && event.configOptions && event.configOptions.length > 0) {
       this.init.onAgentReady?.(event.configOptions);
     }

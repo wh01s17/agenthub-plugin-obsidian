@@ -158,6 +158,12 @@ export const en = {
   settingsExportFolder: 'Export folder',
   settingsExportFolderDesc: 'Vault folder where exported sessions are saved.',
   exportButton: 'Export to note',
+
+  // Sessions (T4.5)
+  settingsIdleTimeout: 'Stop idle agents after (minutes)',
+  settingsIdleTimeoutDesc:
+    'Frees the agent process when a session is unused. The conversation continues when you write again. 0 = never.',
+  cmdOpenNewView: 'Open AgentHub in a new pane',
 };
 
 export type Messages = typeof en;

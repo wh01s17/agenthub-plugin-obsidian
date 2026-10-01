@@ -159,4 +159,10 @@ export const es: Messages = {
   settingsExportFolder: 'Carpeta de exportación',
   settingsExportFolderDesc: 'Carpeta del vault donde se guardan las sesiones exportadas.',
   exportButton: 'Exportar a nota',
+
+  // Sessions (T4.5)
+  settingsIdleTimeout: 'Detener agentes inactivos tras (minutos)',
+  settingsIdleTimeoutDesc:
+    'Libera el proceso del agente cuando una sesión no se usa. La conversación continúa al volver a escribir. 0 = nunca.',
+  cmdOpenNewView: 'Abrir AgentHub en un panel nuevo',
 };

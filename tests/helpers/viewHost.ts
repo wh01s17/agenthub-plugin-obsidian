@@ -29,7 +29,7 @@ export function makeViewHost(
     onCreate: (session) => store?.track(session),
   });
   const app = {
-    workspace: { openLinkText: vi.fn(), requestSaveLayout: vi.fn() },
+    workspace: { openLinkText: vi.fn(), requestSaveLayout: vi.fn(), getLeavesOfType: () => [] },
   } as unknown as App;
   const host: ViewHost = {
     app,

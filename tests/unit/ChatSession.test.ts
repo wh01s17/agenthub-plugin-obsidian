@@ -234,3 +234,49 @@ describe('options before the first message', () => {
     expect(session.getState().items.map((i) => i.kind)).toEqual(['user', 'assistant']);
   });
 });
+
+describe('idle agents (T4.5)', () => {
+  function managed(now: () => number) {
+    const adapter = new StubAdapter(say('ok'));
+    const manager = new SessionManager({
+      getAdapter: () => adapter,
+      host: hostServices,
+      sessionOptions: () => ({ cwd: '/vault' }),
+    });
+    return { adapter, manager, now };
+  }
+
+  it('stops agents idle for too long and resumes the conversation on the next message', async () => {
+    const { adapter, manager } = managed(() => 0);
+    const session = manager.create('stub');
+    await session?.send([{ type: 'text', text: 'hola' }]);
+    expect(session?.hasAgent).toBe(true);
+
+    expect(await manager.reapIdle(60_000, Date.now() + 1_000)).toBe(0); // not idle yet
+    expect(await manager.reapIdle(60_000, Date.now() + 120_000)).toBe(1);
+    expect(session?.hasAgent).toBe(false);
+    expect(adapter.sessions[0]?.disposed).toBe(true);
+
+    await session?.send([{ type: 'text', text: 'sigo' }]);
+    expect(adapter.resumed).toEqual(['stub-native']); // continued, not a fresh conversation
+    expect(session?.getState().items.filter((i) => i.kind === 'user')).toHaveLength(2);
+  });
+
+  it('never stops an agent in the middle of a turn', async () => {
+    let release!: () => void;
+    const adapter = new StubAdapter(
+      () => new Promise((resolve) => (release = () => resolve('end_turn'))),
+    );
+    const manager = new SessionManager({
+      getAdapter: () => adapter,
+      host: hostServices,
+      sessionOptions: () => ({ cwd: '/vault' }),
+    });
+    const session = manager.create('stub');
+    const turn = session?.send([{ type: 'text', text: 'largo' }]);
+    await vi.waitFor(() => expect(session?.busy).toBe(true));
+    expect(await manager.reapIdle(0, Date.now() + 999_999)).toBe(0);
+    release();
+    await turn;
+  });
+});
