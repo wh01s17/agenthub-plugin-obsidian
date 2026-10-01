@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 1 — Spikes**: S2–S4 ✅ hechos; S1 y S5 pendientes (requieren Obsidian abierto). Fase 0 casi cerrada (falta confirmar restauración tras reinicio, T0.5). |
-| Próxima tarea | **T2.1** (tipos de dominio, ya ajustados con S2–S4) en paralelo con **S1** (consola de Obsidian, lo ejecuta el usuario) |
+| Fase actual | **Fase 1 — Spikes**: S2–S4 ✅ hechos; S1 ✅; S5 pendiente (requiere Obsidian). Fase 0 casi cerrada (falta confirmar restauración tras reinicio, T0.5). |
+| Próxima tarea | **T2.1** (tipos de dominio, ya ajustados con S2–S4) |
 | Tareas en paralelo posibles | S1, S5 y T0.5 (manuales, en Obsidian) ∥ T2.1, T2.3, T2.4 (código) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -197,9 +197,10 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | OpenCode | 1.18.34 | `~/.local/share/mise/installs/opencode/latest/opencode` |
 | SO | Linux (Omarchy / Arch, Hyprland), shell zsh | — |
 
-> **Consecuencia importante:** todos los agentes están instalados vía **mise**, cuyas rutas se añaden
-> al `PATH` solo en shells interactivos. Si Obsidian se lanza desde el lanzador de Hyprland, su
-> `process.env.PATH` **no** contendrá esas rutas. La resolución de entorno (§4.7) es obligatoria desde el MVP.
+> **Actualizado tras S1** ✅: aunque los agentes están instalados con **mise**, Obsidian lanzado desde el lanzador
+> de Hyprland **sí** los encuentra (la sesión de Omarchy incluye `~/.local/share/mise/shims` en el `PATH`). El shell
+> de login tarda ≈1,4 s y resuelve otros binarios. La resolución de entorno (§4.7) sigue siendo necesaria para otros
+> sistemas (macOS, escritorios sin esa configuración), pero como **respaldo perezoso**. Ver `docs/spikes/S1-env.md`.
 
 ### 3.2 API de Obsidian que usaremos
 
@@ -622,10 +623,12 @@ reanudable (si `loadSession`) o se marca cerrada.
 
 ### 4.7 Resolución de entorno y binarios (`src/process/ShellEnv.ts`, `BinaryResolver.ts`)
 
-1. Al primer uso (perezoso, cacheado): ejecutar el shell de login interactivo del usuario y capturar su entorno:
+0. Resolver primero con `process.env` (S1: suficiente en este equipo). Solo si algún comando no se encuentra:
+1. Ejecutar **de forma asíncrona** (≈1,4 s medidos en S1; nunca `spawnSync` en el hilo de la UI) y cachear el shell de login del usuario:
    `$SHELL -ilc 'printf "__AGH_START__"; env -0; printf "__AGH_END__"'` con timeout de 5 s.
    Los marcadores aíslan ruido de `.zshrc` (banners, prompts). Parsear `env -0` (separado por NUL).
-2. Fusionar: `process.env` ← entorno del shell ← `settings.env.extraPath` (prepend) ← env del agente.
+2. Fusionar: `process.env`; las rutas del `PATH` del shell se **añaden al final** (no cambian qué binario gana si ya existía);
+   `settings.env.extraPath` se antepone; luego el env del agente.
 3. Si el shell falla o excede el timeout: usar `process.env` + rutas comunes:
    `~/.local/bin`, `~/.local/share/mise/shims`, `~/.local/share/mise/installs/*/latest{,/bin}`,
    `~/.npm-global/bin`, `~/.bun/bin`, `~/.cargo/bin`, `/usr/local/bin`, `/opt/homebrew/bin`,
@@ -1140,7 +1143,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 
 ### Fase 1 — Spikes de validación (pueden ir en paralelo con F0; resultado en `docs/spikes/`)
 
-- [ ] **S1 Entorno** — Desde la consola de DevTools de Obsidian lanzado desde el lanzador de
+- [x] **S1 Entorno** — Desde la consola de DevTools de Obsidian lanzado desde el lanzador de
   Hyprland: `require('child_process').spawnSync('claude',['--version'])` con `process.env` vs con el
   entorno de `$SHELL -ilc 'env -0'`. Medir el tiempo del shell de login. Revisar variables `ELECTRON_*`.
   *CA:* estrategia de §4.7 confirmada o ajustada.
@@ -1250,6 +1253,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-014 | Los agentes escriben directamente en disco (S2); el refresco de editores depende del watcher de Obsidian. Se siguen anunciando y sirviendo `fs/*` (con guardia), pero la protección real del vault es el **modo de permisos** del agente. | Ningún agente probado usa `fs/*` del cliente. | Forzar escrituras por `fs/*` (no está en nuestra mano). | Aceptada (matiza ADR-009) |
 | ADR-015 | Modo y modelo se exponen en la UI a partir de `configOptions` (`session/set_config_option`); `modes`/`models` solo como respaldo. | Es lo único común a Claude, Codex y OpenCode. | Selectores separados por `modes`/`models` (OpenCode quedaría sin selector). | Aceptada |
 | ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
+| ADR-017 | `PATH`: `process.env` primero; shell de login solo como respaldo asíncrono y cacheado, añadiendo rutas al final. | S1: en este equipo `process.env` ya encuentra todo; el shell cuesta ≈1,4 s y cambia el binario elegido. | Fusionar siempre el entorno del shell (lento y cambia binarios). | Aceptada (matiza ADR-006) |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1262,7 +1266,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ACP y sus adaptadores cambian rápido (SDK 1.x, adaptadores renombrados en 2026) | Alta | Medio | Versiones fijadas (ADR-010), tests de contrato con fixtures, negociación de `protocolVersion`, mapeo tolerante. |
 | Formatos `stream-json`/`--json` de los CLIs cambian | Alta | Medio | Parsers tolerantes, fixtures por versión, adaptadores directos como vía secundaria. |
 | Agentes que escriben sin pedir permiso en su modo por defecto (Codex `agent`, OpenCode) | Alta | Alto | Mostrar el modo activo siempre; Q8; recomendar git/backup. |
-| PATH/entorno en apps GUI (mise/nvm/asdf) | Alta (en este equipo, segura) | Alto | §4.7 desde el MVP + ruta manual + botón re-detectar. |
+| PATH/entorno en apps GUI (mise/nvm/asdf) | Media (S1: no ocurre en este equipo) | Alto | §4.7 desde el MVP + ruta manual + botón re-detectar. |
 | Obsidian en Flatpak/Snap | Media | Alto | Documentar no soportado; investigar `flatpak-spawn --host` más adelante. |
 | Agente modifica una nota que el usuario está editando | Media | Medio | Escrituras ACP vía Vault API; aviso si el archivo está abierto con cambios sin guardar. |
 | Agente destructivo en modo permisivo | Baja | Alto | Defaults conservadores, confirmación de modos peligrosos, recomendación de git/backup. |
@@ -1374,3 +1378,6 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   `--verbose` obligatorio, prompt por stdin, `permission_denied` en vivo. Codex directo:
   `--skip-git-repo-check` obligatorio y opciones antes de `resume`. Se añadió `@agentclientprotocol/sdk@1.6.0`
   como dependencia. **Pendiente:** S1 y S5 (en Obsidian), T0.5 (reinicio); siguiente tarea de código: T2.1.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — **S1** completado (`docs/spikes/S1-env.md`): Obsidian lanzado desde
+  Hyprland encuentra `claude`, `codex`, `opencode`, `node` y `npx` vía shims de mise; el shell de login tarda
+  1,4 s y resuelve binarios distintos → ADR-017 (shell solo como respaldo asíncrono). T2.2 ya no depende de nada.
