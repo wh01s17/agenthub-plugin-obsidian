@@ -121,7 +121,11 @@ export class AgentHubSettingTab extends PluginSettingTab {
     const row = new Setting(el).setName(agent.label);
     if (agent.enabled) {
       row.setDesc(t('settingsDetecting'));
-      void this.host.detectAgent(agent.id).then((result) => row.setDesc(describeDetection(result)));
+      // Block body on purpose: `Setting` has a fluent `then()` (Obsidian 1.13), so returning it from a
+      // promise callback makes the promise adopt it forever and freezes the app.
+      void this.host.detectAgent(agent.id).then((result) => {
+        row.setDesc(describeDetection(result));
+      });
     } else {
       row.setDesc(t('settingsDisabled'));
     }

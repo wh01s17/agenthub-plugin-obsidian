@@ -21,6 +21,8 @@ Todo debe estar en verde antes de empezar y antes de cada commit.
 
 - `src/core/` y `src/adapters/` no importan `obsidian` (ver plan §4.2).
 - Ningún archivo de código supera 1000 líneas salvo justificación (no aplica a `plan.md`).
+- Nunca devolver un `Setting` ni componentes de Obsidian desde callbacks de promesa o funciones `async`: son
+  *thenables* (Obsidian 1.13) y congelan la app. Usa cuerpos de bloque.
 - Sin `innerHTML`; estilos solo en `styles.css` con prefijo `agenthub-` y variables CSS de Obsidian.
 - Textos de UI vía `t()` (`src/i18n/`), con las mismas claves en `en.ts` y `es.ts`.
 - Commits: Conventional Commits con el ID de tarea, p. ej. `feat(ui): permission card [T2.8]`.

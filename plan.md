@@ -1318,7 +1318,11 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - `core/` y `adapters/` no importan `obsidian` (excepto `HostBridgeImpl.ts`).
 - Nombres: clases `PascalCase`, archivos de clase `PascalCase.ts`, utilidades `camelCase.ts`, componentes `PascalCase.tsx`.
 - Recursos de Obsidian siempre con `this.register*`; nada de listeners globales sin limpieza.
-- Usar `this.app`, nunca el global `app`. Sin `innerHTML`/`outerHTML`. Estilos solo en `styles.css`
+- Usar `this.app`, nunca el global `app`.
+- **Nunca devolver un `Setting` ni un componente de Obsidian (`BaseComponent`: toggles, dropdowns, botones, textos)
+  desde un callback de promesa o una función `async`.** Desde Obsidian 1.13 tienen un `then()` fluido y son
+  *thenables*: la promesa los "adopta" en un bucle infinito de microtareas que congela la app. Usar cuerpos de bloque
+  (`.then((r) => { row.setDesc(r); })`). El mock de `obsidian` reproduce esto y `no-misused-promises` lo marca. Sin `innerHTML`/`outerHTML`. Estilos solo en `styles.css`
   con prefijo `agenthub-` y variables CSS de Obsidian.
 - Textos de UI en *sentence case* y a través de `t()` (i18n).
 
@@ -1438,3 +1442,13 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   y Codex (codex-acp 2.1.1)** recorriendo todo el stack (registro → `AcpAdapter` → `ChatSession` → archivo escrito en
   el vault de prueba), con permisos aprobados vía el estado de la sesión. Sin procesos huérfanos tras los tests.
   Pendiente: la verificación visual en Obsidian.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — **Bug: abrir los ajustes de AgentHub congelaba Obsidian.** Reproducido
+  lanzando Obsidian con `--remote-debugging-port` y controlándolo por CDP (scripts en el scratchpad de la sesión), y
+  aislado por bisección: el disparador era `detectAgent(id).then((r) => row.setDesc(...))`. **Causa raíz:** en Obsidian
+  1.13 `Setting` (y todo `BaseComponent`) tiene un método fluido `then(cb)` → es un *thenable*; al devolverlo desde el
+  callback, la promesa lo adopta, su `then` se llama a sí mismo y se forma un bucle infinito de microtareas (la UI
+  nunca vuelve a pintar). No tenía relación con la detección ni con la ventana separada de ajustes. **Arreglo:** cuerpo de
+  bloque. **Regresión:** el mock de `obsidian` ahora implementa `Setting`/componentes como thenables con un contador que
+  convierte el bucle en fallo (`tests/unit/SettingsTab.test.ts`; verificado que falla con el bug y pasa con el arreglo).
+  Regla añadida en §15 y `AGENTS.md`. Además se verificó **en Obsidian real** (vía CDP, agente simulado): chat con
+  streaming, tarjetas de herramientas, flujo de permisos (Allow), Detener y limpieza de procesos al cerrar la sesión.
