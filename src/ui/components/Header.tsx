@@ -1,6 +1,7 @@
 import type { ConfigOption } from '../../core/types';
 import { t } from '../../i18n';
 import type { AgentConfig } from '../../settings/settings';
+import { AgentBadge } from './AgentBadge';
 import { Icon } from './Icon';
 
 interface HeaderProps {
@@ -22,6 +23,10 @@ export function Header(props: HeaderProps) {
   return (
     <header class="agenthub-header">
       <div class="agenthub-header-row">
+        <AgentBadge
+          agentId={agentId}
+          label={agents.find((agent) => agent.id === agentId)?.label ?? agentId}
+        />
         <select
           class="dropdown agenthub-agent-select"
           aria-label={t('agentLabel')}

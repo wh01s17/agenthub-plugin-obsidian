@@ -1281,6 +1281,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-020 | `AgentRegistry` vive en `src/agents/` (capa de composición), no en `src/core/`. | Construye adaptadores concretos; en `core/` invertiría la dependencia núcleo → adaptadores. | `core/AgentRegistry.ts` (plan original). | Aceptada |
 | ADR-021 | `SessionStore` recibe un subconjunto estructural de `DataAdapter` y guarda snapshots JSONL completos, serializados, con `.tmp` y respaldo `.bak` recuperable. El núcleo lo conecta mediante `SessionManager.onCreate`. | Herramientas y planes cambian después de insertarse; snapshots evitan duplicados. Verificado en Obsidian 1.13.7: `rename()` rechaza destinos existentes. El respaldo conserva la versión anterior durante el reemplazo. | Append de cada snapshot (duplicación); usar `fs.rename` directamente (acoplamiento a disco); asumir que `DataAdapter.rename` sobrescribe. | Aceptada |
 | ADR-022 | Reabrir una sesión guardada usa `session/resume` si el agente lo anuncia; si no, `session/load` ignorando la repetición del historial (ya está en el transcript local); si no, sesión nueva con aviso `contextNotRestored`. | El transcript local es la fuente de lo que se muestra; el agente solo necesita recuperar su contexto. S2: Claude, Codex y OpenCode anuncian `resume`. | Usar siempre `session/load` (duplicaría el historial). | Aceptada |
+| ADR-023 | Identidad por agente: monograma + color de la paleta del tema (`--color-orange`, `--color-green`…): Claude naranja «C», Codex verde «Cx», Gemini azul «G», OpenCode morado «O»; los personalizados, color estable por hash del id e iniciales. Sin logotipos de marca. | Distinguir de un vistazo qué agente se usa, respetando temas claro/oscuro (ADR-018). | Logotipos oficiales (restricciones de marca, no se adaptan al tema). | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1511,3 +1512,10 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   sesiones (título, agente, fecha, "Current"), y alternar entre ellas restaura cada transcript completo (mensajes,
   herramientas, permisos y respuestas). Observación: los selectores de modo/modelo de una sesión reabierta aparecen
   recién tras el primer mensaje, porque el agente arranca de forma perezosa (mejora posible: guardar `configOptions`).
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Rediseño **compacto y sobrio** pedido por el usuario (historial,
+  mensajes, cabecera/selectores, compositor/estado): herramientas como filas finas sin caja, plan y permisos con acento
+  lateral, avisos sin recuadro, selectores de opciones compactos, el compositor pasa a ser una caja única (texto +
+  barra con chips de contexto y Enviar) que toma el color del agente al enfocar, historial con acciones al pasar el
+  ratón o con foco de teclado, etiqueta "You" solo para lectores de pantalla. **Identidad por agente** (ADR-023):
+  `src/ui/agentIdentity.ts` + `AgentBadge` en la cabecera y en cada fila del historial. 152 tests. Falta revisión
+  visual del usuario.

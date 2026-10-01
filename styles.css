@@ -1,4 +1,4 @@
-/* AgentHub — only Obsidian CSS variables, so every theme (light/dark/community) applies (ADR-018). */
+/* AgentHub — compact, sober sidebar. Only Obsidian CSS variables, so every theme applies (ADR-018). */
 
 .agenthub-view {
   padding: 0;
@@ -9,6 +9,7 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  font-size: var(--font-ui-small);
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
@@ -16,7 +17,7 @@
 .agenthub-header {
   display: flex;
   flex-direction: column;
-  gap: var(--size-4-2);
+  gap: var(--size-4-1);
   padding: var(--size-4-2) var(--size-4-3);
   border-bottom: var(--border-width) solid var(--background-modifier-border);
 }
@@ -24,7 +25,7 @@
 .agenthub-header-row {
   display: flex;
   align-items: center;
-  gap: var(--size-4-2);
+  gap: var(--size-4-1);
 }
 
 .agenthub-agent-select {
@@ -37,9 +38,21 @@
 }
 
 .agenthub-config-select {
-  flex: 1 1 8rem;
+  flex: 0 1 auto;
   min-width: 0;
+  max-width: 100%;
+  height: auto;
+  padding-block: 2px;
+  padding-inline: var(--size-4-2) var(--size-4-6);
+  border: var(--border-width) solid var(--background-modifier-border);
+  background-color: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
   font-size: var(--font-ui-smaller);
+}
+
+.agenthub-config-select:hover {
+  color: var(--text-normal);
 }
 
 .agenthub-icon-button {
@@ -51,12 +64,13 @@
 
 .agenthub-empty {
   margin: auto;
-  padding: var(--size-4-6);
+  padding: var(--size-4-6) var(--size-4-4);
   text-align: center;
   color: var(--text-muted);
 }
 
 .agenthub-empty-title {
+  margin-bottom: var(--size-4-1);
   font-weight: var(--font-semibold);
   color: var(--text-normal);
 }
@@ -74,21 +88,26 @@
 }
 
 .agenthub-message.is-user {
-  align-self: flex-end;
-  max-width: 90%;
   padding: var(--size-4-2) var(--size-4-3);
   border-radius: var(--radius-m);
-  background: var(--background-secondary-alt);
-}
-
-.agenthub-message-author {
-  font-size: var(--font-ui-smaller);
-  color: var(--text-muted);
+  background: var(--background-secondary);
 }
 
 .agenthub-message-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  color: var(--text-normal);
+}
+
+.agenthub-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--size-4-2);
+  margin: var(--size-4-1) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
 }
 
 .agenthub-markdown {
@@ -106,35 +125,50 @@
 
 .agenthub-thought {
   color: var(--text-muted);
-  font-size: var(--font-ui-small);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-thought > summary {
+  cursor: pointer;
 }
 
 .agenthub-thought-text {
-  white-space: pre-wrap;
+  margin-top: var(--size-4-1);
   padding-left: var(--size-4-3);
   border-left: 2px solid var(--background-modifier-border);
+  white-space: pre-wrap;
 }
 
-/* ── Tool calls, plan, permissions, notices ─────────────────────────────── */
+/* ── Tool calls: thin rows, details on demand ───────────────────────────── */
 
-.agenthub-tool,
-.agenthub-plan,
-.agenthub-permission,
-.agenthub-notice,
-.agenthub-debug {
-  border: var(--border-width) solid var(--background-modifier-border);
-  border-radius: var(--radius-m);
-  background: var(--background-secondary);
-  font-size: var(--font-ui-small);
+.agenthub-tool {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+/* Consecutive tool calls read as one compact list. */
+.agenthub-tool + .agenthub-tool {
+  margin-top: calc(var(--size-4-2) * -1);
 }
 
 .agenthub-tool-summary {
   display: flex;
   align-items: center;
   gap: var(--size-4-2);
-  min-height: 28px;
-  padding: var(--size-4-1) var(--size-4-2);
+  min-height: 24px;
+  padding: 0 var(--size-4-1);
+  border-radius: var(--radius-s);
+  list-style: none;
   cursor: pointer;
+}
+
+.agenthub-tool-summary::-webkit-details-marker {
+  display: none;
+}
+
+.agenthub-tool-summary:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
 }
 
 .agenthub-tool-title {
@@ -147,22 +181,26 @@
 }
 
 .agenthub-tool-body {
-  padding: 0 var(--size-4-2) var(--size-4-2);
+  margin: var(--size-4-1) 0 var(--size-4-1) var(--size-4-3);
+  padding-left: var(--size-4-3);
+  border-left: 2px solid var(--background-modifier-border);
 }
 
 .agenthub-tool-label {
-  color: var(--text-muted);
-  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  font-size: 0.85em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .agenthub-tool-output,
 .agenthub-debug-output {
-  max-height: 16rem;
+  max-height: 14rem;
   overflow: auto;
   margin: var(--size-4-1) 0;
   padding: var(--size-4-2);
   border-radius: var(--radius-s);
-  background: var(--background-primary);
+  background: var(--background-secondary);
   font-family: var(--font-monospace);
   font-size: var(--font-ui-smaller);
   white-space: pre-wrap;
@@ -172,22 +210,22 @@
 
 .agenthub-tool-locations {
   margin: var(--size-4-1) 0;
-  padding-left: var(--size-4-4);
+  padding: 0;
+  list-style: none;
   font-family: var(--font-monospace);
 }
 
 .agenthub-tool-exit,
 .agenthub-tool-diff-path {
-  color: var(--text-muted);
-  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
 }
 
 .agenthub-badge {
   margin-left: var(--size-4-2);
   padding: 0 var(--size-4-1);
   border-radius: var(--radius-s);
-  background: var(--interactive-accent);
-  color: var(--text-on-accent);
+  background: var(--background-modifier-hover);
+  color: var(--text-muted);
 }
 
 .agenthub-status-completed {
@@ -214,8 +252,13 @@
   }
 }
 
-.agenthub-plan {
-  padding: var(--size-4-2);
+/* ── Plan, permissions, notices: accent on the left, no boxes ───────────── */
+
+.agenthub-plan,
+.agenthub-permission {
+  padding: var(--size-4-1) var(--size-4-3);
+  border-left: 2px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller);
 }
 
 .agenthub-plan-title,
@@ -223,6 +266,7 @@
   display: flex;
   align-items: center;
   gap: var(--size-4-1);
+  color: var(--text-muted);
   font-weight: var(--font-semibold);
 }
 
@@ -236,56 +280,74 @@
   display: flex;
   align-items: center;
   gap: var(--size-4-2);
+  min-height: 20px;
+}
+
+.agenthub-plan-entry.is-in_progress {
+  color: var(--text-normal);
 }
 
 .agenthub-plan-entry.is-completed {
-  color: var(--text-muted);
+  color: var(--text-faint);
   text-decoration: line-through;
 }
 
-.agenthub-permission {
-  padding: var(--size-4-2) var(--size-4-3);
-  border-color: var(--interactive-accent);
+.agenthub-permission.is-pending {
+  border-left-color: var(--interactive-accent);
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  background: var(--background-secondary);
 }
 
 .agenthub-permission.is-resolved {
-  border-color: var(--background-modifier-border);
-  color: var(--text-muted);
+  color: var(--text-faint);
 }
 
 .agenthub-permission-title {
   margin: var(--size-4-1) 0;
+  color: var(--text-normal);
   font-family: var(--font-monospace);
   overflow-wrap: anywhere;
+}
+
+.agenthub-permission.is-resolved .agenthub-permission-title {
+  margin: 0;
+  color: var(--text-muted);
 }
 
 .agenthub-permission-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--size-4-2);
+  gap: var(--size-4-1);
+  padding-bottom: var(--size-4-1);
 }
 
 .agenthub-permission-actions button {
-  min-height: 28px;
+  min-height: 24px;
+  font-size: var(--font-ui-smaller);
 }
 
 .agenthub-notice {
   display: flex;
   gap: var(--size-4-2);
-  padding: var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
 }
 
-.agenthub-notice.is-warning {
-  border-color: var(--color-orange);
+.agenthub-notice.is-warning .agenthub-icon {
+  color: var(--color-orange);
 }
 
 .agenthub-notice.is-error {
-  border-color: var(--color-red);
+  color: var(--text-normal);
+}
+
+.agenthub-notice.is-error .agenthub-icon {
+  color: var(--color-red);
 }
 
 .agenthub-notice-body {
-  min-width: 0;
   flex: 1;
+  min-width: 0;
 }
 
 .agenthub-notice-hint {
@@ -294,110 +356,119 @@
 
 .agenthub-debug {
   margin: 0 var(--size-4-3);
-  padding: var(--size-4-1) var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
 }
 
-/* ── Status and composer ────────────────────────────────────────────────── */
+/* ── Status line and composer box ──────────────────────────────────────── */
 
 .agenthub-status {
   display: flex;
   gap: var(--size-4-3);
-  padding: var(--size-4-1) var(--size-4-3);
-  color: var(--text-muted);
+  padding: var(--size-4-1) var(--size-4-4) 0;
+  color: var(--text-faint);
   font-size: var(--font-ui-smaller);
+}
+
+.agenthub-status.is-running,
+.agenthub-status.is-starting,
+.agenthub-status.is-awaiting-permission {
+  color: var(--text-muted);
 }
 
 .agenthub-status.is-error {
   color: var(--color-red);
 }
 
-.agenthub-status-usage {
-  margin-left: auto;
+.agenthub-status-text {
+  margin-right: auto;
 }
 
 .agenthub-composer {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: var(--size-4-2);
-  padding: var(--size-4-2) var(--size-4-3) var(--size-4-3);
-  border-top: var(--border-width) solid var(--background-modifier-border);
+  margin: var(--size-4-1) var(--size-4-3) var(--size-4-3);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-primary);
 }
 
 .agenthub-composer-input {
-  flex: 1;
-  min-height: 3.5rem;
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
   max-height: 12rem;
+  padding: var(--size-4-2) var(--size-4-3) 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
   resize: vertical;
+}
+
+.agenthub-composer-input:focus,
+.agenthub-composer-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.agenthub-composer-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  padding: var(--size-4-1) var(--size-4-2) var(--size-4-2);
+}
+
+.agenthub-composer-context {
+  flex: 1;
+  min-width: 0;
 }
 
 .agenthub-composer-button {
   display: flex;
   align-items: center;
   gap: var(--size-4-1);
-  min-height: 28px;
+  height: auto;
+  min-height: 24px;
+  padding: 2px var(--size-4-3);
+  font-size: var(--font-ui-smaller);
 }
 
-/* ── Shared ─────────────────────────────────────────────────────────────── */
-
-.agenthub-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-}
-
-.agenthub-icon svg {
-  width: var(--icon-s);
-  height: var(--icon-s);
-}
-
-.agenthub-app :is(button, select, textarea, summary):focus-visible {
-  outline: 2px solid var(--interactive-accent);
-  outline-offset: 1px;
-}
-
-.agenthub-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.agenthub-settings-agent {
-  margin-left: var(--size-4-4);
-  padding-left: var(--size-4-3);
-  border-left: 2px solid var(--background-modifier-border);
-}
-
-/* ── Context (Fase 3) ───────────────────────────────────────────────────── */
+/* ── Context chips ──────────────────────────────────────────────────────── */
 
 .agenthub-chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--size-4-1);
-  padding: 0 var(--size-4-3);
 }
 
 .agenthub-chip {
   display: inline-flex;
   align-items: center;
   gap: var(--size-4-1);
+  max-width: 100%;
+  height: auto;
   min-height: 24px;
   padding: 0 var(--size-4-2);
-  border: var(--border-width) solid var(--background-modifier-border);
-  border-radius: var(--radius-l);
-  background: var(--background-secondary);
+  border: none;
+  border-radius: var(--radius-s);
+  background: var(--background-modifier-hover);
+  box-shadow: none;
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
 }
 
+.agenthub-chip > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .agenthub-chip.is-on {
   color: var(--text-normal);
-  border-color: var(--interactive-accent);
 }
 
 .agenthub-chip.is-off {
+  background: transparent;
+  color: var(--text-faint);
   text-decoration: line-through;
 }
 
@@ -406,22 +477,13 @@
   min-height: 24px;
 }
 
-.agenthub-attachments {
-  margin: var(--size-4-1) 0 0;
-  padding-left: var(--size-4-4);
-  color: var(--text-muted);
-  font-size: var(--font-ui-smaller);
-}
-
-.agenthub-path-link {
-  color: var(--link-color);
-}
+/* ── Suggestions popup ──────────────────────────────────────────────────── */
 
 .agenthub-suggestions {
   position: absolute;
-  bottom: calc(100% - var(--size-4-1));
-  left: var(--size-4-3);
-  right: var(--size-4-3);
+  bottom: calc(100% + var(--size-4-1));
+  left: 0;
+  right: 0;
   z-index: var(--layer-popover);
   max-height: 14rem;
   overflow-y: auto;
@@ -452,7 +514,7 @@
   font-size: var(--font-ui-smaller);
 }
 
-/* ── History (Fase 4) ───────────────────────────────────────────────────── */
+/* ── History ────────────────────────────────────────────────────────────── */
 
 .agenthub-history {
   flex: 1;
@@ -464,7 +526,7 @@
 .agenthub-history-header {
   display: flex;
   align-items: center;
-  gap: var(--size-4-2);
+  gap: var(--size-4-1);
   margin-bottom: var(--size-4-2);
 }
 
@@ -483,11 +545,18 @@
   display: flex;
   align-items: center;
   gap: var(--size-4-1);
-  border-bottom: var(--border-width) solid var(--background-modifier-border);
+  padding: 0 var(--size-4-1) 0 var(--size-4-2);
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--radius-s) var(--radius-s) 0;
 }
 
-.agenthub-history-entry.is-current .agenthub-history-title {
-  color: var(--interactive-accent);
+.agenthub-history-entry:hover,
+.agenthub-history-entry:focus-within {
+  background: var(--background-modifier-hover);
+}
+
+.agenthub-history-entry.is-current {
+  border-left-color: var(--interactive-accent);
 }
 
 .agenthub-history-open {
@@ -496,11 +565,18 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  gap: 1px;
   height: auto;
   padding: var(--size-4-2) var(--size-4-1);
+  border: none;
   background: none;
   box-shadow: none;
   text-align: left;
+  cursor: pointer;
+}
+
+.agenthub-history-open:hover {
+  background: none;
 }
 
 .agenthub-history-title {
@@ -508,14 +584,123 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
 }
 
 .agenthub-history-meta {
-  color: var(--text-muted);
+  color: var(--text-faint);
   font-size: var(--font-ui-smaller);
+}
+
+/* Row actions appear on hover or keyboard focus, so the list stays calm. */
+.agenthub-history-entry .agenthub-icon-button {
+  opacity: 0;
+}
+
+.agenthub-history-entry:hover .agenthub-icon-button,
+.agenthub-history-entry:focus-within .agenthub-icon-button,
+.agenthub-history-entry .agenthub-icon-button.mod-warning {
+  opacity: 1;
 }
 
 .agenthub-history-rename {
   flex: 1;
   min-width: 0;
+  margin: var(--size-4-1) 0;
+}
+
+/* ── Shared ─────────────────────────────────────────────────────────────── */
+
+.agenthub-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.agenthub-icon svg {
+  width: var(--icon-s);
+  height: var(--icon-s);
+}
+
+.agenthub-path-link {
+  color: var(--link-color);
+}
+
+.agenthub-app :is(button, select, textarea, input, summary):focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+.agenthub-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.agenthub-settings-agent {
+  margin-left: var(--size-4-4);
+  padding-left: var(--size-4-3);
+  border-left: 2px solid var(--background-modifier-border);
+}
+
+/* ── Agent identity (color + monogram per agent) ────────────────────────── */
+
+.agenthub-app,
+.agenthub-agent-badge {
+  --agenthub-agent: var(--interactive-accent);
+}
+
+[data-agent-color='orange'] {
+  --agenthub-agent: var(--color-orange);
+}
+[data-agent-color='green'] {
+  --agenthub-agent: var(--color-green);
+}
+[data-agent-color='blue'] {
+  --agenthub-agent: var(--color-blue);
+}
+[data-agent-color='purple'] {
+  --agenthub-agent: var(--color-purple);
+}
+[data-agent-color='cyan'] {
+  --agenthub-agent: var(--color-cyan);
+}
+[data-agent-color='pink'] {
+  --agenthub-agent: var(--color-pink);
+}
+[data-agent-color='yellow'] {
+  --agenthub-agent: var(--color-yellow);
+}
+[data-agent-color='red'] {
+  --agenthub-agent: var(--color-red);
+}
+
+.agenthub-agent-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 var(--size-4-1);
+  border-radius: var(--radius-s);
+  background: color-mix(in srgb, var(--agenthub-agent) 18%, transparent);
+  color: var(--agenthub-agent);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-bold);
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+/* The active agent tints the composer focus and the streaming status. */
+.agenthub-app .agenthub-composer:focus-within {
+  border-color: var(--agenthub-agent);
+}
+
+.agenthub-app .agenthub-status.is-running .agenthub-status-text,
+.agenthub-app .agenthub-status.is-starting .agenthub-status-text {
+  color: var(--agenthub-agent);
 }

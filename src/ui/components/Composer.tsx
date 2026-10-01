@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useRef, useState } from 'preact/hooks';
 import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
 import type { SlashCommand } from '../../core/types';
@@ -15,6 +16,8 @@ interface ComposerProps {
   commands: readonly SlashCommand[];
   onSend: (text: string) => void;
   onStop: () => void;
+  /** Shown in the composer toolbar, left of the send button (context chips). */
+  children?: ComponentChildren;
 }
 
 interface Suggestions {
@@ -153,28 +156,31 @@ export function Composer(props: ComposerProps) {
         onKeyDown={onKeyDown}
         onBlur={() => setSuggestions(null)}
       />
-      {busy ? (
-        <button
-          type="button"
-          class="agenthub-composer-button mod-warning"
-          onClick={onStop}
-          aria-label={t('stop')}
-        >
-          <Icon name="square" />
-          <span>{t('stop')}</span>
-        </button>
-      ) : (
-        <button
-          type="button"
-          class="agenthub-composer-button mod-cta"
-          onClick={send}
-          disabled={disabled || !text.trim()}
-          aria-label={t('send')}
-        >
-          <Icon name="send" />
-          <span>{t('send')}</span>
-        </button>
-      )}
+      <div class="agenthub-composer-toolbar">
+        <div class="agenthub-composer-context">{props.children}</div>
+        {busy ? (
+          <button
+            type="button"
+            class="agenthub-composer-button mod-warning"
+            onClick={onStop}
+            aria-label={t('stop')}
+          >
+            <Icon name="square" />
+            <span>{t('stop')}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            class="agenthub-composer-button mod-cta"
+            onClick={send}
+            disabled={disabled || !text.trim()}
+            aria-label={t('send')}
+          >
+            <Icon name="send" />
+            <span>{t('send')}</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

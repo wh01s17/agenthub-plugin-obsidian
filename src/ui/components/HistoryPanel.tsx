@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import type { SessionEntry } from '../../storage/sessionSchema';
+import { AgentBadge } from './AgentBadge';
 import { Icon } from './Icon';
 
 export interface SessionHistory {
@@ -34,6 +35,7 @@ function Entry(props: {
 
   return (
     <li class={`agenthub-history-entry ${current ? 'is-current' : ''}`}>
+      <AgentBadge agentId={entry.agentId} label={agent.label} />
       {editing ? (
         <input
           class="agenthub-history-rename"

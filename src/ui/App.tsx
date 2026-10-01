@@ -14,6 +14,7 @@ import { HistoryPanel } from './components/HistoryPanel';
 import { Header } from './components/Header';
 import { MessageList } from './components/MessageList';
 import { StatusBar } from './components/StatusBar';
+import { agentIdentity } from './agentIdentity';
 import { useSessionState } from './hooks';
 import type { ViewHost } from './ViewHost';
 
@@ -99,7 +100,11 @@ function ChatView(props: AppProps & { session: ChatSession }) {
   };
 
   return (
-    <div class="agenthub-app" data-session-id={state.localId}>
+    <div
+      class="agenthub-app"
+      data-session-id={state.localId}
+      data-agent-color={agentIdentity(state.agentId, agentLabel).color}
+    >
       <Header
         agents={host.agents.enabled()}
         agentId={state.agentId}
@@ -144,13 +149,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
       )}
       {host.settings.debugPanel && <DebugPanel lines={session.debugLog()} />}
       <StatusBar status={state.status} usage={state.usage} />
-      <ContextChips
-        activeNotePath={activeNotePath}
-        includeActive={includeActive}
-        selection={selection}
-        onToggleActive={() => setIncludeActive((value) => !value)}
-        onRemoveSelection={() => props.onClearSelection?.()}
-      />
+
       <Composer
         agentLabel={agentLabel}
         busy={busy}
@@ -160,7 +159,15 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         commands={state.commands}
         onSend={onSend}
         onStop={() => void session.cancel()}
-      />
+      >
+        <ContextChips
+          activeNotePath={activeNotePath}
+          includeActive={includeActive}
+          selection={selection}
+          onToggleActive={() => setIncludeActive((value) => !value)}
+          onRemoveSelection={() => props.onClearSelection?.()}
+        />
+      </Composer>
     </div>
   );
 }
