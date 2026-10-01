@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅, T2.2 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
-| Próxima tarea | **Verificación manual del MVP en Obsidian** (pendiente del usuario) y **Fase 3** (T3.1) |
+| Fase actual | **Fase 2 — Núcleo + ACP**: T2.1–T2.10 hechas en código (107 tests). Falta la verificación manual del criterio de salida F2 en Obsidian con agentes reales. |
+| Próxima tarea | **Verificación manual del MVP en Obsidian** (usuario) → luego **Fase 3** (T3.1) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1190,8 +1190,8 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   `accessibility`): todo control es un `<button>`/`<select>`/`<textarea>` nativo con etiqueta, foco visible, objetivos
   ≥ 24×24 px, operable solo con teclado, avisos de estado y streaming en región `aria-live="polite"`, sin animaciones
   sin `prefers-reduced-motion`. Dirección visual según ADR-018. *CA:* RF-04, RF-05, RF-06 (ACP), RF-07, RF-19.
-- [ ] **T2.9** Selector de modo/modelo cuando el agente los expone. *CA:* RF-12 para ACP.
-- [ ] **T2.10** Manejo de errores de §4.14 (binario faltante, auth, crash, timeout).
+- [x] **T2.9** Selector de modo/modelo cuando el agente los expone. *CA:* RF-12 para ACP.
+- [x] **T2.10** Manejo de errores de §4.14 (binario faltante, auth, crash, timeout).
 
 **Criterio de salida F2 (MVP):** desde el sidebar, con **Claude (ACP)** y **Codex (ACP)** —y Gemini/OpenCode
 si están disponibles—: enviar un prompt, ver la respuesta en streaming renderizada, ver tool calls,
@@ -1431,3 +1431,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.6** hecho: `src/core/reducer.ts` (puro e inmutable; acciones locales + `AgentEvent`; un plan por turno; ids de aviso deterministas), `src/core/ChatSession.ts` (agente perezoso, `subscribe/getState`, permisos vía estado, cancelación que resuelve permisos pendientes, reintento tras error de arranque, agente nuevo tras caída, log de debug separado, título desde el primer mensaje) y `src/core/SessionManager.ts`. Los avisos del transcript son datos (`Notice` con `key`) para que la UI los traduzca con `t()`. Arreglo en `AcpSession`: los eventos emitidos antes de la primera suscripción (`session.ready`) se guardan y entregan al suscribirse. 79 tests, cobertura 83,8 %.
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.7** hecho: `src/settings/settings.ts` (esquema Zod, `migrate()` campo a campo, presets fijados de Claude/Codex/OpenCode y Gemini desactivado, presets nuevos aparecen desactivados, instrucciones del vault con `{{configDir}}`), `src/agents/AgentRegistry.ts` (ADR-020; detección cacheada con pistas de instalación/login traducidas), `src/settings/SettingsTab.ts` (agentes con estado de detección, activar, editar comando/args/env/opciones iniciales, añadir/eliminar personalizados, re-detectar; sesiones; entorno). `main.ts`: ajustes, resolver por llamada según ajustes, `killAll()` en `onunload`. `t()` admite `{placeholders}`. ADR-019 (`display()` frente a la API declarativa de 1.13). 91 tests; bundle 565 KB.
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.8** hecho (código; verificación manual en Obsidian pendiente): `src/ui/` → `App.tsx`, `AgentHubView.ts` (sesión por vista; cerrar la vista termina la sesión y su proceso; nueva sesión / cambio de agente), `hooks.ts` (`useSessionState`, `useThrottledValue` 100 ms), `components/` (`Header` con selector de agente y selectores de `configOptions`, `MessageList` con auto-scroll que respeta la lectura, `Markdown` con `MarkdownRenderer` y enlaces internos, `ToolCallCard`, `PermissionCard`, `PlanView`, `NoticeItem` que traduce avisos, `Composer` Enter/Mod+Enter + Detener, `StatusBar` como única región live, `DebugPanel`, `Icon`). `src/host/ObsidianHost.ts` (lectura con contenido no guardado del editor, escritura por Vault API, `src/core/pathGuard.ts` + `text.ts`), `src/host/openSettings.ts` (API privada `app.setting` comprobada en ejecución). `main.ts` crea `SessionManager` y en `onunload` cierra sesiones y mata procesos. Estilos solo con variables del tema, foco visible, objetivos ≥ 24 px, spinner con `prefers-reduced-motion`. Tests de UI con Testing Library (`tests/setup.ts` hace `cleanup()`). 103 tests; bundle 593 KB.
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.9** hecho: la cabecera muestra un `<select>` etiquetado por cada `configOption` (modo, modelo…) y llama a `session/set_config_option`; se bloquea mientras el agente trabaja. Tests de UI.
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.10** hecho: binario ausente (`AgentError` `missing-binary` + comando de instalación), login requerido (`auth` + comando de login), caída (aviso con las últimas líneas de stderr; el siguiente mensaje arranca un agente nuevo), timeout de arranque (30 s) y cancelación sin respuesta (kill a los 5 s). La UI los muestra con `NoticeItem` (rol `alert`, pista y detalles plegables). 107 tests. **Fase 2 completa en código; falta la verificación manual con agentes reales en Obsidian (criterio de salida F2).**
