@@ -40,9 +40,9 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅). Pendientes manuales: S5 (render en Obsidian) y T0.5 (restauración tras reinicio). |
+| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
 | Próxima tarea | **T2.2** (`ShellEnv` + `BinaryResolver`, según ADR-017) y **T2.3** (`ProcessRunner`) |
-| Tareas en paralelo posibles | S1, S5 y T0.5 (manuales, en Obsidian) ∥ T2.1, T2.3, T2.4 (código) |
+| Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
 | Código existente | Scaffolding: build/lint/test en verde, vista lateral vacía con Preact, i18n es/en, vault de pruebas. Repo git en rama `main` con los commits de Fase 0 (sin remoto). |
@@ -1140,7 +1140,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   un test trivial. *CA:* `pnpm lint && pnpm test` en verde.
 - [x] **T0.4** `test-vault/` con notas de ejemplo + `scripts/link-test-vault.mjs` + script `dev`.
   *CA:* el plugin aparece y se habilita en el vault de pruebas.
-- [~] **T0.5** *(verificado en Obsidian 1.13.7: se abre en el panel derecho con el estado vacío; falta confirmar que se restaura al reiniciar)* Vista lateral vacía: `registerView`, icono de cinta, comando `open-view`,
+- [x] **T0.5** Vista lateral vacía: `registerView`, icono de cinta, comando `open-view`,
   activación en hoja derecha, `getState/setState`, montaje/desmontaje de Preact con un "Hola".
   *CA:* abrir/cerrar la vista repetidas veces sin errores ni fugas; se restaura al reiniciar.
 - [x] **T0.6** `AGENTS.md` y `CLAUDE.md` (breves: "lee plan.md §0", comandos de build/test).
@@ -1392,3 +1392,5 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   `usage` de contexto, `AGENT_EVENT_TYPES` verificado por un test de tipos) y `src/core/AgentAdapter.ts`
   (`HostBridge`, `Logger`, `AgentCapabilities`, `AgentSession.setConfigOption`). Sin `any`; 12 tests en verde.
   Siguiente: T2.2 y T2.3.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — **T0.5** verificada: tras reiniciar Obsidian la vista AgentHub sigue
+  abierta en el panel derecho. **Fase 0 cerrada.**
