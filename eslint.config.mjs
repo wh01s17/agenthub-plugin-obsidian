@@ -16,6 +16,7 @@ export default defineConfig([
             'vitest.config.ts',
             'scripts/*.mjs',
             'scripts/spikes/*.mjs',
+            'tests/helpers/*.mjs',
           ],
         },
       },
@@ -23,7 +24,7 @@ export default defineConfig([
   },
   {
     // Scripts de desarrollo y config: corren en Node, no dentro de Obsidian.
-    files: ['scripts/**', '*.config.mjs', '*.config.ts'],
+    files: ['scripts/**', 'tests/helpers/**', '*.config.mjs', '*.config.ts'],
     languageOptions: { globals: { ...globals.node } },
     rules: {
       'import/no-nodejs-modules': 'off',
@@ -36,6 +37,12 @@ export default defineConfig([
   {
     // Los tests corren en jsdom puro, sin los helpers DOM de Obsidian.
     files: ['tests/**'],
-    rules: { 'obsidianmd/prefer-create-el': 'off' },
+    rules: { 'obsidianmd/prefer-create-el': 'off', 'obsidianmd/prefer-window-timers': 'off' },
+  },
+  {
+    // Núcleo, procesos y adaptadores no dependen del DOM y se prueban en Node: los timers de `window`
+    // (pensados para ventanas emergentes de la UI) no aplican.
+    files: ['src/core/**', 'src/process/**', 'src/adapters/**'],
+    rules: { 'obsidianmd/prefer-window-timers': 'off' },
   },
 ]);
