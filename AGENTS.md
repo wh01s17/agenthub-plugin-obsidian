@@ -7,12 +7,12 @@ añadir una entrada a la bitácora §17, registrar ADR en §12).
 ## Comandos
 
 ```bash
-npm install          # .npmrc usa legacy-peer-deps (peer exacto de eslint-plugin-obsidianmd)
-npm run lint         # ESLint + reglas de eslint-plugin-obsidianmd
-npm test             # Vitest (jsdom; `obsidian` se sustituye por tests/__mocks__/obsidian.ts)
-npm run build        # tsc --noEmit + esbuild producción → main.js
-npm run dev          # esbuild en modo watch
-npm run link-vault   # enlaza el build en test-vault/.obsidian/plugins/agenthub
+pnpm install       # config de pnpm en pnpm-workspace.yaml (allowBuilds, peers)
+pnpm lint          # ESLint + reglas de eslint-plugin-obsidianmd
+pnpm test          # Vitest (jsdom; `obsidian` se sustituye por tests/__mocks__/obsidian.ts)
+pnpm build         # tsc --noEmit + esbuild producción → main.js
+pnpm dev           # esbuild en modo watch
+pnpm link-vault    # enlaza el build en test-vault/.obsidian/plugins/agenthub
 ```
 
 Todo debe estar en verde antes de empezar y antes de cada commit.

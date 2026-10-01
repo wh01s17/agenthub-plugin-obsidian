@@ -4,6 +4,7 @@
   "description": "Use coding agents like Claude Code and Codex from an Obsidian sidebar.",
   "main": "main.js",
   "private": true,
+  "packageManager": "pnpm@12.3.4",
   "type": "module",
   "license": "MIT",
   "scripts": {

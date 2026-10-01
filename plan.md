@@ -52,7 +52,7 @@
 1. **Leer** este documento completo; como mínimo §0, §4, §11 y la última entrada de §17.
 2. **Inspeccionar el repo:** `git status`, `git log --oneline -20`.
 3. **Comprobar que todo está verde** antes de tocar nada:
-   `npm ci && npm run lint && npm test && npm run build`.
+   `pnpm install --frozen-lockfile && pnpm lint && pnpm test && pnpm build`.
    Si algo falla, arreglarlo es la primera tarea (registrarlo en la bitácora).
 4. **Elegir la tarea:** la primera tarea sin marcar `[ ]` de la fase actual cuyas dependencias
    estén completas. No saltar de fase sin cerrar los criterios de aceptación de la anterior.
@@ -985,6 +985,7 @@ agenthub-plugin-obsidian/
 | Tests | Vitest + jsdom + `@testing-library/preact` | Rápido, ESM, buen soporte TS. |
 | Lint/format | ESLint (flat config) + `eslint-plugin-obsidianmd` + Prettier | Cumplir guías de revisión. |
 | Node de desarrollo | ≥ 22 (instalado v26) | — |
+| Gestor de paquetes | **pnpm** (12.3.4, fijado en `packageManager`) | Preferencia del usuario (ADR-013). No usar npm/yarn en el repo. |
 
 Dependencias que **no** se usan: `node-pty` (nativo, no distribuible), React completo (tamaño),
 librerías de estado pesadas.
@@ -997,9 +998,9 @@ librerías de estado pesadas.
 
 ```bash
 cd ~/workspace/agenthub-plugin-obsidian
-npm install
-npm run build                 # genera main.js
-node scripts/link-test-vault.mjs   # symlink de main.js/manifest.json/styles.css a test-vault/.obsidian/plugins/agenthub/
+pnpm install
+pnpm build                    # genera main.js
+pnpm link-vault   # symlink de main.js/manifest.json/styles.css a test-vault/.obsidian/plugins/agenthub/
 ```
 
 Abrir `test-vault/` en Obsidian (abrir carpeta como vault), activar plugins de la comunidad y
@@ -1029,7 +1030,7 @@ habilitar AgentHub. Instalar el plugin **Hot Reload** (pjeby) en el vault de pru
 
 ### 8.4 Release
 
-1. `npm version <patch|minor|major>` (actualiza manifest/versions).
+1. `pnpm version <patch|minor|major>` (actualiza manifest/versions).
 2. Push del tag → workflow `release.yml` crea el release con `main.js`, `manifest.json`, `styles.css`.
 3. Beta: distribuir con BRAT. Publicación: PR a `obsidianmd/obsidian-releases` (`community-plugins.json`).
 
@@ -1044,7 +1045,7 @@ habilitar AgentHub. Instalar el plugin **Hot Reload** (pjeby) en el vault de pru
 | Integración | `AcpAdapter` ↔ `fake-acp-agent.mjs` (texto en streaming, tool calls, permisos, plan, cancelación, crash del agente, auth requerida) | Proceso real, sin red, sin coste. |
 | UI | Componentes clave (`ToolCallCard`, `PermissionCard`, `Composer`) | `@testing-library/preact` + jsdom. |
 | E2E manual | Checklist en `test-vault` con cada agente real | Ver lista abajo; se ejecuta antes de cada release. |
-| E2E automatizado (opcional) | Prompts mínimos contra CLIs reales | `npm run test:e2e`, nunca en CI. |
+| E2E automatizado (opcional) | Prompts mínimos contra CLIs reales | `pnpm test:e2e`, nunca en CI. |
 
 **Checklist manual de release** (por agente disponible): abrir vista · detectar agente · enviar
 prompt · streaming visible · tool call visible · permiso aprobado y denegado · cancelar a mitad ·
@@ -1087,9 +1088,9 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   excepto lo necesario), licencia (por decidir, §14), README mínimo. *CA:* repo con primer commit.
 - [x] **T0.2** Scaffolding: `package.json`, `tsconfig.json` (strict, `jsx: react-jsx`,
   `jsxImportSource: preact`), `esbuild.config.mjs`, `manifest.json` (`isDesktopOnly: true`,
-  `minAppVersion: 1.8.7`), `versions.json`, `styles.css`. *CA:* `npm run build` genera `main.js`.
+  `minAppVersion: 1.8.7`), `versions.json`, `styles.css`. *CA:* `pnpm build` genera `main.js`.
 - [x] **T0.3** Calidad: ESLint (`eslint-plugin-obsidianmd`), Prettier, Vitest con mock de `obsidian`,
-  un test trivial. *CA:* `npm run lint && npm test` en verde.
+  un test trivial. *CA:* `pnpm lint && pnpm test` en verde.
 - [~] **T0.4** *(código listo; falta comprobarlo en Obsidian)* `test-vault/` con notas de ejemplo + `scripts/link-test-vault.mjs` + script `dev`.
   *CA:* el plugin aparece y se habilita en el vault de pruebas.
 - [~] **T0.5** *(código y test unitario listos; falta comprobarlo en Obsidian)* Vista lateral vacía: `registerView`, icono de cinta, comando `open-view`,
@@ -1209,7 +1210,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-009 | Las escrituras `fs/write_text_file` de ACP pasan por la Vault API con guardia de rutas. | Obsidian refresca editores abiertos; control de `.obsidian/`. | Escritura directa con `fs` (desincroniza editores). | Aceptada |
 | ADR-010 | Fijar versiones de adaptadores ACP en los presets. | Los adaptadores evolucionan rápido (p. ej. renombres de paquetes). | `@latest` (roturas silenciosas). | Aceptada |
 | ADR-011 | `minAppVersion` 1.8.7 (antes 1.7.2). | `getLanguage()` (i18n) existe desde 1.8.7; el entorno usa 1.13.7. | Leer el idioma de `localStorage` (no documentado). | Aceptada |
-| ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `.npmrc` con `legacy-peer-deps`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
+| ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
+| ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
 ---
 
@@ -1260,7 +1262,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 **Definition of Done de una tarea**
 1. Código + tests (unitarios o de integración según la tarea).
-2. `npm run lint && npm test && npm run build` en verde.
+2. `pnpm lint && pnpm test && pnpm build` en verde.
 3. Si toca UI: probado manualmente en `test-vault` (anotar en la bitácora qué se probó).
 4. `plan.md` actualizado (checkbox, §0.1, bitácora, ADR si aplica, ⚠️ resueltos).
 
@@ -1313,3 +1315,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   `npm run lint && npm test && npm run build` en verde.
   **Pendiente:** abrir `test-vault/` en Obsidian, activar el plugin y comprobar T0.4/T0.5 (abrir/cerrar la
   vista, reinicio); luego spikes S1–S4 y T2.1. Commits de Fase 0 creados en `main`.
+- **2026-10-01 · Claude (Opus 5.5)** — Migrado de npm a **pnpm** (ADR-013): eliminado `package-lock.json` y
+  `.npmrc`; añadido `pnpm-workspace.yaml` y `pnpm-lock.yaml`; `packageManager: pnpm@12.3.4`; CI, README,
+  AGENTS.md y este plan usan comandos `pnpm`. Las instrucciones para usuarios finales sobre instalar
+  adaptadores globales (`npm i -g …`) se mantienen con npm. lint/test/build en verde con pnpm.

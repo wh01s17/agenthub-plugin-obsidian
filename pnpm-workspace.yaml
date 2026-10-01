@@ -1,0 +1,10 @@
+# Solo esbuild necesita ejecutar su script de instalación (descarga el binario nativo).
+allowBuilds:
+  esbuild: true
+
+# eslint-plugin-obsidianmd declara obsidian@1.8.7 como peer exacto; usamos tipos más nuevos.
+strictPeerDependencies: false
+
+# vite 8.3.2 es más reciente que la antigüedad mínima de publicación configurada.
+minimumReleaseAgeExclude:
+  - vite@8.3.2

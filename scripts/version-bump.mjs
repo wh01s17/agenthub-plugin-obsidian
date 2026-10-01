@@ -1,8 +1,8 @@
-// Sincroniza manifest.json y versions.json con la versión de package.json (se usa en `npm version`).
+// Sincroniza manifest.json y versions.json con la versión de package.json (se usa en `pnpm version`).
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const targetVersion = process.env.npm_package_version;
-if (!targetVersion) throw new Error('Ejecutar mediante `npm version`.');
+if (!targetVersion) throw new Error('Ejecutar mediante `pnpm version`.');
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 manifest.version = targetVersion;

@@ -2,4 +2,4 @@ node_modules/
 main.js
 test-vault/
 plan.md
-package-lock.json
+pnpm-lock.yaml
