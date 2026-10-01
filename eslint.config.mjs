@@ -15,6 +15,7 @@ export default defineConfig([
             'esbuild.config.mjs',
             'vitest.config.ts',
             'scripts/*.mjs',
+            'scripts/spikes/*.mjs',
           ],
         },
       },
@@ -29,6 +30,7 @@ export default defineConfig([
       'no-console': 'off',
       'obsidianmd/rule-custom-message': 'off',
       'obsidianmd/hardcoded-config-path': 'off',
+      'obsidianmd/prefer-window-timers': 'off',
     },
   },
   {
