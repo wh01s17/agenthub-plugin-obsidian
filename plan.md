@@ -1224,7 +1224,14 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T4.4** Export de sesión a nota (§4.10). *CA:* nota válida con callouts plegables.
 - [x] **T4.5** Múltiples vistas/sesiones simultáneas + reaper de inactividad. *CA:* RF-11; procesos liberados tras `idleTimeoutMin`.
 
-### Fase 5 — Adaptadores directos (sin adaptadores ACP)
+### Fase 5 — Opcional / condicional: adaptadores directos (sin adaptadores ACP)
+
+> **No se implementa salvo que ocurra un disparador (ADR-025).** ACP ya cubre Claude, Codex y OpenCode con permisos
+> interactivos, streaming, reanudación y opciones. El trabajo previo (spikes S3/S4, fixtures en `tests/fixtures/claude`
+> y `tests/fixtures/codex`, §5.2–5.3) queda listo para retomarla. **Disparadores:**
+> 1. El adaptador ACP de Claude o Codex se rompe, se abandona o queda muy atrás respecto al CLI.
+> 2. Hace falta funcionar sin Node/npm (`npx` no disponible).
+> 3. Se necesita una función del CLI que ACP no expone.
 
 - [ ] **T5.1** `ClaudeNativeAdapter` + parser + tests con fixtures S3. *Dep:* S3.
 - [ ] **T5.2** `CodexNativeAdapter` + parser + tests con fixtures S4. *Dep:* S4.
@@ -1283,6 +1290,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-022 | Reabrir una sesión guardada usa `session/resume` si el agente lo anuncia; si no, `session/load` ignorando la repetición del historial (ya está en el transcript local); si no, sesión nueva con aviso `contextNotRestored`. | El transcript local es la fuente de lo que se muestra; el agente solo necesita recuperar su contexto. S2: Claude, Codex y OpenCode anuncian `resume`. | Usar siempre `session/load` (duplicaría el historial). | Aceptada |
 | ADR-023 | Identidad por agente: monograma + color de la paleta del tema (`--color-orange`, `--color-green`…): Claude naranja «C», Codex verde «Cx», Gemini azul «G», OpenCode morado «O»; los personalizados, color estable por hash del id e iniciales. Sin logotipos de marca. | Distinguir de un vistazo qué agente se usa, respetando temas claro/oscuro (ADR-018). | Logotipos oficiales (restricciones de marca, no se adaptan al tema). | Aceptada |
 | ADR-024 | El agente arranca en segundo plano al mostrar una sesión (no con el primer mensaje), para que modo/modelo/esfuerzo se elijan **antes** de conversar. Mientras arranca se muestran las opciones que anunció al iniciar la última vez (`knownConfigOptions` en `data.json`, solo valores iniciales: un modo peligroso nunca queda fijado); un cambio hecho antes o durante el arranque se aplica al iniciar. Arrancar no bloquea el envío. | Pedido del usuario: configurar antes de iniciar la conversación. | Arranque perezoso (las opciones no aparecían hasta el primer mensaje). | Aceptada — revisar consumo con el reaper (T4.5) |
+| ADR-025 | La Fase 5 (adaptadores directos `stream-json` / `exec --json`) pasa a **opcional y condicional**, con tres disparadores (adaptador ACP roto o abandonado, entorno sin Node/npm, función del CLI ausente en ACP). | ACP ya da todo lo necesario con mejores permisos y streaming; dos formatos extra que mantener no compensan hoy. Se conserva la investigación (S3/S4). | Implementarla ya (coste de una fase para una segunda vía a lo mismo); borrarla (perder el trabajo previo y la salida de emergencia). | Aceptada (decidido con el usuario) |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1551,3 +1559,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `github.com/wh01s17/agenthub-plugin-obsidian`, público) y el usuario hace los push; el workflow de CI pasa en verde
   en cada push. Se marca **T0.7** como hecha y se quitan del plan las menciones a "falta remoto". Lección: comprobar
   `git remote -v` y `gh run list` antes de afirmar el estado del repositorio.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Decidido con el usuario: **Fase 5 opcional/condicional** (ADR-025), con
+  tres disparadores para retomarla. Se sigue con la Fase 6.
