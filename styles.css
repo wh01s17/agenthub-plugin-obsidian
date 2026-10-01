@@ -389,32 +389,36 @@
   margin: var(--size-4-1) var(--size-4-3) var(--size-4-3);
   border: var(--border-width) solid var(--background-modifier-border);
   border-radius: var(--radius-m);
-  background: var(--background-primary);
+  background: var(--background-modifier-form-field);
 }
 
-.agenthub-composer-input {
+/* The box shows focus; the textarea inside stays flat and grows with its content. */
+.agenthub-app .agenthub-composer .agenthub-composer-input {
   display: block;
   width: 100%;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   max-height: 12rem;
-  padding: var(--size-4-2) var(--size-4-3) 0;
+  field-sizing: content;
+  padding: var(--size-4-2) var(--size-4-3) var(--size-4-1);
   border: none;
+  border-radius: var(--radius-m) var(--radius-m) 0 0;
   background: transparent;
   box-shadow: none;
-  resize: vertical;
+  outline: none;
+  resize: none;
 }
 
-.agenthub-composer-input:focus,
-.agenthub-composer-input:focus-visible {
-  outline: none;
+.agenthub-app .agenthub-composer .agenthub-composer-input:is(:hover, :focus, :focus-visible) {
+  background: transparent;
   box-shadow: none;
+  outline: none;
 }
 
 .agenthub-composer-toolbar {
   display: flex;
   align-items: center;
   gap: var(--size-4-2);
-  padding: var(--size-4-1) var(--size-4-2) var(--size-4-2);
+  padding: var(--size-4-1) var(--size-4-2) var(--size-4-2) var(--size-4-3);
 }
 
 .agenthub-composer-context {
@@ -426,9 +430,9 @@
   display: flex;
   align-items: center;
   gap: var(--size-4-1);
-  height: auto;
-  min-height: 24px;
-  padding: 2px var(--size-4-3);
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 var(--size-4-3);
   font-size: var(--font-ui-smaller);
 }
 
@@ -445,8 +449,7 @@
   align-items: center;
   gap: var(--size-4-1);
   max-width: 100%;
-  height: auto;
-  min-height: 24px;
+  height: 26px;
   padding: 0 var(--size-4-2);
   border: none;
   border-radius: var(--radius-s);
@@ -626,7 +629,7 @@
   color: var(--link-color);
 }
 
-.agenthub-app :is(button, select, textarea, input, summary):focus-visible {
+.agenthub-app :is(button, select, input, summary):focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: 1px;
 }
@@ -698,6 +701,7 @@
 /* The active agent tints the composer focus and the streaming status. */
 .agenthub-app .agenthub-composer:focus-within {
   border-color: var(--agenthub-agent);
+  box-shadow: 0 0 0 1px var(--agenthub-agent);
 }
 
 .agenthub-app .agenthub-status.is-running .agenthub-status-text,
