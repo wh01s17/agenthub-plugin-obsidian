@@ -4,13 +4,13 @@ Obsidian 1.13.7 lanzado desde el lanzador de Hyprland (Omarchy), consola de DevT
 Se comparó `command -v <cmd>` con `process.env` del renderer frente al entorno de
 `$SHELL -ilc 'env -0'` (shell de login interactivo, zsh).
 
-| cmd | `process.env` de Obsidian | entorno del shell de login |
-|---|---|---|
-| claude | `~/.local/share/mise/shims/claude` | `~/.local/bin/claude` |
-| codex | `~/.local/share/mise/shims/codex` | `~/.local/bin/codex` |
-| opencode | `~/.local/share/mise/shims/opencode` | `~/.local/bin/opencode` |
-| node | `~/.local/share/mise/shims/node` | `~/.config/nvm/versions/node/v24.19.0/bin/node` |
-| npx | `~/.local/share/mise/shims/npx` | `~/.config/nvm/versions/node/v24.19.0/bin/npx` |
+| cmd      | `process.env` de Obsidian            | entorno del shell de login                      |
+| -------- | ------------------------------------ | ----------------------------------------------- |
+| claude   | `~/.local/share/mise/shims/claude`   | `~/.local/bin/claude`                           |
+| codex    | `~/.local/share/mise/shims/codex`    | `~/.local/bin/codex`                            |
+| opencode | `~/.local/share/mise/shims/opencode` | `~/.local/bin/opencode`                         |
+| node     | `~/.local/share/mise/shims/node`     | `~/.config/nvm/versions/node/v24.19.0/bin/node` |
+| npx      | `~/.local/share/mise/shims/npx`      | `~/.config/nvm/versions/node/v24.19.0/bin/npx`  |
 
 - Shell de login: **1437 ms**, exit 0. Hay 4 variables `ELECTRON_*`/`NODE_OPTIONS`/`CHROME*` en el entorno del
   renderer (nombres por revisar en T2.3).
