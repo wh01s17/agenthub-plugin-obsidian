@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 1 — Spikes**: S2–S4 ✅ hechos; S1 ✅; S5 pendiente (requiere Obsidian). Fase 0 casi cerrada (falta confirmar restauración tras reinicio, T0.5). |
-| Próxima tarea | **T2.1** (tipos de dominio, ya ajustados con S2–S4) |
+| Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅). Pendientes manuales: S5 (render en Obsidian) y T0.5 (restauración tras reinicio). |
+| Próxima tarea | **T2.2** (`ShellEnv` + `BinaryResolver`, según ADR-017) y **T2.3** (`ProcessRunner`) |
 | Tareas en paralelo posibles | S1, S5 y T0.5 (manuales, en Obsidian) ∥ T2.1, T2.3, T2.4 (código) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -407,6 +407,9 @@ para poder testearlos con Vitest sin Obsidian. Lo que necesitan de Obsidian lleg
 
 ### 4.3 Modelo de dominio (`src/core/types.ts`)
 
+> **Implementado en T2.1.** El código de `src/core/types.ts` es la fuente de verdad; el bloque siguiente es
+> orientativo y puede quedar desfasado en detalles (p. ej. `rawOutput` en `ToolCall`, `SessionStatus`).
+
 ```ts
 export type AgentId = string; // 'claude-acp', 'codex-acp', 'gemini', 'opencode', 'claude-native', ...
 
@@ -505,6 +508,10 @@ export interface SessionViewState {
 ```
 
 ### 4.4 Interfaz de adaptadores (`src/core/AgentAdapter.ts`)
+
+> **Implementado en T2.1** (fuente de verdad: `src/core/AgentAdapter.ts`). Cambios respecto al bloque: modo y
+> modelo se fijan con `SessionOptions.config` (`{ mode: 'plan' }`) y `AgentSession.setConfigOption()` (ADR-015),
+> sin `setMode`/`setModel`; `AgentCapabilities` tiene `configOptions` en lugar de `modes`/`models`.
 
 ```ts
 export interface Disposable { dispose(): void }
@@ -1164,7 +1171,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 
 ### Fase 2 — Núcleo + ACP (MVP)
 
-- [ ] **T2.1** `core/types.ts` y `core/AgentAdapter.ts` según §4.3–4.4. *CA:* compila; sin `any`.
+- [x] **T2.1** `core/types.ts` y `core/AgentAdapter.ts` según §4.3–4.4. *CA:* compila; sin `any`.
 - [ ] **T2.2** `ShellEnv` + `BinaryResolver` + tests. *Dep:* S1. *CA:* resuelve `claude`, `codex`,
   `gemini`, `opencode`, `npx` en este equipo lanzando Obsidian desde el lanzador gráfico.
 - [ ] **T2.3** `ProcessRunner` + `ProcessRegistry` + `LineDecoder` + tests (con scripts de prueba que
@@ -1381,3 +1388,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - **2026-10-01 · usuario + Claude (Opus 5.5)** — **S1** completado (`docs/spikes/S1-env.md`): Obsidian lanzado desde
   Hyprland encuentra `claude`, `codex`, `opencode`, `node` y `npx` vía shims de mise; el shell de login tarda
   1,4 s y resuelve binarios distintos → ADR-017 (shell solo como respaldo asíncrono). T2.2 ya no depende de nada.
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.1** hecho: `src/core/types.ts` (modelo de dominio con `ConfigOption`,
+  `usage` de contexto, `AGENT_EVENT_TYPES` verificado por un test de tipos) y `src/core/AgentAdapter.ts`
+  (`HostBridge`, `Logger`, `AgentCapabilities`, `AgentSession.setConfigOption`). Sin `any`; 12 tests en verde.
+  Siguiente: T2.2 y T2.3.
