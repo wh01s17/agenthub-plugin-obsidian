@@ -1,0 +1,103 @@
+// Session → Markdown note (plan §4.10, T4.4). Pure: the caller writes the file.
+
+import type { PromptBlock, SessionViewState, ToolCall, TranscriptItem } from '../core/types';
+
+export interface ExportLabels {
+  agent: string;
+  you: string;
+  thinking: string;
+  plan: string;
+  permission: string;
+  notice: (item: TranscriptItem & { kind: 'notice' }) => string;
+}
+
+/** Prefixes every line so multi-line text stays inside a callout. */
+const quote = (text: string) =>
+  text
+    .split('\n')
+    .map((line) => (line ? `> ${line}` : '>'))
+    .join('\n');
+
+const yamlString = (value: string) => JSON.stringify(value);
+
+function userMarkdown(blocks: readonly PromptBlock[]): string {
+  const text = blocks.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('\n\n');
+  const attachments = blocks.flatMap((b) => {
+    if (b.type === 'file') return [`- [[${b.path}]]`];
+    if (b.type === 'selection') return [`- [[${b.path}]] (${b.fromLine}–${b.toLine})`];
+    return [];
+  });
+  return attachments.length > 0 ? `${text}\n\n${attachments.join('\n')}` : text;
+}
+
+function toolMarkdown(call: ToolCall): string {
+  const body: string[] = [];
+  for (const location of call.locations ?? []) body.push(`- ${location.path}`);
+  for (const content of call.content ?? []) {
+    if (content.type === 'text') body.push('```', content.text, '```');
+    if (content.type === 'terminal') body.push('```', content.output, '```');
+    if (content.type === 'diff') body.push(`\`${content.path}\``, '```', content.newText, '```');
+  }
+  const header = `[!tool]- ${call.title} (${call.status})`;
+  return quote([header, ...body].join('\n'));
+}
+
+export function sessionToMarkdown(
+  state: SessionViewState,
+  labels: ExportLabels,
+  now: Date,
+): string {
+  const front = [
+    '---',
+    `agent: ${yamlString(labels.agent)}`,
+    `session: ${yamlString(state.localId)}`,
+    `exported: ${now.toISOString()}`,
+    '---',
+    '',
+    `# ${state.title || state.localId}`,
+    '',
+  ];
+  const body = state.items.map((item): string => {
+    switch (item.kind) {
+      case 'user':
+        return `## ${labels.you}\n\n${userMarkdown(item.blocks)}`;
+      case 'assistant':
+        return `## ${labels.agent}\n\n${item.text}`;
+      case 'thought':
+        return quote(`[!note]- ${labels.thinking}\n${item.text}`);
+      case 'tool':
+        return toolMarkdown(item.call);
+      case 'plan':
+        return quote(
+          [
+            `[!todo] ${labels.plan}`,
+            ...item.entries.map((e) => `- [${e.status === 'completed' ? 'x' : ' '}] ${e.content}`),
+          ].join('\n'),
+        );
+      case 'permission': {
+        const resolved = item.resolved;
+        const answer =
+          resolved?.outcome === 'selected'
+            ? item.request.options.find((o) => o.id === resolved.optionId)?.label
+            : resolved?.outcome;
+        return quote(
+          `[!warning] ${labels.permission}: ${item.request.toolCall.title}${answer ? ` → ${answer}` : ''}`,
+        );
+      }
+      case 'notice':
+        return quote(`[!${item.level === 'error' ? 'failure' : 'info'}] ${labels.notice(item)}`);
+    }
+  });
+  return [...front, body.join('\n\n'), ''].join('\n');
+}
+
+/** A safe, unique-ish file name from the session title. */
+export function exportFileName(title: string, now: Date): string {
+  const stamp = now.toISOString().slice(0, 16).replace('T', ' ').replace(':', '-');
+  const safe =
+    title
+      .replace(/[\\/:*?"<>|#^[\]]/g, '')
+      .trim()
+      .slice(0, 60) || 'AgentHub session';
+  return `${safe} ${stamp}.md`;
+}

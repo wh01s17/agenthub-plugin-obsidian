@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 4 — Persistencia e historial**: T4.1–T4.3 hechas (falta verificación manual de T4.2/T4.3 en Obsidian) |
-| Próxima tarea | **T4.4** (exportar sesión a nota) y **T4.5** (varias vistas + reaper de inactividad) |
+| Fase actual | **Fase 4 — Persistencia e historial**: T4.1–T4.4 hechas (falta verificación manual de T4.2–T4.4 en Obsidian) |
+| Próxima tarea | Verificar T4.2–T4.4 en Obsidian → **T4.5** (varias vistas + reaper de inactividad) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1221,7 +1221,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T4.2** Panel de historial (listar, buscar, renombrar, borrar, reanudar). Reanudar con
   `loadSession` si existe; si no, modo lectura + "Continuar en sesión nueva". *CA:* RF-10.
 - [x] **T4.3** Restaurar la sesión mostrada en cada vista al reiniciar Obsidian (`getState/setState`). *CA:* RF-01.
-- [ ] **T4.4** Export de sesión a nota (§4.10). *CA:* nota válida con callouts plegables.
+- [x] **T4.4** Export de sesión a nota (§4.10). *CA:* nota válida con callouts plegables.
 - [ ] **T4.5** Múltiples vistas/sesiones simultáneas + reaper de inactividad. *CA:* RF-11; procesos liberados tras `idleTimeoutMin`.
 
 ### Fase 5 — Adaptadores directos (sin adaptadores ACP)
@@ -1503,3 +1503,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   reiniciar Obsidian. Agente simulado con `session/resume` (`--no-resume` para el caso contrario). `MemoryAdapter`
   pasa a `tests/helpers/`. 148 tests; e2e opcional de reanudación real pasa con OpenCode (recordó una palabra clave
   en un proceso nuevo).
+- **2026-10-01 · Claude (Opus 5.5)** — **T4.4** hecho: `src/storage/exportToNote.ts` (frontmatter con agente, sesión y
+  fecha; mensajes como secciones; adjuntos como `[[enlaces]]`; herramientas, razonamiento, plan, permisos y avisos como
+  callouts plegables; nombre de archivo saneado) y comando "Exportar la sesión de AgentHub a una nota", que crea la
+  nota en la carpeta configurable `exportFolder` (por defecto `AgentHub`, sin sobrescribir) y la abre. 150 tests.

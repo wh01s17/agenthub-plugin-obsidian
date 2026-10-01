@@ -128,6 +128,11 @@ export class AgentHubView extends ItemView {
     this.contentEl.querySelector<HTMLTextAreaElement>('.agenthub-composer-input')?.focus();
   }
 
+  /** Exports the session shown in this view to a note. */
+  exportSession(): Promise<void> {
+    return this.session ? this.host.exportSession(this.session.getState()) : Promise.resolve();
+  }
+
   /** Stops the running turn, if any. */
   stop(): void {
     void this.session?.cancel();

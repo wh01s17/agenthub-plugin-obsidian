@@ -39,6 +39,8 @@ const SettingsSchema = z.object({
   debugPanel: z.boolean(),
   historyEnabled: z.boolean(),
   maxSessions: z.number().int().min(1).max(10000),
+  /** Vault folder for exported sessions. */
+  exportFolder: z.string(),
   /** Ask the login shell for PATH when a command is not found (ADR-017). */
   resolveLoginShell: z.boolean(),
   /** Directories put first in PATH for agent commands. */
@@ -130,6 +132,7 @@ export function defaultSettings(): AgentHubSettings {
     debugPanel: false,
     historyEnabled: true,
     maxSessions: 200,
+    exportFolder: 'AgentHub',
     resolveLoginShell: true,
     extraPath: [],
   };
@@ -181,6 +184,7 @@ export function migrate(raw: unknown): AgentHubSettings {
     debugPanel: field('debugPanel'),
     historyEnabled: field('historyEnabled'),
     maxSessions: field('maxSessions'),
+    exportFolder: field('exportFolder'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),
   };

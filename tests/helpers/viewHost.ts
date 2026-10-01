@@ -45,6 +45,7 @@ export function makeViewHost(
     },
     history: store,
     openSettings: vi.fn(),
+    exportSession: vi.fn(() => Promise.resolve()),
     workingDirectory: () => '/vault',
   };
   return { host, adapter, sessions };

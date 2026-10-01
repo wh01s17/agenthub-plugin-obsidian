@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
 import type { AgentRegistry } from '../agents/AgentRegistry';
 import type { SessionManager } from '../core/SessionManager';
+import type { SessionViewState } from '../core/types';
 import type { NoteContext } from '../host/NoteContext';
 import type { AgentHubSettings } from '../settings/settings';
 import type { StoredSession } from '../storage/SessionStore';
@@ -17,6 +18,8 @@ export interface ViewHost {
   readonly history:
     (SessionHistory & { load(localId: string): Promise<StoredSession | undefined> }) | undefined;
   openSettings(): void;
+  /** Writes the session as a Markdown note and opens it (T4.4). */
+  exportSession(state: SessionViewState): Promise<void>;
   /** Absolute working directory for new sessions (for display). */
   workingDirectory(): string;
 }

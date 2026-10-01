@@ -150,6 +150,14 @@ export const en = {
   historyUntitled: 'Untitled session',
   historyAgentMissing: '{agent} (not enabled)',
   historyCurrent: 'Current',
+
+  // Export (T4.4)
+  cmdExportSession: 'Export the AgentHub session to a note',
+  exportDone: 'Session exported to {path}',
+  exportEmpty: 'This session has no messages to export.',
+  settingsExportFolder: 'Export folder',
+  settingsExportFolderDesc: 'Vault folder where exported sessions are saved.',
+  exportButton: 'Export to note',
 };
 
 export type Messages = typeof en;

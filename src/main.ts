@@ -1,8 +1,16 @@
-import { type Editor, type MarkdownFileInfo, Notice, Plugin, type WorkspaceLeaf } from 'obsidian';
+import {
+  type Editor,
+  type MarkdownFileInfo,
+  Notice,
+  normalizePath,
+  Plugin,
+  type WorkspaceLeaf,
+} from 'obsidian';
 import { AgentRegistry } from './agents/AgentRegistry';
 import { AGENTHUB_ICON, VIEW_TYPE_AGENTHUB } from './constants';
 import type { DetectionResult, SessionOptions } from './core/AgentAdapter';
 import type { SelectionRef } from './core/PromptBuilder';
+import type { SessionViewState } from './core/types';
 import { SessionManager } from './core/SessionManager';
 import { createNoteContext } from './host/NoteContext';
 import { createObsidianHost, vaultBasePath } from './host/ObsidianHost';
@@ -20,7 +28,9 @@ import {
 import { AgentHubSettingTab, type SettingsHost } from './settings/SettingsTab';
 import { AgentHubView } from './ui/AgentHubView';
 import type { ViewHost } from './ui/ViewHost';
+import { exportFileName, sessionToMarkdown } from './storage/exportToNote';
 import { SessionStore } from './storage/SessionStore';
+import { noticeText } from './ui/components/NoticeItem';
 
 export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
   override settings: AgentHubSettings = defaultSettings();
@@ -99,6 +109,11 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       callback: () => this.run(this.withView((view) => view.startNewSession())),
     });
     this.addCommand({
+      id: 'export-session',
+      name: t('cmdExportSession'),
+      callback: () => this.run(this.activateView().then((view) => view?.exportSession())),
+    });
+    this.addCommand({
       id: 'stop-turn',
       name: t('cmdStop'),
       callback: () => this.run(this.withView((view) => view.stop())),
@@ -154,6 +169,37 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
 
   openSettings(): void {
     if (!openPluginSettings(this.app, this.manifest.id)) new Notice(t('settingsButton'));
+  }
+
+  async exportSession(state: SessionViewState): Promise<void> {
+    if (state.items.length === 0) {
+      new Notice(t('exportEmpty'));
+      return;
+    }
+    const now = new Date();
+    const markdown = sessionToMarkdown(
+      state,
+      {
+        agent: this.agents.config(state.agentId)?.label ?? state.agentId,
+        you: t('you'),
+        thinking: t('thinking'),
+        plan: t('planTitle'),
+        permission: t('permissionTitle'),
+        notice: (item) => noticeText(item.notice),
+      },
+      now,
+    );
+    const folder = normalizePath(this.settings.exportFolder || '/');
+    if (folder !== '/' && !this.app.vault.getFolderByPath(folder)) {
+      await this.app.vault.createFolder(folder);
+    }
+    let path = normalizePath(`${folder}/${exportFileName(state.title, now)}`);
+    for (let n = 2; this.app.vault.getFileByPath(path); n++) {
+      path = path.replace(/( \(\d+\))?\.md$/, ` (${n}).md`);
+    }
+    const file = await this.app.vault.create(path, markdown);
+    await this.app.workspace.getLeaf(true).openFile(file);
+    new Notice(t('exportDone', { path }));
   }
 
   workingDirectory(): string {

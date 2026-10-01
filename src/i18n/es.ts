@@ -151,4 +151,12 @@ export const es: Messages = {
   historyUntitled: 'Sesión sin título',
   historyAgentMissing: '{agent} (no activado)',
   historyCurrent: 'Actual',
+
+  // Export (T4.4)
+  cmdExportSession: 'Exportar la sesión de AgentHub a una nota',
+  exportDone: 'Sesión exportada a {path}',
+  exportEmpty: 'Esta sesión no tiene mensajes para exportar.',
+  settingsExportFolder: 'Carpeta de exportación',
+  settingsExportFolderDesc: 'Carpeta del vault donde se guardan las sesiones exportadas.',
+  exportButton: 'Exportar a nota',
 };

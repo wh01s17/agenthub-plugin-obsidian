@@ -251,6 +251,17 @@ export class AgentHubSettingTab extends PluginSettingTab {
       });
 
     new Setting(el)
+      .setName(t('settingsExportFolder'))
+      .setDesc(t('settingsExportFolderDesc'))
+      .addText((text) =>
+        text.setValue(settings.exportFolder).onChange((value) =>
+          this.save((s) => {
+            s.exportFolder = value.trim();
+          }),
+        ),
+      );
+
+    new Setting(el)
       .setName(t('settingsCwd'))
       .setDesc(t('settingsCwdDesc'))
       .addDropdown((dropdown) =>
