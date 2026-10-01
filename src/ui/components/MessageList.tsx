@@ -1,5 +1,5 @@
 import type { App } from 'obsidian';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { PermissionOutcome, PromptBlock, TranscriptItem } from '../../core/types';
 import { t } from '../../i18n';
 import { Markdown } from './Markdown';
@@ -16,6 +16,9 @@ interface MessageListProps {
   /** Opens a vault path; returns false when it cannot be opened. */
   onOpenPath: (path: string) => boolean;
 }
+
+/** Items rendered at first, and how many more each "show earlier" adds (plan T6.4). */
+export const PAGE_SIZE = 100;
 
 /** How close to the bottom (px) still counts as "following" the conversation. */
 const FOLLOW_THRESHOLD = 48;
@@ -110,6 +113,19 @@ export function MessageList({
 }: MessageListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const following = useRef(true);
+  // Long sessions render only their tail: each agent reply goes through Obsidian's Markdown renderer.
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const heightBeforeExpand = useRef<number | null>(null);
+  const start = Math.max(0, items.length - limit);
+
+  // Keep the reading position when older items are inserted above.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el && heightBeforeExpand.current !== null) {
+      el.scrollTop += el.scrollHeight - heightBeforeExpand.current;
+      heightBeforeExpand.current = null;
+    }
+  }, [limit]);
 
   // Keep the newest content in view, unless the user scrolled up to read.
   useEffect(() => {
@@ -125,9 +141,21 @@ export function MessageList({
   return (
     // Not a live region: streamed chunks would be announced one by one. The status bar announces progress.
     <div ref={ref} class="agenthub-messages" onScroll={onScroll}>
-      {items.map((item, index) => (
+      {start > 0 && (
+        <button
+          type="button"
+          class="agenthub-show-earlier"
+          onClick={() => {
+            heightBeforeExpand.current = ref.current?.scrollHeight ?? null;
+            setLimit((value) => value + PAGE_SIZE);
+          }}
+        >
+          {t('showEarlier', { count: Math.min(PAGE_SIZE, start) })}
+        </button>
+      )}
+      {items.slice(start).map((item, offset) => (
         <Item
-          key={itemKey(item, index)}
+          key={itemKey(item, start + offset)}
           app={app}
           item={item}
           showThoughts={showThoughts}

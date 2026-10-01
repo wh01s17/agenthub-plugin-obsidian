@@ -175,4 +175,7 @@ export const es: Messages = {
   errorAuth: 'El agente necesita que inicies sesión.',
   errorStartup: 'El agente no respondió a tiempo.',
   errorCrash: 'El proceso del agente se detuvo inesperadamente.',
+
+  // Performance (T6.4)
+  showEarlier: 'Mostrar {count} mensajes anteriores',
 };

@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
-| Próxima tarea | **T6.3** (accesibilidad) → **T6.6** (release: workflow, BRAT, checklist) → T6.7 |
+| Próxima tarea | Verificación manual (T4.3–T4.5, T6.1, checklist de T6.3) → primer release (T6.6) → T6.7 (decidir `minAppVersion`) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1251,7 +1251,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [~] **T6.3** *(auditoría automática con axe-core hecha y sin violaciones; falta la revisión manual con teclado y lector de pantalla)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
   orden de foco, tamaño de objetivos).
-- [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
+- [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
 - [~] **T6.6** *(workflow `release.yml` y pasos en el README listos; falta el primer tag/release, probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
@@ -1566,3 +1566,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   con todos los tipos de elemento (mensajes, razonamiento, herramienta con diff y terminal, plan, permiso, aviso de
   error, chips, selectores) y el panel de historial: **0 violaciones**. Guardas: exige reglas superadas (no pasa en
   vacío) y un control negativo comprueba que detecta un botón sin nombre. Falta la checklist manual (§11 T6.3).
+- **2026-10-01 · Claude (Opus 5.5)** — **T6.4** hecho: `MessageList` renderiza solo los últimos 100 elementos
+  (`PAGE_SIZE`) y un botón "Mostrar N mensajes anteriores" carga más en bloques conservando la posición de lectura.
+  La carga del plugin no lanza procesos (los agentes arrancan al mostrar una sesión). 165 tests.

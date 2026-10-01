@@ -125,3 +125,32 @@ describe('contextPercent', () => {
     expect(contextPercent({ contextUsed: 500, contextSize: 200 })).toBe(100);
   });
 });
+
+describe('long sessions (T6.4)', () => {
+  it('renders only the latest items and loads earlier ones on demand', async () => {
+    const { MessageList, PAGE_SIZE } = await import('../../src/ui/components/MessageList');
+    const items = Array.from({ length: PAGE_SIZE + 30 }, (_, i) => ({
+      kind: 'user' as const,
+      id: `u${i}`,
+      at: i,
+      blocks: [{ type: 'text' as const, text: `mensaje ${i}` }],
+    }));
+    const { container } = render(
+      <MessageList
+        app={{} as never}
+        items={items}
+        showThoughts={false}
+        onPermission={vi.fn()}
+        onOpenPath={() => false}
+      />,
+    );
+    expect(container.querySelectorAll('.agenthub-message')).toHaveLength(PAGE_SIZE);
+    expect(screen.queryByText('mensaje 0')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show 30 earlier messages' }));
+    await waitFor(() =>
+      expect(container.querySelectorAll('.agenthub-message')).toHaveLength(PAGE_SIZE + 30),
+    );
+    expect(screen.getByText('mensaje 0')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /earlier messages/ })).toBeNull();
+  });
+});

@@ -174,6 +174,9 @@ export const en = {
   errorAuth: 'The agent needs you to log in.',
   errorStartup: 'The agent did not respond in time.',
   errorCrash: 'The agent process stopped unexpectedly.',
+
+  // Performance (T6.4)
+  showEarlier: 'Show {count} earlier messages',
 };
 
 export type Messages = typeof en;
