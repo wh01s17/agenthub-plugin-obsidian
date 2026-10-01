@@ -1494,7 +1494,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   con agente simulado, transcript de 4 items, `nativeSessionId`, sobrescritura y cierre; ajustes de historial y
   retención operados y guardados en `data.json`, captura revisada. README y §0.1 corregidos (indicaban Fase 0).
   **Pendiente:** T4.2 (panel de historial y reanudación), T4.3–T4.5; S5 y modo carpeta de nota activa siguen pendientes.
-
 - **2026-10-01 · Claude (Opus 5.5)** — **T4.2 y T4.3** hechos sobre el `SessionStore` de Codex (T4.1).
   `AcpSession` acepta `resumeId` (ADR-022) y expone `restored`; `AcpAdapter.loadSession`; `ChatSession` con `restore`
   (transcript + `nativeSessionId`; solo el primer agente reanuda; aviso si no hay contexto); `SessionManager.restore`.
