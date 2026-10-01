@@ -1,0 +1,101 @@
+{
+  "agent": "claude",
+  "command": "npx -y @agentclientprotocol/<email>",
+  "fsCalls": [],
+  "permissions": [
+    {
+      "title": "Write resumen.md",
+      "kinds": [
+        "allow_once",
+        "allow_always",
+        "reject_once"
+      ],
+      "chose": "allow_once"
+    }
+  ],
+  "protocolVersion": 1,
+  "agentCapabilities": {
+    "_meta": {
+      "claudeCode": {
+        "promptQueueing": true
+      },
+      "authStatus": {}
+    },
+    "promptCapabilities": {
+      "image": true,
+      "embeddedContext": true
+    },
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    },
+    "auth": {
+      "logout": {}
+    },
+    "providers": {},
+    "loadSession": true,
+    "sessionCapabilities": {
+      "additionalDirectories": {},
+      "close": {},
+      "delete": {},
+      "fork": {},
+      "list": {},
+      "resume": {},
+      "subagents": {}
+    }
+  },
+  "authMethods": [],
+  "agentInfo": {
+    "name": "@agentclientprotocol/claude-agent-acp",
+    "title": "Claude Agent",
+    "version": "0.85.0"
+  },
+  "newSession": {
+    "modes": {
+      "currentModeId": "default",
+      "availableModes": [
+        {
+          "id": "default",
+          "name": "Manual",
+          "description": "Always ask before making changes"
+        },
+        {
+          "id": "acceptEdits",
+          "name": "Accept edits",
+          "description": "Automatically accept all file edits"
+        },
+        {
+          "id": "plan",
+          "name": "Plan",
+          "description": "Create a plan before making changes"
+        },
+        {
+          "id": "auto",
+          "name": "Auto",
+          "description": "Claude handles permission decisions"
+        },
+        {
+          "id": "bypassPermissions",
+          "name": "Bypass permissions",
+          "description": "Accepts all permissions"
+        }
+      ]
+    },
+    "keys": [
+      "sessionId",
+      "modes",
+      "configOptions"
+    ]
+  },
+  "updateCounts": {
+    "available_commands_update": 5,
+    "usage_update": 7,
+    "tool_call": 2,
+    "tool_call_update": 7,
+    "agent_message_chunk": 9
+  },
+  "stopReason": "end_turn",
+  "resumenMd": "Ideas para automatizar notas: resumir notas largas, proponer etiquetas según su contenido y detectar enlaces rotos.",
+  "durationMs": 20257,
+  "stderrTail": "[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=validate-cwd durationMs=1 totalMs=1\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=settings durationMs=31 totalMs=31\n[session/query] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add resume=none apiType=native baseUrl=native\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=prepare-query durationMs=12 totalMs=43\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=sdk-initialize durationMs=2708 totalMs=2751\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=models durationMs=2 totalMs=2753\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=modes durationMs=1 totalMs=2754\n[session/create] sessionId=cffd789b-d352-40ef-8c4e-e1f1e6376add phase=register durationMs=2 totalMs=2756\n"
+}

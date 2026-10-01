@@ -1,0 +1,52 @@
+{
+  "agent": "opencode",
+  "command": "opencode acp",
+  "fsCalls": [],
+  "permissions": [],
+  "protocolVersion": 1,
+  "agentCapabilities": {
+    "loadSession": true,
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    },
+    "promptCapabilities": {
+      "embeddedContext": true,
+      "image": true
+    },
+    "sessionCapabilities": {
+      "close": {},
+      "fork": {},
+      "list": {},
+      "resume": {}
+    }
+  },
+  "authMethods": [
+    {
+      "description": "Run `opencode auth login` in the terminal",
+      "name": "Login with opencode",
+      "id": "opencode-login"
+    }
+  ],
+  "agentInfo": {
+    "name": "OpenCode",
+    "version": "1.18.34"
+  },
+  "newSession": {
+    "keys": [
+      "sessionId",
+      "configOptions"
+    ]
+  },
+  "updateCounts": {
+    "available_commands_update": 1,
+    "tool_call": 2,
+    "tool_call_update": 4,
+    "agent_message_chunk": 7,
+    "usage_update": 1
+  },
+  "stopReason": "end_turn",
+  "resumenMd": "# Resumen\n\nIdeas: resumir notas largas automáticamente, proponer etiquetas a partir del contenido y detectar enlaces rotos.",
+  "durationMs": 19478,
+  "stderrTail": ""
+}

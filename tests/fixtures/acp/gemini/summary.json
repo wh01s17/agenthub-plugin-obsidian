@@ -1,0 +1,60 @@
+{
+  "agent": "gemini",
+  "command": "gemini --acp",
+  "fsCalls": [],
+  "permissions": [],
+  "protocolVersion": 1,
+  "agentCapabilities": {
+    "loadSession": true,
+    "promptCapabilities": {
+      "image": true,
+      "audio": true,
+      "embeddedContext": true
+    },
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    }
+  },
+  "authMethods": [
+    {
+      "id": "oauth-personal",
+      "name": "Log in with Google",
+      "description": "Log in with your Google account"
+    },
+    {
+      "id": "gemini-api-key",
+      "name": "Gemini API key",
+      "description": "Use an API key with Gemini Developer API",
+      "_meta": {
+        "api-key": {
+          "provider": "google"
+        }
+      }
+    },
+    {
+      "id": "vertex-ai",
+      "name": "Vertex AI",
+      "description": "Use an API key with Vertex AI GenAI API"
+    },
+    {
+      "id": "gateway",
+      "name": "AI API Gateway",
+      "description": "Use a custom AI API Gateway",
+      "_meta": {
+        "gateway": {
+          "protocol": "google",
+          "restartRequired": "false"
+        }
+      }
+    }
+  ],
+  "agentInfo": {
+    "name": "gemini-cli",
+    "title": "Gemini CLI",
+    "version": "0.62.0"
+  },
+  "error": "This client is no longer supported for Gemini Code Assist for individuals. To continue using Gemini, please migrate to the Antigravity suite of products: https://antigravity.google",
+  "durationMs": 5366,
+  "stderrTail": ""
+}
