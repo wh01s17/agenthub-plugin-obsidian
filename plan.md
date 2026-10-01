@@ -1248,7 +1248,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [x] **T6.2** i18n es/en completo; textos en *sentence case*.
-- [ ] **T6.3** Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
+- [~] **T6.3** *(auditoría automática con axe-core hecha y sin violaciones; falta la revisión manual con teclado y lector de pantalla)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
   orden de foco, tamaño de objetivos).
 - [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
@@ -1561,3 +1561,8 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `git remote -v` y `gh run list` antes de afirmar el estado del repositorio.
 - **2026-10-01 · usuario + Claude (Opus 5.5)** — Decidido con el usuario: **Fase 5 opcional/condicional** (ADR-025), con
   tres disparadores para retomarla. Se sigue con la Fase 6.
+- **2026-10-01 · Claude (Opus 5.5)** — **T6.3 (parte automática):** `tests/unit/a11y.test.tsx` audita con **axe-core**
+  (WCAG 2.0/2.1/2.2 A y AA, sin contraste porque jsdom no calcula estilos y los colores son del tema) la vista de chat
+  con todos los tipos de elemento (mensajes, razonamiento, herramienta con diff y terminal, plan, permiso, aviso de
+  error, chips, selectores) y el panel de historial: **0 violaciones**. Guardas: exige reglas superadas (no pasa en
+  vacío) y un control negativo comprueba que detecta un botón sin nombre. Falta la checklist manual (§11 T6.3).
