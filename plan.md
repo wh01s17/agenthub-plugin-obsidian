@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 2 — Núcleo + ACP**: T2.1–T2.10 hechas en código (107 tests). Falta la verificación manual del criterio de salida F2 en Obsidian con agentes reales. |
-| Próxima tarea | **Verificación manual del MVP en Obsidian** (usuario) → luego **Fase 3** (T3.1) |
+| Fase actual | **Fase 3 — Integración con Obsidian** (Fase 2 cerrada y verificada en Obsidian por el usuario) |
+| Próxima tarea | **T3.1** (`PromptBuilder`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1452,3 +1452,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   convierte el bucle en fallo (`tests/unit/SettingsTab.test.ts`; verificado que falla con el bug y pasa con el arreglo).
   Regla añadida en §15 y `AGENTS.md`. Además se verificó **en Obsidian real** (vía CDP, agente simulado): chat con
   streaming, tarjetas de herramientas, flujo de permisos (Allow), Detener y limpieza de procesos al cerrar la sesión.
+- **2026-10-01 · usuario** — Verificación manual de la Fase 2 en Obsidian: ajustes con los tres agentes detectados y vista lista. **Fase 2 cerrada.**
