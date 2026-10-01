@@ -40,7 +40,7 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 4 — Persistencia e historial**: T4.1–T4.4 hechas (falta verificación manual de T4.2–T4.4 en Obsidian) |
+| Fase actual | **Fase 4 — Persistencia e historial**: T4.1–T4.4 hechas; T4.2 verificada en Obsidian por el usuario (faltan T4.3 tras reinicio y T4.4 exportar) |
 | Próxima tarea | Verificar T4.2–T4.4 en Obsidian → **T4.5** (varias vistas + reaper de inactividad) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
@@ -1507,3 +1507,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   fecha; mensajes como secciones; adjuntos como `[[enlaces]]`; herramientas, razonamiento, plan, permisos y avisos como
   callouts plegables; nombre de archivo saneado) y comando "Exportar la sesión de AgentHub a una nota", que crea la
   nota en la carpeta configurable `exportFolder` (por defecto `AgentHub`, sin sobrescribir) y la abre. 150 tests.
+- **2026-10-01 · usuario** — Verificación de **T4.2** en Obsidian con Claude Code: el panel de historial lista dos
+  sesiones (título, agente, fecha, "Current"), y alternar entre ellas restaura cada transcript completo (mensajes,
+  herramientas, permisos y respuestas). Observación: los selectores de modo/modelo de una sesión reabierta aparecen
+  recién tras el primer mensaje, porque el agente arranca de forma perezosa (mejora posible: guardar `configOptions`).
