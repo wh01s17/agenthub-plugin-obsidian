@@ -1313,6 +1313,10 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 **Commits**: Conventional Commits con ID de tarea: `feat(ui): permission card [T2.8]`, `fix(process): kill group on unload [T2.3]`.
 
+**Tamaño de archivos de código**: ningún archivo de código (`src/`, `tests/`, `scripts/`) debe superar
+**1000 líneas** salvo justificación explícita (indicada en el propio archivo). Dividir por responsabilidad antes de
+llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`) ni a fixtures grabados.
+
 **Definition of Done de una tarea**
 1. Código + tests (unitarios o de integración según la tarea).
 2. `pnpm lint && pnpm test && pnpm build` en verde.
@@ -1399,3 +1403,6 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   (`which` con PATHEXT en Windows, `CommandResolver`: `process.env` → shell de login solo si falta el comando,
   rutas del shell añadidas al final, `extraPath` primero). 16 tests nuevos (28 en total). La comprobación real en
   Obsidian queda cubierta por S1 y se repetirá al conectar la detección de agentes (T2.7).
+- **2026-10-01 · Claude (Opus 5.5)** — Límite de **1000 líneas por archivo de código** (petición del usuario; §15).
+  Se probó dividir `plan.md` en `docs/plan/`, pero el usuario aclaró que el límite es solo para el código: se
+  revirtió y el plan sigue en un único archivo.
