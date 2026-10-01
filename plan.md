@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅, T2.2 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
-| Próxima tarea | **T2.5** (`AcpAdapter`) |
+| Próxima tarea | **T2.6** (`reducer` + `ChatSession` + `SessionManager`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1178,7 +1178,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   emiten JSONL partido, UTF-8 multibyte, líneas enormes, y que ignoran SIGTERM).
   *CA:* ningún proceso huérfano tras `dispose()`/`onunload`.
 - [x] **T2.4** `scripts/fake-acp-agent.mjs` con los escenarios de §9. *Dep:* S2.
-- [ ] **T2.5** `AcpAdapter` (§5.1) + `mapping.ts` + `pathGuard.ts` + tests de integración con el fake.
+- [x] **T2.5** `AcpAdapter` (§5.1) + `mapping.ts` + `pathGuard.ts` + tests de integración con el fake.
   *Dep:* T2.1–T2.4. *CA:* todos los escenarios del fake pasan.
 - [ ] **T2.6** `reducer.ts` + `ChatSession` + `SessionManager` (sin persistencia aún) + tests con fixtures.
 - [ ] **T2.7** `AgentRegistry` + presets (§5.4) + `SettingsTab` (lista de agentes, estado de
@@ -1424,3 +1424,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   spikes con `check_dependencies` y UUID portable. Criterios añadidos: validación de ajustes con esquema (T2.7),
   checklist de accesibilidad y `killAll()` en `onunload` (T2.8, T6.3), ADR-018 (frontend-design dentro del tema de
   Obsidian), riesgo `moment`. Las guardas de tipo en `mapping.ts`/`AcpSession.ts` se aplican con T2.5.
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.5** hecho: `src/adapters/acp/` → `AcpAdapter` (detección + creación de sesión), `AcpSession` (SDK `acp.client()`, handshake con timeout de 30 s, `configOptions` iniciales, permisos que se cancelan con el turno, `session/cancel` con kill a los 5 s si el agente no responde, caída detectada aunque la conexión se cierre antes del `exit`), `mapping.ts` (guardas de tipo sin `as`), `promptBlocks.ts` (la selección se envía siempre como texto: más simple y universal que un recurso embebido) y `src/core/errors.ts` (`AgentError` con `kind`/`hint`/`detail`). La guardia de rutas de `fs/*` se implementa en `HostBridgeImpl` (T2.8). 12 tests de integración con el agente simulado + 8 de mapeo con fixtures reales (59 en total, estables).

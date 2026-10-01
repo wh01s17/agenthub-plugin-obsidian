@@ -51,6 +51,7 @@ const CONFIG_OPTIONS = () => [
 const state = { mode: 'manual', model: 'fake-small', sessions: new Map(), counter: 0 };
 const sleep = (ms, signal) =>
   new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(new Error('aborted'));
     const timer = setTimeout(resolve, ms);
     signal?.addEventListener('abort', () => {
       clearTimeout(timer);
