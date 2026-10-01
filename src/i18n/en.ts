@@ -35,6 +35,14 @@ export const en = {
 
   // Settings: sessions
   settingsSessions: 'Sessions',
+  settingsHistory: 'Save session history',
+  settingsHistoryDesc:
+    'Save transcripts in the plugin folder. Vault sync or Git may sync them too. Disabling this keeps existing history.',
+  settingsMaxSessions: 'Maximum saved sessions',
+  settingsMaxSessionsDesc:
+    'Keep the most recently updated sessions (1–10,000). Applied on the next save.',
+  historySaveError:
+    'AgentHub could not read or save session history. See the developer console for details.',
   settingsCwd: 'Working directory',
   settingsCwdDesc: 'Folder where agents run.',
   settingsCwdVault: 'Vault root',

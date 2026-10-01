@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 3 cerrada** (verificada en Obsidian por el usuario). Siguiente: **Fase 4 — Persistencia e historial** |
-| Próxima tarea | **T4.1** (`SessionStore`) |
-| Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
+| Fase actual | **Fase 4 — Persistencia e historial**, T4.1 implementada y verificada en Obsidian 1.13.7 con agente simulado |
+| Próxima tarea | **T4.2** (panel de historial y reanudación ACP); después T4.3–T4.5 |
+| Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
-| Código existente | Scaffolding: build/lint/test en verde, vista lateral vacía con Preact, i18n es/en, vault de pruebas. Repo git en rama `main` con los commits de Fase 0 (sin remoto). |
+| Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Lint y build pasan; 141 tests pasan, e2e real optativo. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -702,6 +702,11 @@ cada vez que se activan y muestran un distintivo rojo en la cabecera.
 
 - Se persisten **items consolidados** (mensajes completos, no cada chunk) para que los archivos sean pequeños.
 - Escrituras con *debounce* (1 s) y al terminar cada turno; acceso vía `app.vault.adapter` (funciona en `.obsidian`).
+- **T4.1 implementada:** se reemplaza el snapshot JSONL completo para consolidar también cambios en herramientas
+  y planes. Escrituras serializadas con `.tmp` y respaldo `.bak`: `DataAdapter.rename()` no sobrescribe destinos;
+  se restaura el respaldo si falla el reemplazo o al leer después de una interrupción (ADR-021).
+  Un índice corrupto produce un error sin sobrescribirlo; registros JSONL inválidos se omiten con aviso.
+  Los snapshots guardados no contienen streaming activo ni permisos pendientes accionables.
 - La reanudación real del contexto del modelo la hace el **agente** (`session/load`, `--resume`,
   `codex exec resume`); el transcript local es para mostrar historial. Si el agente no puede reanudar,
   la sesión se abre en modo lectura con botón "Continuar en sesión nueva".
@@ -1210,7 +1215,9 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 ### Fase 4 — Persistencia e historial
 
-- [ ] **T4.1** `SessionStore` (índice + JSONL, debounce, retención) + tests.
+- [x] **T4.1** `SessionStore` (índice + JSONL, debounce, retención) + tests. Guardado conectado a
+  `SessionManager` y cierre de vistas/plugin; ajustes `historyEnabled` y `maxSessions` (defecto 200).
+  Verificado en Obsidian 1.13.7 con agente simulado, dos turnos, cierre y controles de ajustes.
 - [ ] **T4.2** Panel de historial (listar, buscar, renombrar, borrar, reanudar). Reanudar con
   `loadSession` si existe; si no, modo lectura + "Continuar en sesión nueva". *CA:* RF-10.
 - [ ] **T4.3** Restaurar la sesión mostrada en cada vista al reiniciar Obsidian (`getState/setState`). *CA:* RF-01.
@@ -1272,6 +1279,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-018 | La skill `frontend-design` se aplica solo en su principio (dirección visual intencional y coherente), no en su estética "audaz" (fuentes propias, fondos con texturas, paletas propias). | Las guías de Obsidian exigen respetar el tema del usuario: solo variables CSS de Obsidian, sin fuentes impuestas. | Seguir la skill al pie de la letra (rompería temas y la revisión de la comunidad). | Aceptada |
 | ADR-019 | La pestaña de ajustes usa `PluginSettingTab.display()` (deprecado en Obsidian 1.13) en lugar de la API declarativa `getSettingDefinitions()`. | La API nueva exige `minAppVersion` ≥ 1.13; mantener 1.8.7 de momento. El lint lo marca como aviso. | Subir ya `minAppVersion` a 1.13 (excluye usuarios en versiones anteriores). | Aceptada — revisar en T6.7 |
 | ADR-020 | `AgentRegistry` vive en `src/agents/` (capa de composición), no en `src/core/`. | Construye adaptadores concretos; en `core/` invertiría la dependencia núcleo → adaptadores. | `core/AgentRegistry.ts` (plan original). | Aceptada |
+| ADR-021 | `SessionStore` recibe un subconjunto estructural de `DataAdapter` y guarda snapshots JSONL completos, serializados, con `.tmp` y respaldo `.bak` recuperable. El núcleo lo conecta mediante `SessionManager.onCreate`. | Herramientas y planes cambian después de insertarse; snapshots evitan duplicados. Verificado en Obsidian 1.13.7: `rename()` rechaza destinos existentes. El respaldo conserva la versión anterior durante el reemplazo. | Append de cada snapshot (duplicación); usar `fs.rename` directamente (acoplamiento a disco); asumir que `DataAdapter.rename` sobrescribe. | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1470,3 +1478,18 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   automáticamente ("Note: Bienvenida.md"), lectura y edición de la nota con tarjeta de permiso ("Yes, allow all edits
   during this session"), cambio aplicado en el editor, selectores de `configOptions` (modo, modelo, esfuerzo,
   razonamiento), uso de contexto (4 %) y coste ($0.26) en la barra de estado. **Fase 3 cerrada.**
+- **2026-10-01 · Codex (GPT-6)** — **T4.1 completada:** `src/storage/SessionStore.ts` y
+  `sessionSchema.ts` implementan índice validado, transcripts JSONL versionados y consolidados, cola de escrituras,
+  debounce de 1 s, guardado al terminar turno/cerrar vista/descargar plugin, retención y operaciones de lectura,
+  renombrado y borrado para T4.2. `SessionManager.onCreate` conecta el guardado sin importar Obsidian en el núcleo.
+  Ajustes traducidos `historyEnabled`/`maxSessions` (200 por defecto), migración de ajustes antiguos y aviso sobre
+  sincronización. Reintentos conservan la revisión más reciente; índices corruptos no se sobrescriben; registros
+  JSONL corruptos se omiten con aviso; IDs locales validados antes de formar rutas. **ADR-021** registra el formato
+  y el reemplazo con respaldo: prueba real mostró que `DataAdapter.rename()` no sobrescribe archivos existentes;
+  se corrigió con `.tmp`/`.bak` y recuperación tras fallo/interrupción, y el mock reproduce esa restricción.
+  **Validación:** instalación congelada, lint sin errores (9 avisos preexistentes), **141 tests pasan** y 1 e2e
+  optativo omitido, build correcto. Las pruebas de procesos requieren salir del sandbox de Codex (15 fallos
+  ambientales dentro; pasan fuera). Obsidian **1.13.7** abierto con perfil/vault temporal en `/tmp`: dos turnos ACP
+  con agente simulado, transcript de 4 items, `nativeSessionId`, sobrescritura y cierre; ajustes de historial y
+  retención operados y guardados en `data.json`, captura revisada. README y §0.1 corregidos (indicaban Fase 0).
+  **Pendiente:** T4.2 (panel de historial y reanudación), T4.3–T4.5; S5 y modo carpeta de nota activa siguen pendientes.

@@ -223,6 +223,32 @@ export class AgentHubSettingTab extends PluginSettingTab {
   private renderSessions(el: HTMLElement): void {
     const { settings } = this.host;
     new Setting(el).setName(t('settingsSessions')).setHeading();
+    new Setting(el)
+      .setName(t('settingsHistory'))
+      .setDesc(t('settingsHistoryDesc'))
+      .addToggle((toggle) => {
+        toggle.setValue(settings.historyEnabled).onChange((value) =>
+          this.save((s) => {
+            s.historyEnabled = value;
+          }),
+        );
+      });
+    new Setting(el)
+      .setName(t('settingsMaxSessions'))
+      .setDesc(t('settingsMaxSessionsDesc'))
+      .addText((text) => {
+        text.inputEl.type = 'number';
+        text.inputEl.min = '1';
+        text.inputEl.max = '10000';
+        text.setValue(String(settings.maxSessions)).onChange((value) => {
+          const count = Number(value);
+          if (Number.isInteger(count) && count >= 1 && count <= 10000) {
+            this.save((s) => {
+              s.maxSessions = count;
+            });
+          }
+        });
+      });
 
     new Setting(el)
       .setName(t('settingsCwd'))

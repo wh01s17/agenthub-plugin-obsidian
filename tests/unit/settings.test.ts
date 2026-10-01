@@ -25,6 +25,21 @@ describe('migrate', () => {
     expect(settings.showThoughts).toBe(false);
   });
 
+  it('adds history defaults when migrating settings from before T4.1', () => {
+    const { historyEnabled: _enabled, maxSessions: _max, ...old } = defaultSettings();
+    expect(migrate(old)).toMatchObject({ historyEnabled: true, maxSessions: 200 });
+  });
+
+  it('preserves disabled history and rejects invalid retention values', () => {
+    expect(migrate({ historyEnabled: false, maxSessions: 10 })).toMatchObject({
+      historyEnabled: false,
+      maxSessions: 10,
+    });
+    for (const maxSessions of [0, -1, 1.5, '200', Infinity, 10001]) {
+      expect(migrate({ maxSessions }).maxSessions).toBe(200);
+    }
+  });
+
   it('drops invalid agents and adds presets from newer versions as disabled', () => {
     const custom = newCustomAgent([], (n) => `Custom ${n}`);
     const settings = migrate({

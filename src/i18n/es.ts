@@ -37,6 +37,14 @@ export const es: Messages = {
     'Una opción=valor por línea, p. ej. mode=plan. Se aplican al iniciar una sesión.',
 
   settingsSessions: 'Sesiones',
+  settingsHistory: 'Guardar historial de sesiones',
+  settingsHistoryDesc:
+    'Guarda las conversaciones en la carpeta del plugin. La sincronización del vault o Git también puede sincronizarlas. Desactivar conserva el historial existente.',
+  settingsMaxSessions: 'Máximo de sesiones guardadas',
+  settingsMaxSessionsDesc:
+    'Conserva las sesiones actualizadas más recientemente (1–10.000). Se aplica al guardar la próxima sesión.',
+  historySaveError:
+    'AgentHub no pudo leer o guardar el historial. Consulta la consola de desarrollador para más detalles.',
   settingsCwd: 'Directorio de trabajo',
   settingsCwdDesc: 'Carpeta donde se ejecutan los agentes.',
   settingsCwdVault: 'Raíz del vault',

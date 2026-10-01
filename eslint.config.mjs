@@ -42,7 +42,7 @@ export default defineConfig([
   {
     // Núcleo, procesos y adaptadores no dependen del DOM y se prueban en Node: los timers de `window`
     // (pensados para ventanas emergentes de la UI) no aplican.
-    files: ['src/core/**', 'src/process/**', 'src/adapters/**'],
+    files: ['src/core/**', 'src/process/**', 'src/adapters/**', 'src/storage/**'],
     rules: { 'obsidianmd/prefer-window-timers': 'off' },
   },
 ]);

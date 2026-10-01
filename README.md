@@ -3,7 +3,8 @@
 Plugin de Obsidian (solo escritorio) para usar agentes de código como **Claude Code**, **Codex**,
 **Gemini CLI** u **OpenCode** desde una vista lateral, con el contexto de tus notas.
 
-> Estado: en desarrollo temprano (Fase 0). Ver [`plan.md`](plan.md) para la arquitectura y el roadmap.
+> Estado: Fases 0–3 completas; Fase 4 en curso. Chat ACP, permisos, contexto de notas y guardado
+> automático disponibles. El panel de historial y la reanudación están pendientes. Ver [`plan.md`](plan.md).
 
 ## Desarrollo
 
@@ -69,9 +70,9 @@ plugin esté más avanzado y con el vault respaldado (ver [Privacidad y segurida
   (si no, ejecuta `pnpm build` y `pnpm link-vault`) y recarga la lista de plugins.
 - **Errores al cargar:** abre la consola de desarrollador con `Ctrl+Shift+I` (`Cmd+Opt+I` en macOS)
   y filtra por `AgentHub`.
-- **Agentes no encontrados (fases siguientes):** si instalaste los agentes con mise, nvm o similar y
+- **Agentes no encontrados:** si instalaste los agentes con mise, nvm o similar y
   abres Obsidian desde el lanzador del escritorio, Obsidian puede no ver su `PATH`. AgentHub intentará
-  resolverlo y permitirá configurar la ruta del binario a mano en los ajustes.
+  resolverlo y permite configurar la ruta del binario a mano en los ajustes.
 
 ## Privacidad y seguridad
 
@@ -79,6 +80,10 @@ plugin esté más avanzado y con el vault respaldado (ver [Privacidad y segurida
   red propias ni envía telemetría; cada agente se conecta a su proveedor por su cuenta.
 - Los agentes pueden leer y modificar archivos del vault y ejecutar comandos según el modo de permisos
   que elijas. Ten el vault bajo control de versiones o con copia de seguridad.
+- Las conversaciones se guardan en `<configDir>/plugins/agenthub/sessions/` (normalmente dentro de
+  `.obsidian`), con las notas y selecciones adjuntas. La sincronización del vault o Git puede incluirlas.
+  En los ajustes puedes desactivar el guardado y cambiar la retención (200 sesiones por defecto).
+  Desactivar conserva el historial existente. El panel para consultar ese historial llegará en T4.2.
 
 ## Licencia
 

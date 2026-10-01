@@ -20,9 +20,11 @@ import {
 import { AgentHubSettingTab, type SettingsHost } from './settings/SettingsTab';
 import { AgentHubView } from './ui/AgentHubView';
 import type { ViewHost } from './ui/ViewHost';
+import { SessionStore } from './storage/SessionStore';
 
 export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
   override settings: AgentHubSettings = defaultSettings();
+  private sessionStore?: SessionStore;
   readonly processes = new ProcessRegistry();
   readonly agents = new AgentRegistry({
     resolveCommand: (command) => this.resolveCommand(command),
@@ -42,6 +44,7 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       debug: () => this.settings.debugPanel,
     }),
     sessionOptions: (agentId) => this.sessionOptions(agentId),
+    onCreate: (session) => this.sessionStore?.track(session),
   });
   readonly notes = createNoteContext(this.app);
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });
@@ -49,6 +52,17 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
   override async onload(): Promise<void> {
     this.settings = migrate(await this.loadData());
     this.agents.setAgents(this.settings.agents);
+    this.sessionStore = new SessionStore(this.app.vault.adapter, {
+      directory: `${this.app.vault.configDir}/plugins/${this.manifest.id}/sessions`,
+      settings: () => ({
+        enabled: this.settings.historyEnabled,
+        maxSessions: this.settings.maxSessions,
+      }),
+      onError: (error) => {
+        console.error('[AgentHub] Session storage', error);
+        new Notice(t('historySaveError'));
+      },
+    });
 
     this.registerView(VIEW_TYPE_AGENTHUB, (leaf) => new AgentHubView(leaf, this));
     this.addSettingTab(new AgentHubSettingTab(this.app, this, this));
@@ -106,7 +120,12 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
 
   override onunload(): void {
     // No agent process may outlive the plugin (RNF-02).
-    this.run(this.sessions.disposeAll().finally(() => this.processes.killAll()));
+    this.run(
+      this.sessions
+        .disposeAll()
+        .finally(() => this.processes.killAll())
+        .finally(() => this.sessionStore?.dispose()),
+    );
   }
 
   // ── SettingsHost ───────────────────────────────────────────────────────────

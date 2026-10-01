@@ -37,6 +37,8 @@ const SettingsSchema = z.object({
   sendWith: z.enum(['enter', 'mod-enter']),
   showThoughts: z.boolean(),
   debugPanel: z.boolean(),
+  historyEnabled: z.boolean(),
+  maxSessions: z.number().int().min(1).max(10000),
   /** Ask the login shell for PATH when a command is not found (ADR-017). */
   resolveLoginShell: z.boolean(),
   /** Directories put first in PATH for agent commands. */
@@ -126,6 +128,8 @@ export function defaultSettings(): AgentHubSettings {
     sendWith: 'enter',
     showThoughts: false,
     debugPanel: false,
+    historyEnabled: true,
+    maxSessions: 200,
     resolveLoginShell: true,
     extraPath: [],
   };
@@ -175,6 +179,8 @@ export function migrate(raw: unknown): AgentHubSettings {
     sendWith: field('sendWith'),
     showThoughts: field('showThoughts'),
     debugPanel: field('debugPanel'),
+    historyEnabled: field('historyEnabled'),
+    maxSessions: field('maxSessions'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),
   };

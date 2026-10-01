@@ -10,6 +10,7 @@ export interface SessionManagerDeps {
   /** Per-agent options (cwd, initial config, vault instructions). */
   sessionOptions(agentId: AgentId): SessionOptions;
   newId?: () => string;
+  onCreate?: (session: ChatSession) => void;
 }
 
 export class SessionManager {
@@ -30,6 +31,7 @@ export class SessionManager {
       options: this.deps.sessionOptions(agentId),
     });
     this.sessions.set(id, session);
+    this.deps.onCreate?.(session);
     return session;
   }
 
