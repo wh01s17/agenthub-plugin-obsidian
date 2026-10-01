@@ -3,3 +3,4 @@ main.js
 test-vault/
 plan.md
 pnpm-lock.yaml
+tests/fixtures/
