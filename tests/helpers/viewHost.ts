@@ -5,10 +5,15 @@ import { AgentRegistry } from '../../src/agents/AgentRegistry';
 import { SessionManager } from '../../src/core/SessionManager';
 import { ProcessRegistry } from '../../src/process/ProcessRunner';
 import { defaultSettings, type AgentHubSettings } from '../../src/settings/settings';
+import type { SessionStore } from '../../src/storage/SessionStore';
 import type { ViewHost } from '../../src/ui/ViewHost';
 import { StubAdapter, hostServices, type StubScript } from './stubAgent';
 
-export function makeViewHost(script: StubScript, settings: Partial<AgentHubSettings> = {}) {
+export function makeViewHost(
+  script: StubScript,
+  settings: Partial<AgentHubSettings> = {},
+  store?: SessionStore,
+) {
   const adapter = new StubAdapter(script, 'claude-acp', 'Claude Code');
   const agents = new AgentRegistry({
     resolveCommand: () => Promise.resolve(null),
@@ -21,6 +26,7 @@ export function makeViewHost(script: StubScript, settings: Partial<AgentHubSetti
     getAdapter: (id) => (agents.config(id)?.enabled && id === adapter.id ? adapter : undefined),
     host: hostServices,
     sessionOptions: () => ({ cwd: '/vault' }),
+    onCreate: (session) => store?.track(session),
   });
   const app = {
     workspace: { openLinkText: vi.fn(), requestSaveLayout: vi.fn() },
@@ -37,6 +43,7 @@ export function makeViewHost(script: StubScript, settings: Partial<AgentHubSetti
       listNotes: () => [],
       openPath: () => false,
     },
+    history: store,
     openSettings: vi.fn(),
     workingDirectory: () => '/vault',
   };

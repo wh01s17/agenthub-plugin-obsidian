@@ -31,6 +31,9 @@ export interface InitialSession {
   agentId: AgentId;
   cwd: string;
   title?: string;
+  /** Transcript and native id of a stored session being reopened. */
+  items?: TranscriptItem[];
+  nativeSessionId?: string;
 }
 
 export function createInitialState({
@@ -38,14 +41,17 @@ export function createInitialState({
   agentId,
   cwd,
   title = '',
+  items = [],
+  nativeSessionId,
 }: InitialSession): SessionViewState {
   return {
     localId,
     agentId,
     cwd,
     title,
+    nativeSessionId,
     status: 'idle',
-    items: [],
+    items,
     configOptions: [],
     commands: [],
   };

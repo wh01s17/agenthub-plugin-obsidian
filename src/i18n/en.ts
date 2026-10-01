@@ -135,6 +135,21 @@ export const en = {
   suggestNotes: 'Notes',
   suggestCommands: 'Agent commands',
   openFile: 'Open {path}',
+
+  // History (Fase 4)
+  noticeContextNotRestored:
+    'The agent could not continue the previous conversation; it starts with a fresh context.',
+  history: 'Session history',
+  historySearch: 'Search sessions',
+  historyEmpty: 'No saved sessions yet.',
+  historyBack: 'Back to the conversation',
+  historyOpen: 'Open "{title}"',
+  historyRename: 'Rename',
+  historyDelete: 'Delete',
+  historyConfirmDelete: 'Confirm delete',
+  historyUntitled: 'Untitled session',
+  historyAgentMissing: '{agent} (not enabled)',
+  historyCurrent: 'Current',
 };
 
 export type Messages = typeof en;

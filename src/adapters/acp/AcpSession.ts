@@ -29,6 +29,8 @@ export interface AcpSessionInit {
   systemPromptAppend?: string;
   /** Shown when the agent asks for authentication, e.g. "Run `codex login`". */
   loginHint?: string;
+  /** Native session to continue instead of starting a new one (plan T4.2). */
+  resumeId?: string;
 }
 
 type Connection = ReturnType<ReturnType<typeof acp.client>['connect']>;
@@ -54,6 +56,9 @@ export class AcpSession implements AgentSession {
   private firstPrompt = true;
   private permissionCounter = 0;
   private disposed = false;
+  /** True while `session/load` replays history we already have locally. */
+  private replaying = false;
+  private restoredFlag = false;
   private turnActive = false;
   private crashReported = false;
   /** Kills an agent that ignores `session/cancel`; cleared when the turn ends. */
@@ -75,6 +80,11 @@ export class AcpSession implements AgentSession {
 
   get nativeSessionId(): string | undefined {
     return this.sessionId;
+  }
+
+  /** Whether the agent continued the requested session (`resumeId`) with its context. */
+  get restored(): boolean {
+    return this.restoredFlag;
   }
 
   get capabilities(): AgentCapabilities {
@@ -174,7 +184,7 @@ export class AcpSession implements AgentSession {
     this.connection = acp
       .client({ name: 'agenthub' })
       .onNotification(acp.methods.client.session.update, (ctx) => {
-        if (ctx.params.sessionId === this.sessionId)
+        if (ctx.params.sessionId === this.sessionId && !this.replaying)
           this.emitAll(this.mapper.map(ctx.params.update));
       })
       .onRequest(acp.methods.client.session.requestPermission, (ctx) =>
@@ -208,13 +218,7 @@ export class AcpSession implements AgentSession {
       images: agentCaps?.promptCapabilities?.image === true,
     };
 
-    const created = await this.withStartupGuard(
-      this.connection.agent.request(acp.methods.agent.session.new, {
-        cwd: this.init.cwd,
-        mcpServers: [],
-      }),
-    );
-    this.sessionId = created.sessionId;
+    const created = await this.openSession(init.agentCapabilities);
     let configOptions = mapConfigOptions(created.configOptions);
     for (const [id, value] of Object.entries(this.init.config ?? {})) {
       const option = configOptions.find((o) => o.id === id);
@@ -254,6 +258,51 @@ export class AcpSession implements AgentSession {
         });
       }, 0);
     });
+  }
+
+  /**
+   * Continues `resumeId` when asked: `session/resume` if supported (no replay), else `session/load`
+   * with its history replay ignored (the transcript is stored locally), else a new session.
+   */
+  private async openSession(
+    caps: acp.InitializeResponse['agentCapabilities'],
+  ): Promise<{ sessionId: string } & acp.NewSessionResponse> {
+    const { cwd, resumeId } = this.init;
+    const agent = this.connection.agent;
+    if (resumeId && caps?.sessionCapabilities?.resume) {
+      this.sessionId = resumeId;
+      const response = await this.withStartupGuard(
+        agent.request(acp.methods.agent.session.resume, {
+          sessionId: resumeId,
+          cwd,
+          mcpServers: [],
+        }),
+      );
+      this.restoredFlag = true;
+      return { ...response, sessionId: resumeId };
+    }
+    if (resumeId && caps?.loadSession) {
+      this.sessionId = resumeId;
+      this.replaying = true;
+      try {
+        const response = await this.withStartupGuard(
+          agent.request(acp.methods.agent.session.load, {
+            sessionId: resumeId,
+            cwd,
+            mcpServers: [],
+          }),
+        );
+        this.restoredFlag = true;
+        return { ...response, sessionId: resumeId };
+      } finally {
+        this.replaying = false;
+      }
+    }
+    const created = await this.withStartupGuard(
+      agent.request(acp.methods.agent.session.new, { cwd, mcpServers: [] }),
+    );
+    this.sessionId = created.sessionId;
+    return created;
   }
 
   private withStartupGuard<T>(request: Promise<T>): Promise<T> {

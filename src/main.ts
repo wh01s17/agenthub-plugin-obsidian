@@ -25,6 +25,11 @@ import { SessionStore } from './storage/SessionStore';
 export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
   override settings: AgentHubSettings = defaultSettings();
   private sessionStore?: SessionStore;
+
+  /** Saved sessions stay browsable even when saving new ones is disabled (README). */
+  get history(): SessionStore | undefined {
+    return this.sessionStore;
+  }
   readonly processes = new ProcessRegistry();
   readonly agents = new AgentRegistry({
     resolveCommand: (command) => this.resolveCommand(command),

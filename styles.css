@@ -451,3 +451,71 @@
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
 }
+
+/* ── History (Fase 4) ───────────────────────────────────────────────────── */
+
+.agenthub-history {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--size-4-2) var(--size-4-3);
+}
+
+.agenthub-history-header {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  margin-bottom: var(--size-4-2);
+}
+
+.agenthub-history-search {
+  flex: 1;
+  min-width: 0;
+}
+
+.agenthub-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.agenthub-history-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+}
+
+.agenthub-history-entry.is-current .agenthub-history-title {
+  color: var(--interactive-accent);
+}
+
+.agenthub-history-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: auto;
+  padding: var(--size-4-2) var(--size-4-1);
+  background: none;
+  box-shadow: none;
+  text-align: left;
+}
+
+.agenthub-history-title {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenthub-history-meta {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-history-rename {
+  flex: 1;
+  min-width: 0;
+}

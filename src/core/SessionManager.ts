@@ -2,7 +2,7 @@
 
 import type { AgentAdapter, SessionOptions } from './AgentAdapter';
 import { ChatSession, type HostServices } from './ChatSession';
-import type { AgentId } from './types';
+import type { AgentId, TranscriptItem } from './types';
 
 export interface SessionManagerDeps {
   getAdapter(agentId: AgentId): AgentAdapter | undefined;
@@ -31,6 +31,31 @@ export class SessionManager {
       options: this.deps.sessionOptions(agentId),
     });
     this.sessions.set(id, session);
+    this.deps.onCreate?.(session);
+    return session;
+  }
+
+  /** Reopens a stored session under its original local id (plan T4.2/T4.3). */
+  restore(stored: {
+    localId: string;
+    agentId: AgentId;
+    title: string;
+    nativeSessionId?: string;
+    items: TranscriptItem[];
+  }): ChatSession | undefined {
+    const existing = this.sessions.get(stored.localId);
+    if (existing) return existing;
+    const adapter = this.deps.getAdapter(stored.agentId);
+    if (!adapter) return undefined;
+    const session = new ChatSession({
+      localId: stored.localId,
+      adapter,
+      host: this.deps.host,
+      options: this.deps.sessionOptions(stored.agentId),
+      title: stored.title,
+      restore: { items: stored.items, nativeSessionId: stored.nativeSessionId },
+    });
+    this.sessions.set(stored.localId, session);
     this.deps.onCreate?.(session);
     return session;
   }

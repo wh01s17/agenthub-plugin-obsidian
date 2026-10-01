@@ -12,6 +12,8 @@ interface HeaderProps {
   onConfigChange: (id: string, value: string) => void;
   onNewSession: () => void;
   onOpenSettings: () => void;
+  /** Shown only when history is enabled. */
+  onOpenHistory?: () => void;
 }
 
 /** Agent selector, the agent's own options (mode, model…: T2.9) and session actions. */
@@ -43,6 +45,17 @@ export function Header(props: HeaderProps) {
         >
           <Icon name="square-pen" />
         </button>
+        {props.onOpenHistory && (
+          <button
+            type="button"
+            class="clickable-icon agenthub-icon-button"
+            aria-label={t('history')}
+            title={t('history')}
+            onClick={props.onOpenHistory}
+          >
+            <Icon name="history" />
+          </button>
+        )}
         <button
           type="button"
           class="clickable-icon agenthub-icon-button"

@@ -203,3 +203,35 @@ describe('AcpAdapter with the fake ACP agent', () => {
     await vi.waitFor(() => expect(registry.size).toBe(0));
   });
 });
+
+describe('AcpAdapter.loadSession (T4.2)', () => {
+  it('resumes a native session when the agent supports session/resume', async () => {
+    const { host } = makeHost();
+    const resumed = await makeAdapter('echo').loadSession('sess_old', { cwd: process.cwd() }, host);
+    sessions.push(resumed);
+    expect(resumed.restored).toBe(true);
+    expect(resumed.nativeSessionId).toBe('sess_old');
+    await expect(resumed.prompt([{ type: 'text', text: 'sigo' }])).resolves.toBe('end_turn');
+  });
+
+  it('falls back to a new session when the agent cannot resume', async () => {
+    const { host } = makeHost();
+    const adapter = new AcpAdapter(
+      {
+        id: 'fake',
+        label: 'Fake',
+        command: process.execPath,
+        args: [fakeAgent, '--no-resume', '--delay', '1'],
+      },
+      {
+        resolveCommand: () =>
+          Promise.resolve({ path: process.execPath, env: process.env, source: 'process' }),
+        registry,
+      },
+    );
+    const fresh = await adapter.loadSession('sess_old', { cwd: process.cwd() }, host);
+    sessions.push(fresh);
+    expect(fresh.restored).toBe(false);
+    expect(fresh.nativeSessionId).not.toBe('sess_old');
+  });
+});

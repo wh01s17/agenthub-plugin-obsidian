@@ -75,6 +75,8 @@ export interface AgentSession {
   /** May only be known after the first turn in direct mode. */
   readonly nativeSessionId: string | undefined;
   readonly capabilities: AgentCapabilities;
+  /** Set by `loadSession`: whether the agent kept the previous conversation's context. */
+  readonly restored?: boolean;
   onEvent(listener: (event: AgentEvent) => void): Disposable;
   /** Runs one turn; resolves when it ends. */
   prompt(blocks: PromptBlock[]): Promise<StopReason>;

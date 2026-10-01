@@ -54,7 +54,24 @@ export class AcpAdapter implements AgentAdapter {
     return { status: 'available', resolvedCommand: resolved.path };
   }
 
-  async createSession(options: SessionOptions, host: HostBridge): Promise<AgentSession> {
+  createSession(options: SessionOptions, host: HostBridge): Promise<AgentSession> {
+    return this.start(options, host);
+  }
+
+  /** Continues a stored conversation (resume/load); falls back to a fresh session (plan T4.2). */
+  loadSession(
+    nativeSessionId: string,
+    options: SessionOptions,
+    host: HostBridge,
+  ): Promise<AgentSession> {
+    return this.start(options, host, nativeSessionId);
+  }
+
+  private async start(
+    options: SessionOptions,
+    host: HostBridge,
+    resumeId?: string,
+  ): Promise<AgentSession> {
     const resolved = await this.deps.resolveCommand(this.config.command);
     if (!resolved) {
       throw new AgentError(
@@ -80,6 +97,7 @@ export class AcpAdapter implements AgentAdapter {
       config: options.config,
       systemPromptAppend: options.systemPromptAppend,
       loginHint: this.config.loginHint,
+      resumeId,
     });
   }
 }

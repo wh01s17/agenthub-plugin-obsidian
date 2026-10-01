@@ -136,4 +136,19 @@ export const es: Messages = {
   suggestNotes: 'Notas',
   suggestCommands: 'Comandos del agente',
   openFile: 'Abrir {path}',
+
+  // History (Fase 4)
+  noticeContextNotRestored:
+    'El agente no pudo continuar la conversación anterior; empieza con un contexto nuevo.',
+  history: 'Historial de sesiones',
+  historySearch: 'Buscar sesiones',
+  historyEmpty: 'Todavía no hay sesiones guardadas.',
+  historyBack: 'Volver a la conversación',
+  historyOpen: 'Abrir "{title}"',
+  historyRename: 'Renombrar',
+  historyDelete: 'Eliminar',
+  historyConfirmDelete: 'Confirmar borrado',
+  historyUntitled: 'Sesión sin título',
+  historyAgentMissing: '{agent} (no activado)',
+  historyCurrent: 'Actual',
 };

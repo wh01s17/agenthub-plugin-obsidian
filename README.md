@@ -3,8 +3,8 @@
 Plugin de Obsidian (solo escritorio) para usar agentes de código como **Claude Code**, **Codex**,
 **Gemini CLI** u **OpenCode** desde una vista lateral, con el contexto de tus notas.
 
-> Estado: Fases 0–3 completas; Fase 4 en curso. Chat ACP, permisos, contexto de notas y guardado
-> automático disponibles. El panel de historial y la reanudación están pendientes. Ver [`plan.md`](plan.md).
+> Estado: Fases 0–3 completas; Fase 4 en curso. Chat ACP, permisos, contexto de notas, guardado
+> automático, historial y reanudación de sesiones disponibles. Ver [`plan.md`](plan.md).
 
 ## Desarrollo
 
@@ -83,7 +83,7 @@ plugin esté más avanzado y con el vault respaldado (ver [Privacidad y segurida
 - Las conversaciones se guardan en `<configDir>/plugins/agenthub/sessions/` (normalmente dentro de
   `.obsidian`), con las notas y selecciones adjuntas. La sincronización del vault o Git puede incluirlas.
   En los ajustes puedes desactivar el guardado y cambiar la retención (200 sesiones por defecto).
-  Desactivar conserva el historial existente. El panel para consultar ese historial llegará en T4.2.
+  Desactivar conserva el historial existente, que sigue disponible en el panel de historial.
 
 ## Licencia
 

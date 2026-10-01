@@ -29,8 +29,9 @@ const CAPABILITIES: AgentCapabilities = {
 };
 
 export class StubSession implements AgentSession {
-  readonly nativeSessionId = 'stub-native';
+  readonly nativeSessionId: string = 'stub-native';
   readonly capabilities = CAPABILITIES;
+  restored = false;
   readonly prompts: PromptBlock[][] = [];
   disposed = false;
   private listeners = new Set<(event: AgentEvent) => void>();
@@ -74,7 +75,10 @@ export class StubSession implements AgentSession {
 export class StubAdapter implements AgentAdapter {
   readonly sessions: StubSession[] = [];
   readonly options: SessionOptions[] = [];
+  readonly resumed: string[] = [];
   failWith: Error | null = null;
+  /** Whether `loadSession` keeps the previous context (like ACP resume/load). */
+  canRestore = true;
 
   constructor(
     private readonly script: StubScript,
@@ -84,6 +88,17 @@ export class StubAdapter implements AgentAdapter {
 
   detect() {
     return Promise.resolve({ status: 'available' as const });
+  }
+
+  async loadSession(
+    nativeSessionId: string,
+    options: SessionOptions,
+    host: HostBridge,
+  ): Promise<AgentSession> {
+    this.resumed.push(nativeSessionId);
+    const session = (await this.createSession(options, host)) as StubSession;
+    session.restored = this.canRestore;
+    return session;
   }
 
   createSession(options: SessionOptions, host: HostBridge): Promise<AgentSession> {

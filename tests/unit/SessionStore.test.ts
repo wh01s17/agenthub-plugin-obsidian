@@ -2,48 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SessionManager } from '../../src/core/SessionManager';
 import { createInitialState } from '../../src/core/reducer';
 import type { SessionViewState, TranscriptItem } from '../../src/core/types';
-import { SessionStore, type SessionStorageAdapter } from '../../src/storage/SessionStore';
+import { SessionStore } from '../../src/storage/SessionStore';
+import { MemoryAdapter } from '../helpers/memoryStorage';
 import { StubAdapter, hostServices } from '../helpers/stubAgent';
 
 const directory = 'config/plugins/agenthub/sessions';
 const indexPath = `${directory}/index.json`;
-
-class MemoryAdapter implements SessionStorageAdapter {
-  readonly files = new Map<string, string>();
-  readonly directories = new Set<string>();
-  readonly writes: string[] = [];
-  failRename = false;
-  exists(path: string) {
-    return Promise.resolve(this.files.has(path) || this.directories.has(path));
-  }
-  mkdir(path: string) {
-    this.directories.add(path);
-    return Promise.resolve();
-  }
-  read(path: string) {
-    const data = this.files.get(path);
-    return data === undefined ? Promise.reject(new Error('Missing file')) : Promise.resolve(data);
-  }
-  write(path: string, data: string) {
-    this.writes.push(path);
-    this.files.set(path, data);
-    return Promise.resolve();
-  }
-  rename(path: string, target: string) {
-    if (this.failRename) return Promise.reject(new Error('Disk full'));
-    if (this.files.has(target))
-      return Promise.reject(new Error('Destination file already exists!'));
-    const data = this.files.get(path);
-    if (data === undefined) return Promise.reject(new Error('Missing temp file'));
-    this.files.set(target, data);
-    this.files.delete(path);
-    return Promise.resolve();
-  }
-  remove(path: string) {
-    this.files.delete(path);
-    return Promise.resolve();
-  }
-}
 
 function setup() {
   const adapter = new MemoryAdapter();

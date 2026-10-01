@@ -16,6 +16,7 @@ import type {
   PermissionRequest,
   PromptBlock,
   SessionViewState,
+  TranscriptItem,
 } from './types';
 
 export type HostServices = Omit<HostBridge, 'requestPermission'>;
@@ -26,6 +27,8 @@ export interface ChatSessionInit {
   host: HostServices;
   options: SessionOptions;
   title?: string;
+  /** Stored session being reopened: its transcript is shown and the agent is asked to continue it. */
+  restore?: { items: TranscriptItem[]; nativeSessionId?: string };
   now?: () => number;
 }
 
@@ -40,14 +43,19 @@ export class ChatSession {
   private agent: AgentSession | null = null;
   private starting: Promise<AgentSession | null> | null = null;
   private turnCounter = 0;
+  private agentStarts = 0;
   private disposed = false;
 
   constructor(private readonly init: ChatSessionInit) {
+    // Keep local ids unique after reopening a stored transcript.
+    this.turnCounter = init.restore?.items.filter((item) => item.kind === 'user').length ?? 0;
     this.state = createInitialState({
       localId: init.localId,
       agentId: init.adapter.id,
       cwd: init.options.cwd,
       title: init.title,
+      items: init.restore?.items,
+      nativeSessionId: init.restore?.nativeSessionId,
     });
   }
 
@@ -139,13 +147,26 @@ export class ChatSession {
       requestPermission: (request) => this.requestPermission(request),
     };
     try {
-      const agent = await this.init.adapter.createSession(this.init.options, host);
+      const { adapter, options } = this.init;
+      // Only the first agent of a reopened session resumes; after a crash we start fresh.
+      const resumeId = this.agentStarts++ === 0 ? this.init.restore?.nativeSessionId : undefined;
+      const agent =
+        resumeId && adapter.loadSession
+          ? await adapter.loadSession(resumeId, options, host)
+          : await adapter.createSession(options, host);
       if (this.disposed) {
         await agent.dispose();
         return null;
       }
       agent.onEvent((event) => this.onAgentEvent(event));
       this.agent = agent;
+      if (resumeId !== undefined && !agent.restored) {
+        this.dispatch({
+          type: 'local.notice',
+          level: 'info',
+          notice: { key: 'contextNotRestored' },
+        });
+      }
       return agent;
     } catch (error) {
       this.reportError(error);

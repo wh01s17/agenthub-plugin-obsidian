@@ -77,4 +77,40 @@ describe.skipIf(!enabled)('real agents (e2e)', () => {
     },
     240_000,
   );
+
+  it.each(agentIds)(
+    '%s continues a reopened session in a new process (T4.2)',
+    async (agentId) => {
+      const adapter = registry.get(agentId);
+      if (!adapter) return;
+      const options = { cwd: process.cwd() };
+      const first = new ChatSession({ localId: 'e2e-a', adapter, host: hostServices, options });
+      await first.send([
+        { type: 'text', text: 'Remember the code word: PELICANO. Reply only "ok".' },
+      ]);
+      const { nativeSessionId, items } = first.getState();
+      await first.dispose();
+      expect(nativeSessionId).toBeTruthy();
+
+      const reopened = new ChatSession({
+        localId: 'e2e-a',
+        adapter,
+        host: hostServices,
+        options,
+        restore: { items: [...items], nativeSessionId },
+      });
+      try {
+        await reopened.send([
+          { type: 'text', text: 'What was the code word? Reply with the word only.' },
+        ]);
+        const state = reopened.getState();
+        expect(state.items.some((i) => i.kind === 'notice')).toBe(false);
+        const last = [...state.items].reverse().find((i) => i.kind === 'assistant');
+        expect(last?.kind === 'assistant' ? last.text.toUpperCase() : '').toContain('PELICANO');
+      } finally {
+        await reopened.dispose();
+      }
+    },
+    240_000,
+  );
 });

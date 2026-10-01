@@ -145,6 +145,8 @@ export type PermissionOutcome =
 export type Notice =
   | { key: 'agentError'; message: string; hint?: string; detail?: string }
   | { key: 'permissionDenied'; toolName: string }
+  /** A stored session was reopened but the agent could not continue its previous context. */
+  | { key: 'contextNotRestored' }
   | { key: 'turnStopped'; stopReason: Exclude<StopReason, 'end_turn'> };
 
 export type TranscriptItem =

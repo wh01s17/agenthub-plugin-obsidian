@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Simulated ACP agent for development and tests (plan §9). No network, no tokens.
 //
-// Uso: node scripts/fake-acp-agent.mjs [--scenario <nombre>] [--delay <ms>]
+// Uso: node scripts/fake-acp-agent.mjs [--scenario <nombre>] [--delay <ms>] [--no-resume]
 // Escenarios (también se pueden pedir por prompt: "/scenario <nombre>"):
 //   echo           responde con el texto recibido, en chunks
 //   stream-long    ~20 KB de Markdown en chunks pequeños
@@ -22,6 +22,7 @@ const option = (name, fallback) => {
 };
 const defaultScenario = option('scenario', 'echo');
 const delayMs = Number(option('delay', '15'));
+const resumable = !argv.includes('--no-resume');
 
 const CONFIG_OPTIONS = () => [
   {
@@ -66,6 +67,7 @@ acp
     protocolVersion: acp.PROTOCOL_VERSION,
     agentCapabilities: {
       loadSession: false,
+      sessionCapabilities: resumable ? { resume: {} } : {},
       promptCapabilities: { image: false, embeddedContext: true },
       mcpCapabilities: { http: false, sse: false },
     },
@@ -80,6 +82,11 @@ acp
     const sessionId = nextId('sess');
     state.sessions.set(sessionId, { abort: null });
     return { sessionId, configOptions: CONFIG_OPTIONS() };
+  })
+  .onRequest(acp.methods.agent.session.resume, (ctx) => {
+    // A fresh process: pretend the conversation continues under the same id.
+    state.sessions.set(ctx.params.sessionId, { abort: null });
+    return { configOptions: CONFIG_OPTIONS() };
   })
   .onRequest(acp.methods.agent.session.setConfigOption, (ctx) => {
     const { configId, value } = ctx.params;

@@ -10,6 +10,8 @@ export function noticeText(notice: Notice): string {
       return notice.message;
     case 'permissionDenied':
       return t('noticePermissionDenied', { tool: notice.toolName });
+    case 'contextNotRestored':
+      return t('noticeContextNotRestored');
     case 'turnStopped':
       switch (notice.stopReason) {
         case 'cancelled':

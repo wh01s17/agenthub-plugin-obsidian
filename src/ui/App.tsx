@@ -10,6 +10,7 @@ import { t } from '../i18n';
 import { Composer } from './components/Composer';
 import { ContextChips } from './components/ContextChips';
 import { DebugPanel } from './components/DebugPanel';
+import { HistoryPanel } from './components/HistoryPanel';
 import { Header } from './components/Header';
 import { MessageList } from './components/MessageList';
 import { StatusBar } from './components/StatusBar';
@@ -25,6 +26,10 @@ export interface AppProps {
   /** Selection captured by the "Send selection" command, attached to the next message. */
   selection?: SelectionRef | null;
   onClearSelection?: () => void;
+  /** Opens a saved session in this view (plan T4.2). */
+  onOpenSession?: (localId: string) => void;
+  /** Deletes a saved session from the history panel. */
+  onDeleteSession?: (localId: string) => Promise<void>;
 }
 
 export function App(props: AppProps) {
@@ -84,6 +89,8 @@ function ChatView(props: AppProps & { session: ChatSession }) {
   const busy = session.busy;
   const activeNotePath = useActiveNotePath(host);
   const [includeActive, setIncludeActive] = useState(host.settings.includeActiveNote);
+  const [showHistory, setShowHistory] = useState(false);
+  const history = host.history;
 
   const onSend = (text: string) => {
     const context = { activeNotePath: includeActive ? activeNotePath : null, selection };
@@ -102,8 +109,24 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         onConfigChange={(id, value) => void session.setConfigOption(id, value)}
         onNewSession={onNewSession}
         onOpenSettings={() => host.openSettings()}
+        onOpenHistory={history ? () => setShowHistory((open) => !open) : undefined}
       />
-      {state.items.length === 0 ? (
+      {showHistory && history ? (
+        <HistoryPanel
+          history={history}
+          currentId={state.localId}
+          agentLabel={(agentId) => {
+            const agent = host.agents.config(agentId);
+            return { label: agent?.label ?? agentId, enabled: agent?.enabled ?? false };
+          }}
+          onOpen={(localId) => {
+            setShowHistory(false);
+            props.onOpenSession?.(localId);
+          }}
+          onDelete={(localId) => props.onDeleteSession?.(localId) ?? Promise.resolve()}
+          onClose={() => setShowHistory(false)}
+        />
+      ) : state.items.length === 0 ? (
         <div class="agenthub-empty">
           <p class="agenthub-empty-title">{t('welcomeTitle')}</p>
           <p class="agenthub-empty-body">

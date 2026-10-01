@@ -62,13 +62,10 @@ export class AgentHubView extends ItemView {
   }
 
   override async setState(state: unknown, result: ViewStateResult): Promise<void> {
-    // Sessions are not persisted yet (Fase 4): a restored id only survives while the plugin runs.
     this.restoredId = parseViewState(state).sessionId;
-    const existing = this.restoredId ? this.host.sessions.get(this.restoredId) : undefined;
-    if (existing && existing !== this.session) {
-      const replaced = this.session;
-      this.session = existing;
-      if (replaced) void this.host.sessions.close(replaced.localId);
+    // A live session (same plugin run) or a saved one (after restarting Obsidian, T4.3).
+    if (this.restoredId && this.restoredId !== this.session?.localId) {
+      await this.openSession(this.restoredId, false);
     }
     this.ensureSession();
     this.renderApp();
@@ -83,6 +80,41 @@ export class AgentHubView extends ItemView {
     if (previous) void this.host.sessions.close(previous.localId);
     this.renderApp();
     this.host.app.workspace.requestSaveLayout();
+  }
+
+  /**
+   * Shows a session in this view: a live one, or a saved one reopened from history (T4.2). The
+   * replaced session ends (it stays saved). Returns false when it cannot be opened.
+   */
+  async openSession(localId: string, render = true): Promise<boolean> {
+    if (this.session?.localId === localId) return true;
+    let session = this.host.sessions.get(localId);
+    if (!session) {
+      const stored = await this.host.history?.load(localId).catch(() => undefined);
+      if (!stored) return false;
+      session = this.host.sessions.restore({ ...stored.entry, items: stored.items });
+      if (!session) return false;
+    }
+    const previous = this.session;
+    this.session = session;
+    if (previous) void this.host.sessions.close(previous.localId);
+    if (render) {
+      this.renderApp();
+      this.host.app.workspace.requestSaveLayout();
+    }
+    return true;
+  }
+
+  /** Deletes a saved session; the current one is closed first so closing cannot save it again. */
+  async deleteSession(localId: string): Promise<void> {
+    if (this.session?.localId === localId) {
+      const current = this.session;
+      this.session = null;
+      this.ensureSession(current.getState().agentId);
+      this.renderApp();
+      await this.host.sessions.close(localId);
+    }
+    await this.host.history?.delete(localId);
   }
 
   /** Attaches an editor selection to the next message (command "Send selection"). */
@@ -127,6 +159,8 @@ export class AgentHubView extends ItemView {
         onAgentChange: (agentId: string) => this.startNewSession(agentId),
         onNewSession: () => this.startNewSession(),
         selection: this.selection,
+        onOpenSession: (localId: string) => void this.openSession(localId),
+        onDeleteSession: (localId: string) => this.deleteSession(localId),
         onClearSelection: () => {
           this.selection = null;
           this.renderApp();
