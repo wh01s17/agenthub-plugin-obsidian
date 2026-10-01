@@ -46,9 +46,11 @@ function hasInput(input: unknown): boolean {
 function Content({
   item,
   onOpenPath,
+  pathLabel,
 }: {
   item: ToolContent;
   onOpenPath?: (path: string) => boolean;
+  pathLabel?: (path: string) => string;
 }) {
   switch (item.type) {
     case 'text':
@@ -69,6 +71,7 @@ function Content({
           oldText={item.oldText}
           newText={item.newText}
           onOpenPath={onOpenPath}
+          pathLabel={pathLabel}
         />
       );
   }
@@ -79,9 +82,16 @@ interface ToolCallCardProps {
   expanded?: boolean;
   /** Opens a path in Obsidian; returns false when it is outside the vault. */
   onOpenPath?: (path: string) => boolean;
+  /** How to show a path (vault-relative when possible). */
+  pathLabel?: (path: string) => string;
 }
 
-export function ToolCallCard({ call, expanded = false, onOpenPath }: ToolCallCardProps) {
+export function ToolCallCard({
+  call,
+  expanded = false,
+  onOpenPath,
+  pathLabel = (path) => path,
+}: ToolCallCardProps) {
   const status = t(STATUS_TEXT[call.status]);
   return (
     <details class={`agenthub-tool agenthub-tool-${call.status}`} open={expanded}>
@@ -108,10 +118,10 @@ export function ToolCallCard({ call, expanded = false, onOpenPath }: ToolCallCar
                       onOpenPath(location.path);
                     }}
                   >
-                    {location.path}
+                    {pathLabel(location.path)}
                   </a>
                 ) : (
-                  location.path
+                  pathLabel(location.path)
                 )}
                 {location.line !== undefined ? `:${location.line}` : ''}
               </li>
@@ -130,7 +140,7 @@ export function ToolCallCard({ call, expanded = false, onOpenPath }: ToolCallCar
           <div class="agenthub-tool-section">
             <div class="agenthub-tool-label">{t('toolOutput')}</div>
             {call.content.map((item, index) => (
-              <Content key={index} item={item} onOpenPath={onOpenPath} />
+              <Content key={index} item={item} onOpenPath={onOpenPath} pathLabel={pathLabel} />
             ))}
           </div>
         )}

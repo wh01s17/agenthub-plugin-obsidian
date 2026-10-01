@@ -42,6 +42,7 @@ export function makeViewHost(
       readNote: () => Promise.resolve(null),
       listNotes: () => [],
       openPath: () => false,
+      displayPath: (path: string) => path,
     },
     history: store,
     openSettings: vi.fn(),

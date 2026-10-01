@@ -30,13 +30,20 @@ function userMarkdown(blocks: readonly PromptBlock[]): string {
   return attachments.length > 0 ? `${text}\n\n${attachments.join('\n')}` : text;
 }
 
+/** A code fence longer than any backtick run in `text`, so the text cannot close it early. */
+function fenced(text: string): string[] {
+  const longest = Math.max(0, ...[...text.matchAll(/`+/g)].map((match) => match[0].length));
+  const fence = '`'.repeat(Math.max(3, longest + 1));
+  return [fence, text, fence];
+}
+
 function toolMarkdown(call: ToolCall): string {
   const body: string[] = [];
   for (const location of call.locations ?? []) body.push(`- ${location.path}`);
   for (const content of call.content ?? []) {
-    if (content.type === 'text') body.push('```', content.text, '```');
-    if (content.type === 'terminal') body.push('```', content.output, '```');
-    if (content.type === 'diff') body.push(`\`${content.path}\``, '```', content.newText, '```');
+    if (content.type === 'text') body.push(...fenced(content.text));
+    if (content.type === 'terminal') body.push(...fenced(content.output));
+    if (content.type === 'diff') body.push(`\`${content.path}\``, ...fenced(content.newText));
   }
   const header = `[!tool]- ${call.title} (${call.status})`;
   return quote([header, ...body].join('\n'));

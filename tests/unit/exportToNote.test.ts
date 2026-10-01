@@ -79,3 +79,27 @@ describe('exportFileName', () => {
     );
   });
 });
+
+describe('tool output that already contains code fences', () => {
+  it('uses a longer fence so the inner one cannot close it', () => {
+    const state = createInitialState({
+      localId: 's2',
+      agentId: 'claude-acp',
+      cwd: '/v',
+      items: [
+        {
+          kind: 'tool',
+          call: {
+            id: 'c',
+            title: 'Read A.md',
+            kind: 'read',
+            status: 'completed',
+            content: [{ type: 'text', text: '```\n1\tcode\n```' }],
+          },
+        },
+      ],
+    });
+    const md = sessionToMarkdown(state, labels, new Date('2026-10-01T12:00:00Z'));
+    expect(md).toContain('> ````\n> ```\n> 1\tcode\n> ```\n> ````');
+  });
+});

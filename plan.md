@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
-| Próxima tarea | Verificación manual (T4.3–T4.5, T6.1, checklist de T6.3) → primer release (T6.6) → T6.7 (decidir `minAppVersion`) |
+| Próxima tarea | Verificar T4.3 (reinicio) → primer release (T6.6, con confirmación) → T6.7 (decidir `minAppVersion`) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1569,3 +1569,8 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **T6.4** hecho: `MessageList` renderiza solo los últimos 100 elementos
   (`PAGE_SIZE`) y un botón "Mostrar N mensajes anteriores" carga más en bloques conservando la posición de lectura.
   La carga del plugin no lanza procesos (los agentes arrancan al mostrar una sesión). 165 tests.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Verificado en Obsidian por el usuario: **exportar a nota (T4.4)**,
+  **segunda vista (T4.5)**, **diff tras una edición (T6.1)** y **recorrido solo con teclado (T6.3)**. Corregido a partir
+  de sus capturas: la exportación usa un delimitador de código más largo que cualquiera del texto (la salida de `Read`
+  de Claude ya trae ``` y rompía el callout); las rutas de herramientas y diffs se muestran relativas al vault
+  (`NoteContext.displayPath`). Para cerrar un panel extra: clic derecho en su pestaña (icono del robot) → Close.

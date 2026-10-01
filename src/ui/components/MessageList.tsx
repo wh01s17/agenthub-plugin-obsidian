@@ -15,6 +15,8 @@ interface MessageListProps {
   onPermission: (id: string, outcome: PermissionOutcome) => void;
   /** Opens a vault path; returns false when it cannot be opened. */
   onOpenPath: (path: string) => boolean;
+  /** How to show a path (vault-relative when possible). */
+  pathLabel?: (path: string) => string;
 }
 
 /** Items rendered at first, and how many more each "show earlier" adds (plan T6.4). */
@@ -51,6 +53,7 @@ function Item({
   showThoughts,
   onPermission,
   onOpenPath,
+  pathLabel,
 }: Omit<MessageListProps, 'items'> & { item: TranscriptItem }) {
   switch (item.kind) {
     case 'user':
@@ -75,7 +78,7 @@ function Item({
         </details>
       );
     case 'tool':
-      return <ToolCallCard call={item.call} onOpenPath={onOpenPath} />;
+      return <ToolCallCard call={item.call} onOpenPath={onOpenPath} pathLabel={pathLabel} />;
     case 'plan':
       return <PlanView entries={item.entries} />;
     case 'permission':
@@ -110,6 +113,7 @@ export function MessageList({
   showThoughts,
   onPermission,
   onOpenPath,
+  pathLabel,
 }: MessageListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const following = useRef(true);
@@ -161,6 +165,7 @@ export function MessageList({
           showThoughts={showThoughts}
           onPermission={onPermission}
           onOpenPath={onOpenPath}
+          pathLabel={pathLabel}
         />
       ))}
     </div>

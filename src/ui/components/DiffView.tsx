@@ -9,10 +9,17 @@ interface DiffViewProps {
   oldText: string | null;
   newText: string;
   onOpenPath?: (path: string) => boolean;
+  pathLabel?: (path: string) => string;
 }
 
 /** What an edit changed, as a compact line diff (plan T6.1). */
-export function DiffView({ path, oldText, newText, onOpenPath }: DiffViewProps) {
+export function DiffView({
+  path,
+  oldText,
+  newText,
+  onOpenPath,
+  pathLabel = (p) => p,
+}: DiffViewProps) {
   const lines = lineDiff(oldText, newText);
   const shown = lines.slice(0, MAX_LINES);
   return (
@@ -28,10 +35,10 @@ export function DiffView({ path, oldText, newText, onOpenPath }: DiffViewProps) 
               onOpenPath(path);
             }}
           >
-            {path}
+            {pathLabel(path)}
           </a>
         ) : (
-          path
+          pathLabel(path)
         )}
         {oldText === null && <span class="agenthub-badge">{t('toolNewFile')}</span>}
       </div>

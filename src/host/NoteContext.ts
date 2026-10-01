@@ -13,6 +13,8 @@ export interface NoteContext {
   readNote(pathOrLink: string): Promise<NoteRef | null>;
   /** Markdown note paths, for `@` completion. */
   listNotes(): string[];
+  /** Vault-relative form of an absolute path inside the vault; other paths are returned unchanged. */
+  displayPath(path: string): string;
   /** Opens a vault-relative or absolute path inside the vault; returns false if it is outside. */
   openPath(path: string): boolean;
 }
@@ -47,6 +49,11 @@ export function createNoteContext(app: App): NoteContext {
     },
 
     listNotes: () => app.vault.getMarkdownFiles().map((file) => file.path),
+
+    displayPath: (path) =>
+      base && path.startsWith(`${base}/`) && isInside(base, path)
+        ? path.slice(base.length + 1)
+        : path,
 
     openPath(path) {
       let vaultPath = path;
