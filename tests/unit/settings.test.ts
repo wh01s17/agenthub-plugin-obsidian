@@ -1,0 +1,92 @@
+import { describe, expect, it } from 'vitest';
+import {
+  AGENT_PRESETS,
+  defaultSettings,
+  migrate,
+  newCustomAgent,
+  renderInstructions,
+} from '../../src/settings/settings';
+import {
+  describeDetection,
+  formatPairs,
+  parsePairs,
+  toLines,
+} from '../../src/settings/SettingsTab';
+
+describe('migrate', () => {
+  it('returns defaults for empty or invalid data', () => {
+    expect(migrate(undefined)).toEqual(defaultSettings());
+    expect(migrate('garbage')).toEqual(defaultSettings());
+  });
+
+  it('keeps valid fields and resets only the invalid ones', () => {
+    const settings = migrate({ ...defaultSettings(), sendWith: 'mod-enter', showThoughts: 'yes' });
+    expect(settings.sendWith).toBe('mod-enter');
+    expect(settings.showThoughts).toBe(false);
+  });
+
+  it('drops invalid agents and adds presets from newer versions as disabled', () => {
+    const custom = newCustomAgent([], (n) => `Custom ${n}`);
+    const settings = migrate({
+      ...defaultSettings(),
+      agents: [AGENT_PRESETS[0], { id: 'broken' }, { ...custom, command: 'my-agent' }],
+    });
+    expect(settings.agents.map((a) => a.id)).toEqual([
+      'claude-acp',
+      'custom-1',
+      'codex-acp',
+      'opencode',
+      'gemini',
+    ]);
+    expect(settings.agents.find((a) => a.id === 'codex-acp')?.enabled).toBe(false);
+  });
+
+  it('repairs a default agent that no longer exists', () => {
+    const settings = migrate({ ...defaultSettings(), defaultAgentId: 'gone' });
+    expect(settings.defaultAgentId).toBe('claude-acp');
+  });
+
+  it('ships Gemini disabled and pins adapter versions', () => {
+    const presets = Object.fromEntries(AGENT_PRESETS.map((p) => [p.id, p]));
+    expect(presets.gemini?.enabled).toBe(false);
+    expect(presets['claude-acp']?.args.join(' ')).toMatch(/claude-agent-acp@\d+\.\d+\.\d+$/);
+    expect(presets['codex-acp']?.args.join(' ')).toMatch(/codex-acp@\d+\.\d+\.\d+$/);
+  });
+});
+
+describe('newCustomAgent', () => {
+  it('picks the next free id', () => {
+    const agent = newCustomAgent(['custom-1', 'custom-2'], (n) => `Agente ${n}`);
+    expect(agent).toMatchObject({
+      id: 'custom-3',
+      label: 'Agente 3',
+      enabled: false,
+      builtin: false,
+    });
+  });
+});
+
+describe('renderInstructions', () => {
+  it('replaces the config folder placeholder', () => {
+    expect(renderInstructions('No toques {{configDir}}/', { configDir: '.obs' })).toBe(
+      'No toques .obs/',
+    );
+  });
+});
+
+describe('settings tab helpers', () => {
+  it('parses lines and KEY=value pairs', () => {
+    expect(toLines(' a \n\n b ')).toEqual(['a', 'b']);
+    expect(parsePairs('A=1\nB = x=y\nnope\n=bad')).toEqual({ A: '1', B: 'x=y' });
+    expect(formatPairs({ A: '1', B: '2' })).toBe('A=1\nB=2');
+  });
+
+  it('describes detection results', () => {
+    expect(describeDetection({ status: 'available', resolvedCommand: '/bin/x' })).toBe(
+      'Available: /bin/x',
+    );
+    expect(describeDetection({ status: 'missing', message: 'Install it' })).toBe(
+      'Not found. Install it',
+    );
+  });
+});

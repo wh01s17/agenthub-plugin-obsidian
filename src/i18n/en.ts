@@ -3,6 +3,68 @@ export const en = {
   openView: 'Open AgentHub',
   emptyTitle: 'No session yet',
   emptyBody: 'Agents will appear here once they are connected.',
+
+  // Settings: agents
+  settingsAgents: 'Agents',
+  settingsDefaultAgent: 'Default agent',
+  settingsDefaultAgentDesc: 'Agent used for new sessions.',
+  settingsRedetect: 'Detect agents again',
+  settingsRedetectDesc: 'Look for agent commands again, e.g. after installing one.',
+  settingsRedetectButton: 'Detect',
+  settingsAddAgent: 'Add a custom agent',
+  settingsAddAgentDesc: 'Any agent that speaks the Agent Client Protocol (ACP) over stdio.',
+  settingsAddAgentButton: 'Add agent',
+  settingsCustomAgentLabel: 'Custom agent {n}',
+  settingsEdit: 'Edit',
+  settingsDelete: 'Delete',
+  settingsDetecting: 'Detecting…',
+  settingsAvailable: 'Available: {path}',
+  settingsMissing: 'Not found. {hint}',
+  settingsAgentError: 'Unavailable: {message}',
+  settingsDisabled: 'Disabled',
+  settingsLabel: 'Name',
+  settingsCommand: 'Command',
+  settingsCommandDesc: 'Program to run, by name or absolute path.',
+  settingsArgs: 'Arguments',
+  settingsArgsDesc: 'One argument per line.',
+  settingsEnv: 'Environment variables',
+  settingsEnvDesc:
+    'One KEY=value per line. Stored in plain text in the plugin data: avoid secrets.',
+  settingsConfig: 'Initial options',
+  settingsConfigDesc: 'One option=value per line, e.g. mode=plan. Applied when a session starts.',
+
+  // Settings: sessions
+  settingsSessions: 'Sessions',
+  settingsCwd: 'Working directory',
+  settingsCwdDesc: 'Folder where agents run.',
+  settingsCwdVault: 'Vault root',
+  settingsCwdCustom: 'Custom folder',
+  settingsCustomCwd: 'Custom folder',
+  settingsCustomCwdDesc: 'Absolute path.',
+  settingsInstructions: 'Vault instructions',
+  settingsInstructionsDesc:
+    'Sent to the agent with the first message. {{configDir}} is replaced by the Obsidian config folder.',
+  settingsSendWith: 'Send message with',
+  settingsSendEnter: 'Enter (Shift+Enter for a new line)',
+  settingsSendModEnter: 'Ctrl/Cmd+Enter',
+  settingsShowThoughts: 'Show agent reasoning',
+  settingsShowThoughtsDesc: 'Expand the agent thinking blocks by default.',
+  settingsDebug: 'Debug panel',
+  settingsDebugDesc: 'Show raw agent output (stderr and unknown messages) in the view.',
+
+  // Settings: environment
+  settingsEnvironment: 'Environment',
+  settingsLoginShell: 'Use the login shell PATH as a fallback',
+  settingsLoginShellDesc:
+    'If a command is not found, ask your login shell for its PATH (slower, only when needed).',
+  settingsExtraPath: 'Extra PATH folders',
+  settingsExtraPathDesc: 'One folder per line, searched before the rest.',
+
+  // Agent hints
+  hintInstall: 'Install it with: {command}',
+  hintLogin: 'Log in by running `{command}` in a terminal.',
+  hintUnsupported: 'The "{transport}" mode is not supported yet.',
+  hintNoCommand: 'No command configured.',
 };
 
 export type Messages = typeof en;

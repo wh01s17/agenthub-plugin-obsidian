@@ -88,7 +88,7 @@ export interface AgentSession {
 export interface AgentAdapter {
   readonly id: AgentId;
   readonly label: string;
-  detect(host: HostBridge): Promise<DetectionResult>;
+  detect(): Promise<DetectionResult>;
   createSession(options: SessionOptions, host: HostBridge): Promise<AgentSession>;
   loadSession?(
     nativeSessionId: string,

@@ -14,7 +14,15 @@ export function resolveMessages(language: string): Messages {
 
 let current: Messages | null = null;
 
-export function t(key: MessageKey): string {
+/** Localized text; `{name}` placeholders are filled from `vars`. */
+export function t(key: MessageKey, vars?: Record<string, string | number>): string {
   current ??= resolveMessages(getLanguage());
-  return current[key];
+  return format(current[key], vars);
+}
+
+export function format(text: string, vars?: Record<string, string | number>): string {
+  if (!vars) return text;
+  return text.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in vars ? String(vars[name]) : match,
+  );
 }

@@ -44,3 +44,20 @@ export class ItemView extends Component {
 }
 
 export class Plugin extends Component {}
+
+export class Notice {
+  constructor(public message: string) {}
+}
+
+export class PluginSettingTab {
+  containerEl: HTMLElement = document.createElement('div');
+  constructor(
+    public app: unknown,
+    public plugin: unknown,
+  ) {}
+  display(): void {}
+}
+
+export class Setting {
+  constructor(public containerEl: HTMLElement) {}
+}

@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 2 — Núcleo + ACP** (T2.1 ✅, T2.2 ✅). Fase 0 cerrada. Pendiente manual: S5 (render en Obsidian, cuando haya mensajes). |
-| Próxima tarea | **T2.7** (`AgentRegistry` + presets + ajustes validados + `SettingsTab`) |
+| Próxima tarea | **T2.8** (UI del chat + `HostBridgeImpl` + conexión con `SessionManager`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1181,7 +1181,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 - [x] **T2.5** `AcpAdapter` (§5.1) + `mapping.ts` + `pathGuard.ts` + tests de integración con el fake.
   *Dep:* T2.1–T2.4. *CA:* todos los escenarios del fake pasan.
 - [x] **T2.6** `reducer.ts` + `ChatSession` + `SessionManager` (sin persistencia aún) + tests con fixtures.
-- [ ] **T2.7** `AgentRegistry` + presets (§5.4) + `SettingsTab` (lista de agentes, estado de
+- [x] **T2.7** `AgentRegistry` + presets (§5.4) + `SettingsTab` (lista de agentes, estado de
   detección, editar comando/args/env, agente por defecto, agentes personalizados). Los ajustes leídos de `data.json`
   se validan con un esquema (Zod, ya incluido por el SDK de ACP, o Valibot) dentro de `migrate()`. *CA:* RF-02, RF-15, RF-20.
 - [ ] **T2.8** UI: `Header` (selector de agente + estado), `MessageList`, `AssistantMessage` +
@@ -1238,6 +1238,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   orden de foco, tamaño de objetivos).
 - [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [ ] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
+- [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
 - [ ] **T6.6** Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
@@ -1268,6 +1269,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
 | ADR-017 | `PATH`: `process.env` primero; shell de login solo como respaldo asíncrono y cacheado, añadiendo rutas al final. | S1: en este equipo `process.env` ya encuentra todo; el shell cuesta ≈1,4 s y cambia el binario elegido. | Fusionar siempre el entorno del shell (lento y cambia binarios). | Aceptada (matiza ADR-006) |
 | ADR-018 | La skill `frontend-design` se aplica solo en su principio (dirección visual intencional y coherente), no en su estética "audaz" (fuentes propias, fondos con texturas, paletas propias). | Las guías de Obsidian exigen respetar el tema del usuario: solo variables CSS de Obsidian, sin fuentes impuestas. | Seguir la skill al pie de la letra (rompería temas y la revisión de la comunidad). | Aceptada |
+| ADR-019 | La pestaña de ajustes usa `PluginSettingTab.display()` (deprecado en Obsidian 1.13) en lugar de la API declarativa `getSettingDefinitions()`. | La API nueva exige `minAppVersion` ≥ 1.13; mantener 1.8.7 de momento. El lint lo marca como aviso. | Subir ya `minAppVersion` a 1.13 (excluye usuarios en versiones anteriores). | Aceptada — revisar en T6.7 |
+| ADR-020 | `AgentRegistry` vive en `src/agents/` (capa de composición), no en `src/core/`. | Construye adaptadores concretos; en `core/` invertiría la dependencia núcleo → adaptadores. | `core/AgentRegistry.ts` (plan original). | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1426,3 +1429,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   Obsidian), riesgo `moment`. Las guardas de tipo en `mapping.ts`/`AcpSession.ts` se aplican con T2.5.
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.5** hecho: `src/adapters/acp/` → `AcpAdapter` (detección + creación de sesión), `AcpSession` (SDK `acp.client()`, handshake con timeout de 30 s, `configOptions` iniciales, permisos que se cancelan con el turno, `session/cancel` con kill a los 5 s si el agente no responde, caída detectada aunque la conexión se cierre antes del `exit`), `mapping.ts` (guardas de tipo sin `as`), `promptBlocks.ts` (la selección se envía siempre como texto: más simple y universal que un recurso embebido) y `src/core/errors.ts` (`AgentError` con `kind`/`hint`/`detail`). La guardia de rutas de `fs/*` se implementa en `HostBridgeImpl` (T2.8). 12 tests de integración con el agente simulado + 8 de mapeo con fixtures reales (59 en total, estables).
 - **2026-10-01 · Claude (Opus 5.5)** — **T2.6** hecho: `src/core/reducer.ts` (puro e inmutable; acciones locales + `AgentEvent`; un plan por turno; ids de aviso deterministas), `src/core/ChatSession.ts` (agente perezoso, `subscribe/getState`, permisos vía estado, cancelación que resuelve permisos pendientes, reintento tras error de arranque, agente nuevo tras caída, log de debug separado, título desde el primer mensaje) y `src/core/SessionManager.ts`. Los avisos del transcript son datos (`Notice` con `key`) para que la UI los traduzca con `t()`. Arreglo en `AcpSession`: los eventos emitidos antes de la primera suscripción (`session.ready`) se guardan y entregan al suscribirse. 79 tests, cobertura 83,8 %.
+- **2026-10-01 · Claude (Opus 5.5)** — **T2.7** hecho: `src/settings/settings.ts` (esquema Zod, `migrate()` campo a campo, presets fijados de Claude/Codex/OpenCode y Gemini desactivado, presets nuevos aparecen desactivados, instrucciones del vault con `{{configDir}}`), `src/agents/AgentRegistry.ts` (ADR-020; detección cacheada con pistas de instalación/login traducidas), `src/settings/SettingsTab.ts` (agentes con estado de detección, activar, editar comando/args/env/opciones iniciales, añadir/eliminar personalizados, re-detectar; sesiones; entorno). `main.ts`: ajustes, resolver por llamada según ajustes, `killAll()` en `onunload`. `t()` admite `{placeholders}`. ADR-019 (`display()` frente a la API declarativa de 1.13). 91 tests; bundle 565 KB.

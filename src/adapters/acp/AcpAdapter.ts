@@ -25,7 +25,7 @@ export interface AcpAgentConfig {
 }
 
 export interface AcpAdapterDeps {
-  resolveCommand(command: string): Promise<ResolvedCommand | null>;
+  resolveCommand: (command: string) => Promise<ResolvedCommand | null>;
   registry: ProcessRegistry;
 }
 
