@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 0 — Fundaciones** (código listo y commiteado; falta verificación manual en Obsidian) |
-| Próxima tarea | Verificar T0.4/T0.5 en Obsidian → **Fase 1 (spikes S1–S4)** y **T2.1** |
+| Fase actual | **Fase 0 — Fundaciones** (casi cerrada: solo falta confirmar la restauración de la vista tras reiniciar Obsidian) |
+| Próxima tarea | Confirmar restauración tras reinicio (T0.5) → **Fase 1 (spikes S1–S4)** y **T2.1** |
 | Tareas en paralelo posibles | Spikes **S1–S4** (Fase 1) no dependen del scaffolding |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1091,9 +1091,9 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   `minAppVersion: 1.8.7`), `versions.json`, `styles.css`. *CA:* `pnpm build` genera `main.js`.
 - [x] **T0.3** Calidad: ESLint (`eslint-plugin-obsidianmd`), Prettier, Vitest con mock de `obsidian`,
   un test trivial. *CA:* `pnpm lint && pnpm test` en verde.
-- [~] **T0.4** *(código listo; falta comprobarlo en Obsidian)* `test-vault/` con notas de ejemplo + `scripts/link-test-vault.mjs` + script `dev`.
+- [x] **T0.4** `test-vault/` con notas de ejemplo + `scripts/link-test-vault.mjs` + script `dev`.
   *CA:* el plugin aparece y se habilita en el vault de pruebas.
-- [~] **T0.5** *(código y test unitario listos; falta comprobarlo en Obsidian)* Vista lateral vacía: `registerView`, icono de cinta, comando `open-view`,
+- [~] **T0.5** *(verificado en Obsidian 1.13.7: se abre en el panel derecho con el estado vacío; falta confirmar que se restaura al reiniciar)* Vista lateral vacía: `registerView`, icono de cinta, comando `open-view`,
   activación en hoja derecha, `getState/setState`, montaje/desmontaje de Preact con un "Hola".
   *CA:* abrir/cerrar la vista repetidas veces sin errores ni fugas; se restaura al reiniciar.
 - [x] **T0.6** `AGENTS.md` y `CLAUDE.md` (breves: "lee plan.md §0", comandos de build/test).
@@ -1319,3 +1319,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   `.npmrc`; añadido `pnpm-workspace.yaml` y `pnpm-lock.yaml`; `packageManager: pnpm@12.3.4`; CI, README,
   AGENTS.md y este plan usan comandos `pnpm`. Las instrucciones para usuarios finales sobre instalar
   adaptadores globales (`npm i -g …`) se mantienen con npm. lint/test/build en verde con pnpm.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Verificación manual en Obsidian 1.13.7 con `test-vault/`:
+  el plugin aparece en *Installed plugins* (v0.0.1), se activa, el icono de cinta funciona y la vista se
+  abre en el panel derecho mostrando "No session yet". T0.4 cerrada. **Pendiente de T0.5:** reiniciar
+  Obsidian y confirmar que la vista AgentHub sigue abierta.
