@@ -1149,7 +1149,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
   activación en hoja derecha, `getState/setState`, montaje/desmontaje de Preact con un "Hola".
   *CA:* abrir/cerrar la vista repetidas veces sin errores ni fugas; se restaura al reiniciar.
 - [x] **T0.6** `AGENTS.md` y `CLAUDE.md` (breves: "lee plan.md §0", comandos de build/test).
-- [~] **T0.7** *(workflow `.github/workflows/ci.yml` creado; falta remoto en GitHub)* CI de GitHub Actions (lint + test + build) — si hay remoto. *CA:* pipeline verde.
+- [x] **T0.7** CI de GitHub Actions (lint + test + build) — si hay remoto. *CA:* pipeline verde.
 
 **Criterio de salida F0:** plugin cargable con sidebar vacío; lint/test/build verdes.
 
@@ -1247,7 +1247,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [ ] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
-- [~] **T6.6** *(workflow `release.yml` y pasos en el README listos; falta remoto en GitHub, BRAT y envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(workflow `release.yml` y pasos en el README listos; falta el primer tag/release, probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
 
@@ -1545,5 +1545,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   desarrollo).
 - **2026-10-01 · Claude (Opus 5.5)** — **T6.6 (parcial):** `.github/workflows/release.yml` (en cada tag: lint, test,
   build, comprobación tag = versión del manifest, borrador de release con `main.js`/`manifest.json`/`styles.css`) y
-  sección "Publicar una versión" en el README. Falta: crear el remoto en GitHub, probar con BRAT y el PR a
+  sección "Publicar una versión" en el README. Falta: el primer tag/release, probar con BRAT y el PR a
   `obsidianmd/obsidian-releases`.
+- **2026-10-01 · Claude (Opus 5.5)** — **Corrección:** el repositorio ya existía en GitHub (`origin` =
+  `github.com/wh01s17/agenthub-plugin-obsidian`, público) y el usuario hace los push; el workflow de CI pasa en verde
+  en cada push. Se marca **T0.7** como hecha y se quitan del plan las menciones a "falta remoto". Lección: comprobar
+  `git remote -v` y `gh run list` antes de afirmar el estado del repositorio.
