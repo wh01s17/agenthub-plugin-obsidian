@@ -165,4 +165,8 @@ export const es: Messages = {
   settingsIdleTimeoutDesc:
     'Libera el proceso del agente cuando una sesión no se usa. La conversación continúa al volver a escribir. 0 = nunca.',
   cmdOpenNewView: 'Abrir AgentHub en un panel nuevo',
+
+  // Diffs (T6.1)
+  diffAdded: 'Añadido: ',
+  diffRemoved: 'Eliminado: ',
 };

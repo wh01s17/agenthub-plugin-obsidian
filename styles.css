@@ -726,3 +726,44 @@
 .agenthub-app .agenthub-status.is-starting .agenthub-status-text {
   color: var(--agenthub-agent);
 }
+
+/* ── Diffs (T6.1) ───────────────────────────────────────────────────────── */
+
+.agenthub-diff-lines {
+  max-height: 16rem;
+  overflow: auto;
+  margin: var(--size-4-1) 0;
+  padding: var(--size-4-1) 0;
+  border-radius: var(--radius-s);
+  background: var(--background-secondary);
+  font-family: var(--font-monospace);
+  font-size: var(--font-ui-smaller);
+  user-select: text;
+}
+
+.agenthub-diff-line {
+  padding: 0 var(--size-4-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.agenthub-diff-mark {
+  display: inline-block;
+  width: 1.2em;
+  color: var(--text-faint);
+}
+
+.agenthub-diff-line.is-add {
+  background: rgba(var(--color-green-rgb), 0.15);
+  color: var(--text-normal);
+}
+
+.agenthub-diff-line.is-remove {
+  background: rgba(var(--color-red-rgb), 0.15);
+  color: var(--text-muted);
+}
+
+.agenthub-diff-line.is-skip {
+  color: var(--text-faint);
+  text-align: center;
+}

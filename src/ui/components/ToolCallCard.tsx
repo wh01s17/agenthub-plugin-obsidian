@@ -1,5 +1,6 @@
 import type { ToolCall, ToolContent, ToolKind, ToolStatus } from '../../core/types';
 import { t, type MessageKey } from '../../i18n';
+import { DiffView } from './DiffView';
 import { Icon } from './Icon';
 
 const KIND_ICONS: Record<ToolKind, string> = {
@@ -42,7 +43,13 @@ function hasInput(input: unknown): boolean {
   );
 }
 
-function Content({ item }: { item: ToolContent }) {
+function Content({
+  item,
+  onOpenPath,
+}: {
+  item: ToolContent;
+  onOpenPath?: (path: string) => boolean;
+}) {
   switch (item.type) {
     case 'text':
       return <pre class="agenthub-tool-output">{truncate(item.text)}</pre>;
@@ -57,13 +64,12 @@ function Content({ item }: { item: ToolContent }) {
       );
     case 'diff':
       return (
-        <div class="agenthub-tool-diff">
-          <div class="agenthub-tool-diff-path">
-            {item.path}
-            {item.oldText === null && <span class="agenthub-badge">{t('toolNewFile')}</span>}
-          </div>
-          <pre class="agenthub-tool-output">{truncate(item.newText)}</pre>
-        </div>
+        <DiffView
+          path={item.path}
+          oldText={item.oldText}
+          newText={item.newText}
+          onOpenPath={onOpenPath}
+        />
       );
   }
 }
@@ -124,7 +130,7 @@ export function ToolCallCard({ call, expanded = false, onOpenPath }: ToolCallCar
           <div class="agenthub-tool-section">
             <div class="agenthub-tool-label">{t('toolOutput')}</div>
             {call.content.map((item, index) => (
-              <Content key={index} item={item} />
+              <Content key={index} item={item} onOpenPath={onOpenPath} />
             ))}
           </div>
         )}

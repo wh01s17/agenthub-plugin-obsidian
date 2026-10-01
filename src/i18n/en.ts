@@ -164,6 +164,10 @@ export const en = {
   settingsIdleTimeoutDesc:
     'Frees the agent process when a session is unused. The conversation continues when you write again. 0 = never.',
   cmdOpenNewView: 'Open AgentHub in a new pane',
+
+  // Diffs (T6.1)
+  diffAdded: 'Added: ',
+  diffRemoved: 'Removed: ',
 };
 
 export type Messages = typeof en;

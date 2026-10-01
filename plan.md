@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 4 completa en código** (T4.1–T4.5; falta verificar T4.3–T4.5 en Obsidian). Siguiente: **Fase 5** o **Fase 6** (ver §11) |
-| Próxima tarea | **T5.1/T5.2** (adaptadores directos) o pulido de Fase 6 según prioridad del usuario |
+| Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
+| Próxima tarea | **T6.5** (README completo) → T6.2/T6.3 (i18n y accesibilidad) → T6.6 (release) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1230,7 +1230,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [ ] **T5.2** `CodexNativeAdapter` + parser + tests con fixtures S4. *Dep:* S4.
 - [ ] **T5.3** UX de permisos en modo directo: selector de modo de Claude, denegaciones con
   "Permitir y reintentar", selector de sandbox de Codex con confirmación para modos peligrosos.
-- [ ] **T5.4** Uso/coste en la barra de estado (Claude `result`, Codex `turn.completed`, ACP si lo reporta). *CA:* RF-13.
+- [x] **T5.4** Uso/coste en la barra de estado (Claude `result`, Codex `turn.completed`, ACP si lo reporta). *CA:* RF-13.
 - [ ] **T5.5** *(Opcional)* `bridge/`: servidor MCP HTTP local (127.0.0.1 + token) con herramienta
   `approve` (para `--permission-prompt-tool`) y herramientas del vault (`get_active_note`,
   `search_vault`, `open_note`), inyectado en ACP (`mcpServers`) y en Claude (`--mcp-config`).
@@ -1239,7 +1239,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 ### Fase 6 — Pulido y publicación
 
-- [ ] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
+- [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [ ] **T6.2** i18n es/en completo; textos en *sentence case*.
 - [ ] **T6.3** Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
@@ -1530,3 +1530,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `SessionManager.reapIdle()` cada minuto desde `main.ts` según `idleTimeoutMin` (15 por defecto, 0 = nunca), nunca a
   mitad de un turno. Comando "Abrir AgentHub en un panel nuevo"; una vista no cierra una sesión que otra vista sigue
   mostrando. 156 tests. **Fase 4 completa en código.**
+- **2026-10-01 · Claude (Opus 5.5)** — **Fase 5 aplazada**: ACP ya cubre Claude, Codex y OpenCode (los adaptadores se
+  instalan solos con `npx`), así que los adaptadores directos aportan poco por ahora; se retoman si hiciera falta
+  funcionar sin npm o con funciones que ACP no exponga. **T5.4** se da por cubierta vía ACP (`usage_update`: contexto y
+  coste en la barra de estado). **T6.1** hecho: `src/ui/diffLines.ts` (jsdiff 9, contexto de 2 líneas y tramos sin
+  cambios colapsados) y `DiffView` en las tarjetas de edición (añadidos/eliminados con colores del tema, prefijos
+  "Añadido/Eliminado" para lectores de pantalla, enlace para abrir el archivo). 160 tests.
