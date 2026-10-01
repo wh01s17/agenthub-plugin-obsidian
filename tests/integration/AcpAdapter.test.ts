@@ -141,12 +141,14 @@ describe('AcpAdapter with the fake ACP agent', () => {
     expect(text(events)).toBe('Permiso denegado.');
   });
 
-  it('applies initial config and changes options later', async () => {
+  it('delivers session.ready to late subscribers and applies config', async () => {
     const { session, events } = await start('echo', { config: { mode: 'auto' } });
-    // `session.ready` is emitted before the test subscribes, so check through the next change.
+    const ready = ofType(events, 'session.ready')[0];
+    expect(ready?.nativeSessionId).toBe(session.nativeSessionId);
+    expect(ready?.configOptions?.find((o) => o.id === 'mode')?.currentValue).toBe('auto');
+
     await session.setConfigOption?.('model', 'fake-large');
     const options = ofType(events, 'config')[0]?.configOptions ?? [];
-    expect(options.find((o) => o.id === 'mode')?.currentValue).toBe('auto');
     expect(options.find((o) => o.id === 'model')?.currentValue).toBe('fake-large');
   });
 

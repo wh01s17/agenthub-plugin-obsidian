@@ -141,6 +141,12 @@ export type PermissionOutcome =
 
 // ── View state, derived from events by a pure reducer (T2.6) ─────────────────
 
+/** What a notice says, as data: the UI turns it into localized text (`t()`), the core never does. */
+export type Notice =
+  | { key: 'agentError'; message: string; hint?: string; detail?: string }
+  | { key: 'permissionDenied'; toolName: string }
+  | { key: 'turnStopped'; stopReason: Exclude<StopReason, 'end_turn'> };
+
 export type TranscriptItem =
   | { kind: 'user'; id: string; blocks: PromptBlock[]; at: number }
   | { kind: 'assistant'; id: string; text: string; streaming: boolean }
@@ -148,7 +154,7 @@ export type TranscriptItem =
   | { kind: 'tool'; call: ToolCall }
   | { kind: 'plan'; entries: PlanEntry[] }
   | { kind: 'permission'; request: PermissionRequest; resolved?: PermissionOutcome }
-  | { kind: 'notice'; level: 'info' | 'warning' | 'error'; text: string };
+  | { kind: 'notice'; id: string; level: 'info' | 'warning' | 'error'; notice: Notice };
 
 export type SessionStatus =
   'idle' | 'starting' | 'running' | 'awaiting-permission' | 'error' | 'closed';

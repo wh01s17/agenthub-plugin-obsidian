@@ -35,6 +35,8 @@ type Connection = ReturnType<ReturnType<typeof acp.client>['connect']>;
 
 export class AcpSession implements AgentSession {
   private readonly listeners = new Set<(event: AgentEvent) => void>();
+  /** Events emitted before anyone subscribed (e.g. `session.ready` during the handshake). */
+  private backlog: AgentEvent[] = [];
   private readonly mapper = new AcpUpdateMapper();
   private readonly pendingPermissions = new Map<string, (cancelled: true) => void>();
   private connection!: Connection;
@@ -81,6 +83,9 @@ export class AcpSession implements AgentSession {
 
   onEvent(listener: (event: AgentEvent) => void): Disposable {
     this.listeners.add(listener);
+    const backlog = this.backlog;
+    this.backlog = [];
+    backlog.forEach((event) => listener(event));
     return { dispose: () => this.listeners.delete(listener) };
   }
 
@@ -335,6 +340,10 @@ export class AcpSession implements AgentSession {
   }
 
   private emit(event: AgentEvent): void {
+    if (this.listeners.size === 0) {
+      if (!this.disposed) this.backlog.push(event);
+      return;
+    }
     this.listeners.forEach((listener) => listener(event));
   }
 
