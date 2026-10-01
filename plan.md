@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 3 completa en código** (verificación manual en Obsidian pendiente). Siguiente: **Fase 4 — Persistencia e historial** |
-| Próxima tarea | Verificar Fase 3 en Obsidian → **T4.1** (`SessionStore`) |
+| Fase actual | **Fase 3 cerrada** (verificada en Obsidian por el usuario). Siguiente: **Fase 4 — Persistencia e historial** |
+| Próxima tarea | **T4.1** (`SessionStore`) |
 | Tareas en paralelo posibles | T2.2 ∥ T2.3 ∥ T2.4 (independientes entre sí) |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — scaffolding de Fase 0 (Claude Opus 5.5) |
@@ -1466,3 +1466,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   de sugerencias (flechas, Intro/Tab, Escape, ratón sin perder el foco; `textarea` nativo con `aria-autocomplete`,
   `aria-controls` y `aria-activedescendant`, `listbox`/`option`). Los comandos `/` salen de `available_commands_update`.
   **Fase 3 completa en código** (T3.7 sin el modo "carpeta de la nota activa"). 120 tests; falta verificación manual.
+- **2026-10-01 · usuario** — Verificación de la Fase 3 en Obsidian con Claude Code real: nota actual adjunta
+  automáticamente ("Note: Bienvenida.md"), lectura y edición de la nota con tarjeta de permiso ("Yes, allow all edits
+  during this session"), cambio aplicado en el editor, selectores de `configOptions` (modo, modelo, esfuerzo,
+  razonamiento), uso de contexto (4 %) y coste ($0.26) en la barra de estado. **Fase 3 cerrada.**
