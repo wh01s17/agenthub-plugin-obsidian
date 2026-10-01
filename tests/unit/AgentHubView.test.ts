@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { WorkspaceLeaf } from 'obsidian';
-import { AgentHubView, parseViewState } from '../../src/ui/AgentHubView';
 import { VIEW_TYPE_AGENTHUB } from '../../src/constants';
+import { AgentHubView, parseViewState } from '../../src/ui/AgentHubView';
+import { makeViewHost } from '../helpers/viewHost';
+
+const noop = () => 'end_turn' as const;
 
 describe('parseViewState', () => {
   it('keeps a valid session id', () => {
@@ -17,18 +20,37 @@ describe('parseViewState', () => {
 });
 
 describe('AgentHubView', () => {
-  it('mounts the app, persists the session id and unmounts on close', async () => {
-    const view = new AgentHubView(new WorkspaceLeaf());
+  it('opens a session for the default agent and ends it on close', async () => {
+    const { host, sessions } = makeViewHost(noop);
+    const view = new AgentHubView(new WorkspaceLeaf(), host);
     expect(view.getViewType()).toBe(VIEW_TYPE_AGENTHUB);
 
     await view.onOpen();
-    expect(view.contentEl.querySelector('.agenthub-app')).not.toBeNull();
-
-    await view.setState({ sessionId: 's-1' }, { history: false });
-    expect(view.getState()).toMatchObject({ sessionId: 's-1' });
-    expect(view.contentEl.querySelector('[data-session-id="s-1"]')).not.toBeNull();
+    const [session] = sessions.list();
+    expect(session?.getState().agentId).toBe('claude-acp');
+    expect(view.getState()).toMatchObject({ sessionId: session?.localId });
+    expect(view.contentEl.querySelector('.agenthub-composer-input')).not.toBeNull();
 
     await view.onClose();
+    expect(sessions.list()).toEqual([]);
     expect(view.contentEl.querySelector('.agenthub-app')).toBeNull();
+  });
+
+  it('starts a new session and closes the previous one', async () => {
+    const { host, sessions } = makeViewHost(noop);
+    const view = new AgentHubView(new WorkspaceLeaf(), host);
+    await view.onOpen();
+    const first = sessions.list()[0]?.localId;
+    view.startNewSession();
+    const ids = sessions.list().map((s) => s.localId);
+    expect(ids).toHaveLength(1);
+    expect(ids[0]).not.toBe(first);
+  });
+
+  it('shows how to enable agents when none is available', async () => {
+    const { host } = makeViewHost(noop, { defaultAgentId: 'missing', agents: [] });
+    const view = new AgentHubView(new WorkspaceLeaf(), host);
+    await view.onOpen();
+    expect(view.contentEl.textContent).toContain('No agents enabled');
   });
 });

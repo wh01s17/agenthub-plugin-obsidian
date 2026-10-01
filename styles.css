@@ -1,4 +1,4 @@
-/* AgentHub — usar solo variables CSS de Obsidian para respetar los temas. */
+/* AgentHub — only Obsidian CSS variables, so every theme (light/dark/community) applies (ADR-018). */
 
 .agenthub-view {
   padding: 0;
@@ -8,20 +8,46 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
 
 .agenthub-header {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--size-4-2);
   padding: var(--size-4-2) var(--size-4-3);
   border-bottom: var(--border-width) solid var(--background-modifier-border);
 }
 
-.agenthub-header-title {
-  font-weight: var(--font-semibold);
-  color: var(--text-normal);
+.agenthub-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
 }
+
+.agenthub-agent-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.agenthub-config {
+  flex-wrap: wrap;
+}
+
+.agenthub-config-select {
+  flex: 1 1 8rem;
+  min-width: 0;
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-icon-button {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ── Empty states ───────────────────────────────────────────────────────── */
 
 .agenthub-empty {
   margin: auto;
@@ -33,4 +59,312 @@
 .agenthub-empty-title {
   font-weight: var(--font-semibold);
   color: var(--text-normal);
+}
+
+/* ── Messages ───────────────────────────────────────────────────────────── */
+
+.agenthub-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4-3);
+  padding: var(--size-4-3);
+}
+
+.agenthub-message.is-user {
+  align-self: flex-end;
+  max-width: 90%;
+  padding: var(--size-4-2) var(--size-4-3);
+  border-radius: var(--radius-m);
+  background: var(--background-secondary-alt);
+}
+
+.agenthub-message-author {
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+}
+
+.agenthub-message-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.agenthub-markdown {
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.agenthub-markdown > :first-child {
+  margin-top: 0;
+}
+
+.agenthub-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.agenthub-thought {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+
+.agenthub-thought-text {
+  white-space: pre-wrap;
+  padding-left: var(--size-4-3);
+  border-left: 2px solid var(--background-modifier-border);
+}
+
+/* ── Tool calls, plan, permissions, notices ─────────────────────────────── */
+
+.agenthub-tool,
+.agenthub-plan,
+.agenthub-permission,
+.agenthub-notice,
+.agenthub-debug {
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  background: var(--background-secondary);
+  font-size: var(--font-ui-small);
+}
+
+.agenthub-tool-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  min-height: 28px;
+  padding: var(--size-4-1) var(--size-4-2);
+  cursor: pointer;
+}
+
+.agenthub-tool-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-monospace);
+}
+
+.agenthub-tool-body {
+  padding: 0 var(--size-4-2) var(--size-4-2);
+}
+
+.agenthub-tool-label {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-tool-output,
+.agenthub-debug-output {
+  max-height: 16rem;
+  overflow: auto;
+  margin: var(--size-4-1) 0;
+  padding: var(--size-4-2);
+  border-radius: var(--radius-s);
+  background: var(--background-primary);
+  font-family: var(--font-monospace);
+  font-size: var(--font-ui-smaller);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.agenthub-tool-locations {
+  margin: var(--size-4-1) 0;
+  padding-left: var(--size-4-4);
+  font-family: var(--font-monospace);
+}
+
+.agenthub-tool-exit,
+.agenthub-tool-diff-path {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-badge {
+  margin-left: var(--size-4-2);
+  padding: 0 var(--size-4-1);
+  border-radius: var(--radius-s);
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.agenthub-status-completed {
+  color: var(--color-green);
+}
+
+.agenthub-status-failed {
+  color: var(--color-red);
+}
+
+.agenthub-status-in_progress svg {
+  animation: agenthub-spin 1s linear infinite;
+}
+
+@keyframes agenthub-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agenthub-status-in_progress svg {
+    animation: none;
+  }
+}
+
+.agenthub-plan {
+  padding: var(--size-4-2);
+}
+
+.agenthub-plan-title,
+.agenthub-permission-header {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  font-weight: var(--font-semibold);
+}
+
+.agenthub-plan-list {
+  list-style: none;
+  margin: var(--size-4-1) 0 0;
+  padding: 0;
+}
+
+.agenthub-plan-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+}
+
+.agenthub-plan-entry.is-completed {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.agenthub-permission {
+  padding: var(--size-4-2) var(--size-4-3);
+  border-color: var(--interactive-accent);
+}
+
+.agenthub-permission.is-resolved {
+  border-color: var(--background-modifier-border);
+  color: var(--text-muted);
+}
+
+.agenthub-permission-title {
+  margin: var(--size-4-1) 0;
+  font-family: var(--font-monospace);
+  overflow-wrap: anywhere;
+}
+
+.agenthub-permission-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
+}
+
+.agenthub-permission-actions button {
+  min-height: 28px;
+}
+
+.agenthub-notice {
+  display: flex;
+  gap: var(--size-4-2);
+  padding: var(--size-4-2);
+}
+
+.agenthub-notice.is-warning {
+  border-color: var(--color-orange);
+}
+
+.agenthub-notice.is-error {
+  border-color: var(--color-red);
+}
+
+.agenthub-notice-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.agenthub-notice-hint {
+  color: var(--text-muted);
+}
+
+.agenthub-debug {
+  margin: 0 var(--size-4-3);
+  padding: var(--size-4-1) var(--size-4-2);
+}
+
+/* ── Status and composer ────────────────────────────────────────────────── */
+
+.agenthub-status {
+  display: flex;
+  gap: var(--size-4-3);
+  padding: var(--size-4-1) var(--size-4-3);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-status.is-error {
+  color: var(--color-red);
+}
+
+.agenthub-status-usage {
+  margin-left: auto;
+}
+
+.agenthub-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--size-4-2);
+  padding: var(--size-4-2) var(--size-4-3) var(--size-4-3);
+  border-top: var(--border-width) solid var(--background-modifier-border);
+}
+
+.agenthub-composer-input {
+  flex: 1;
+  min-height: 3.5rem;
+  max-height: 12rem;
+  resize: vertical;
+}
+
+.agenthub-composer-button {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  min-height: 28px;
+}
+
+/* ── Shared ─────────────────────────────────────────────────────────────── */
+
+.agenthub-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.agenthub-icon svg {
+  width: var(--icon-s);
+  height: var(--icon-s);
+}
+
+.agenthub-app :is(button, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+.agenthub-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.agenthub-settings-agent {
+  margin-left: var(--size-4-4);
+  padding-left: var(--size-4-3);
+  border-left: 2px solid var(--background-modifier-border);
 }

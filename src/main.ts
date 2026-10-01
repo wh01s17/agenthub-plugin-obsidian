@@ -1,16 +1,25 @@
 import { Notice, Plugin, type WorkspaceLeaf } from 'obsidian';
 import { AgentRegistry } from './agents/AgentRegistry';
 import { AGENTHUB_ICON, VIEW_TYPE_AGENTHUB } from './constants';
-import type { DetectionResult } from './core/AgentAdapter';
+import type { DetectionResult, SessionOptions } from './core/AgentAdapter';
+import { SessionManager } from './core/SessionManager';
+import { createObsidianHost, vaultBasePath } from './host/ObsidianHost';
+import { openPluginSettings } from './host/openSettings';
 import { t } from './i18n';
 import { CommandResolver, type ResolvedCommand } from './process/BinaryResolver';
 import { ProcessRegistry } from './process/ProcessRunner';
 import { LoginShellEnv } from './process/ShellEnv';
-import { type AgentHubSettings, defaultSettings, migrate } from './settings/settings';
+import {
+  type AgentHubSettings,
+  defaultSettings,
+  migrate,
+  renderInstructions,
+} from './settings/settings';
 import { AgentHubSettingTab, type SettingsHost } from './settings/SettingsTab';
 import { AgentHubView } from './ui/AgentHubView';
+import type { ViewHost } from './ui/ViewHost';
 
-export default class AgentHubPlugin extends Plugin implements SettingsHost {
+export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
   override settings: AgentHubSettings = defaultSettings();
   readonly processes = new ProcessRegistry();
   readonly agents = new AgentRegistry({
@@ -23,13 +32,22 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost {
       noCommand: () => t('hintNoCommand'),
     },
   });
+  readonly sessions = new SessionManager({
+    getAdapter: (agentId) => this.agents.get(agentId),
+    host: createObsidianHost({
+      app: this.app,
+      env: () => Promise.resolve(process.env),
+      debug: () => this.settings.debugPanel,
+    }),
+    sessionOptions: (agentId) => this.sessionOptions(agentId),
+  });
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });
 
   override async onload(): Promise<void> {
     this.settings = migrate(await this.loadData());
     this.agents.setAgents(this.settings.agents);
 
-    this.registerView(VIEW_TYPE_AGENTHUB, (leaf) => new AgentHubView(leaf));
+    this.registerView(VIEW_TYPE_AGENTHUB, (leaf) => new AgentHubView(leaf, this));
     this.addSettingTab(new AgentHubSettingTab(this.app, this, this));
 
     this.addRibbonIcon(AGENTHUB_ICON, t('openView'), () => this.run(this.activateView()));
@@ -42,8 +60,10 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost {
 
   override onunload(): void {
     // No agent process may outlive the plugin (RNF-02).
-    this.run(this.processes.killAll());
+    this.run(this.sessions.disposeAll().finally(() => this.processes.killAll()));
   }
+
+  // ── SettingsHost ───────────────────────────────────────────────────────────
 
   async updateSettings(change: (settings: AgentHubSettings) => void): Promise<void> {
     change(this.settings);
@@ -60,6 +80,19 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost {
     this.agents.invalidate();
   }
 
+  // ── ViewHost ───────────────────────────────────────────────────────────────
+
+  openSettings(): void {
+    if (!openPluginSettings(this.app, this.manifest.id)) new Notice(t('settingsButton'));
+  }
+
+  workingDirectory(): string {
+    const { cwdMode, customCwd } = this.settings;
+    return cwdMode === 'custom' && customCwd ? customCwd : (vaultBasePath(this.app) ?? '');
+  }
+
+  // ── internals ──────────────────────────────────────────────────────────────
+
   /** Reveals the existing AgentHub view or opens one in the right sidebar. */
   async activateView(): Promise<void> {
     const { workspace } = this.app;
@@ -72,6 +105,17 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost {
     }
 
     await workspace.revealLeaf(leaf);
+  }
+
+  private sessionOptions(agentId: string): SessionOptions {
+    const agent = this.agents.config(agentId);
+    return {
+      cwd: this.workingDirectory(),
+      config: agent?.config,
+      systemPromptAppend: renderInstructions(this.settings.vaultInstructions, {
+        configDir: this.app.vault.configDir,
+      }),
+    };
   }
 
   /** Built per call so PATH settings apply immediately (ADR-017). */

@@ -5,10 +5,14 @@
 declare global {
   interface HTMLElement {
     addClass(...classes: string[]): void;
+    empty(): void;
   }
 }
 HTMLElement.prototype.addClass = function (this: HTMLElement, ...classes: string[]) {
   this.classList.add(...classes);
+};
+HTMLElement.prototype.empty = function (this: HTMLElement) {
+  this.replaceChildren();
 };
 
 let language = 'en';
@@ -61,3 +65,19 @@ export class PluginSettingTab {
 export class Setting {
   constructor(public containerEl: HTMLElement) {}
 }
+
+export function setIcon(parent: HTMLElement, iconId: string): void {
+  parent.dataset.icon = iconId;
+}
+
+/** Renders Markdown as plain text, enough to assert on content. */
+export const MarkdownRenderer = {
+  render(_app: unknown, markdown: string, el: HTMLElement): Promise<void> {
+    el.textContent = markdown;
+    return Promise.resolve();
+  },
+};
+
+export class MarkdownView {}
+export class FileSystemAdapter {}
+export const normalizePath = (path: string): string => path;

@@ -12,6 +12,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+    setupFiles: ['tests/setup.ts'],
     // Cada test parte de mocks, variables de entorno y globals limpios.
     restoreMocks: true,
     unstubEnvs: true,
