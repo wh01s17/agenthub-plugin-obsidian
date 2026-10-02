@@ -2,6 +2,20 @@
 
 A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini CLI**, **OpenCode**, and other coding agents from a sidebar, with your notes as context.
 
+## Contents
+
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Settings](#settings)
+- [Privacy and security](#privacy-and-security)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+- [Releasing](#releasing)
+- [License](#license)
+
 ## Features
 
 - **Agent chat:** streaming responses rendered with Obsidian's Markdown engine.
@@ -31,7 +45,7 @@ Long permission labels wrap to fit the panel:
 
 ![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png)
 
-### Settings
+### Settings screens
 
 Agents, sessions, context, and environment:
 
@@ -65,9 +79,17 @@ npm i -g @agentclientprotocol/claude-agent-acp @agentclientprotocol/codex-acp
 
 ## Installation
 
-AgentHub is not yet available in the community plugin directory.
+### Community plugins
+
+1. In Obsidian, open **Settings → Community plugins** and turn off **Restricted mode** if it is on.
+2. Select **Browse**, search for **AgentHub**, and select **Install**.
+3. Select **Enable**.
+
+You can also open the [AgentHub listing](https://community.obsidian.md/plugins/agenthub) directly.
 
 ### BRAT
+
+Use BRAT to try beta versions before they reach the community directory.
 
 1. Install and enable BRAT in Obsidian.
 2. Run **BRAT: Add a beta plugin** and enter `wh01s17/agenthub-plugin-obsidian`.

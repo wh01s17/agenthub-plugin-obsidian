@@ -4,6 +4,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Changed
+
+- README adds a table of contents and installation from the community plugin directory; all screenshots are shown expanded.
+
 ## [0.1.1] - 2026-10-02
 
 ### Changed
