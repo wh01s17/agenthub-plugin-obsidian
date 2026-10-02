@@ -40,8 +40,8 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
-| Próxima tarea | Publicar el borrador de la release 0.0.2 (usuario) y probar con BRAT → verificar T4.3 (reinicio) → T6.7 (decidir `minAppVersion`) |
+| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.2 en borrador |
+| Próxima tarea | Publicar la release 0.0.2 y probar con BRAT (usuario) → T6.7 (decidir `minAppVersion`) → checklist manual con lector de pantalla (T6.3) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1584,3 +1584,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `manifest.json`, `versions.json`), tag `0.0.2` sin prefijo, push de `main` y del tag; el workflow `release.yml` pasó
   (lint, test, build, tag = manifest) y creó el **borrador** de release con `main.js` (632 KB), `manifest.json` y
   `styles.css`. Publicarlo queda en manos del usuario.
+- **2026-10-01 · usuario** — Verificado **T4.3**: tras reiniciar Obsidian la vista recupera su conversación. Con esto
+  toda la Fase 4 (T4.1–T4.5) está verificada en Obsidian.
