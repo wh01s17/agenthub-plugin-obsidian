@@ -9,6 +9,9 @@ on:
 
 permissions:
   contents: write
+  # Artifact attestations: provenance of the release assets, checked by the Obsidian community review.
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -31,6 +34,13 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match manifest version $version" >&2
             exit 1
           fi
+      - name: Attest the release assets
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
       - name: Create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
