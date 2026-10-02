@@ -84,10 +84,12 @@ export function OptionPicker({ option, label, busy, onChange }: OptionPickerProp
       if (!root.current?.contains(event.target as Node)) setOpen(false);
     };
     doc?.addEventListener('mousedown', onDown);
-    // Focus the current choice so arrow keys work at once.
-    root.current
-      ?.querySelector<HTMLElement>('[aria-checked="true"], [role="menuitemradio"]')
-      ?.focus();
+    // Focus the current choice (or the first one) so arrow keys work at once.
+    const panel = root.current;
+    (
+      panel?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]') ??
+      panel?.querySelector<HTMLElement>('[role="menuitemradio"]')
+    )?.focus();
     return () => doc?.removeEventListener('mousedown', onDown);
   }, [open]);
 

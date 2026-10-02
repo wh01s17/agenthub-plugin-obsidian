@@ -171,6 +171,7 @@ describe('appearance settings (ADR-032)', () => {
     ).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: 'Reasoning effort: medium' }));
+    expect(document.activeElement).toBe(screen.getByRole('menuitemradio', { name: 'medium' }));
     const filled = container.querySelectorAll('.agenthub-meter-step.is-filled');
     expect(filled).toHaveLength(2); // low and medium
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'high' }));
