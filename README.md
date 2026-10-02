@@ -20,6 +20,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 
 - **Agent chat:** streaming responses rendered with Obsidian's Markdown engine.
 - **Visible tools:** file reads, edits, and commands appear in the conversation. Edits show a diff, and file links open the corresponding note.
+- **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
 - **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
 - **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
@@ -105,7 +106,8 @@ Back up your vault or keep it under version control before allowing an agent to 
 - Choose an agent in the header and its options with the pills in the message box, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
-- Use the **clock icon** for session history and the **pencil icon** for a new session.
+- Use the **clock icon** for session history and the **pencil icon** for a new session in the current tab.
+- Use **`+`** under the header to open another tab with the default agent. Double-click a tab to rename it, and close it with **×** or the middle mouse button; closing a tab stops its agent (the conversation stays in history). Sessions opened from history get their own tab, and your tabs reopen after restarting Obsidian.
 
 Commands have no default keyboard shortcuts. Assign them under **Settings → Hotkeys**.
 
@@ -115,7 +117,10 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 | Open AgentHub in a new pane | Open another view with its own session. |
 | Send selection to AgentHub | Attach selected text to the next message; also available in the editor context menu. |
 | Ask AgentHub about the current note | Open the sidebar with the current note attached. |
-| Start a new AgentHub session | Start a conversation with the same agent. |
+| Start a new AgentHub session | Start a conversation with the same agent in the current tab. |
+| Open a new AgentHub tab | Open a tab with the default agent. |
+| Close the current AgentHub tab | Close the tab and stop its agent. |
+| Go to the next / previous AgentHub tab | Switch between tabs. |
 | Stop the current AgentHub turn | Cancel the current turn. |
 | Export the AgentHub session to a note | Create a conversation note in the configured export folder. |
 

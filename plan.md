@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.2.1 publicada como Latest** (arreglo del scroll de permisos sobre 0.2.0: rediseño, apariencia, historial de prompts); entrada *live* en el directorio de la comunidad. |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md y se atiende la revisión de 0.2.0. Pendiente: repetir la e2e de Gemini cuando se renueve su cuota diaria. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **0.2.1 publicada como Latest**; **Fase 8 (pestañas, 0.3.0)** implementada en `main` sin publicar (T8.1–T8.4). |
+| Próxima tarea | **T8.5:** revisión del usuario de las pestañas en Obsidian; después, release 0.3.0 (MINOR) con su confirmación. Pendiente: *Check for new releases* en community.obsidian.md, repetir la e2e de Gemini cuando se renueve su cuota diaria, T8.6. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Release 0.2.1: los permisos nuevos siempre quedan a la vista. Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 214 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Última actualización | 2026-10-02 — Pestañas con varios agentes en una vista (Fase 8, ADR-033). Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 230 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -157,6 +157,7 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | RF-22 | Apariencia configurable (estilo de mensajes, densidad, tamaño de texto, acento, ubicación de opciones, herramientas desplegadas, consumo) respetando el tema de Obsidian. | Should | 6 (T6.13, ADR-032) |
 | RF-23 | Las opciones elegidas de cada agente (modo, modelo, esfuerzo…) se conservan entre sesiones y reinicios; los modos sin restricciones se confirman en cada inicio. | Should | 6 (T6.13) |
 | RF-24 | Historial de prompts con ↑/↓ en el compositor, solo en memoria. | Could | 6 (T6.14) |
+| RF-25 | Pestañas: varias conversaciones (con agentes distintos) trabajando a la vez en una misma vista, con indicadores de estado y aviso de permisos en pestañas ocultas; se conservan al reiniciar. | Should | 8 (T8.1–T8.4, ADR-033) |
 
 ### 2.2 No funcionales
 
@@ -727,6 +728,7 @@ Disposición a 0.2.0 (T6.12, ADR-032; ajustes por defecto):
 ```
 ┌──────────────────────────────────────┐
 │ ✳ [Claude Code ▾]        [✎] [🕘] [⚙] │ cabecera: logo, agente, nueva sesión, historial, ajustes
+│ [✳ Resumen ●][Cx Carpetas ●×]     [+] │ pestañas (0.3.0, ADR-033): logo, título, indicador
 ├──────────────────────────────────────┤
 │        ╭ Summarize this note… ╮       │ mensaje propio: burbuja (o tarjeta / línea plana)
 │        ╰ Note: Projects/X.md  ╯       │
@@ -745,6 +747,11 @@ Disposición a 0.2.0 (T6.12, ADR-032; ajustes por defecto):
 │ ╰──────────────────────────────────╯ │
 └──────────────────────────────────────┘
 ```
+
+**Pestañas (ADR-033):** cada pestaña es una `ChatSession` con su proceso. Indicador: naranja = espera permiso,
+punto animado del color del agente = trabajando, rojo = error, acento = terminó sin leer. `+` abre pestaña con el agente
+por defecto; `×` o clic central la cierra (termina su proceso, queda en el historial); doble clic o F2 renombra. La cabecera
+(agente, ✎) actúa sobre la pestaña activa. Las pestañas ocultas siguen montadas (borrador, scroll) con `hidden`.
 
 Las pastillas abren un panel que sale del cuadro de mensaje: lista con descripciones, medidor de niveles para el
 esfuerzo, interruptor directo para opciones de dos estados y modo sin restricciones en rojo. Con
@@ -807,6 +814,10 @@ AgentHubSettings = {
 | `switch-agent` | Switch agent (SuggestModal) |
 | `export-session` | Export session to note |
 | `open-history` | Open session history |
+| `open-new-view` | Open AgentHub in a new pane |
+| `new-tab` | Open a new AgentHub tab (ADR-033) |
+| `close-tab` | Close the current AgentHub tab |
+| `next-tab` / `previous-tab` | Go to the next / previous AgentHub tab |
 
 Sin hotkeys por defecto (guía de Obsidian); los usuarios las asignan.
 
@@ -988,12 +999,12 @@ agenthub-plugin-obsidian/
 │   ├── adapters/acp/               # AcpAdapter.ts, AcpSession.ts, mapping.ts, promptBlocks.ts
 │   ├── storage/                    # SessionStore.ts, sessionSchema.ts, exportToNote.ts
 │   └── ui/
-│       ├── AgentHubView.ts         # ItemView que monta Preact; refresh() al cambiar ajustes
-│       ├── App.tsx, ViewHost.ts, hooks.ts, DangerousModeDialog.tsx
+│       ├── AgentHubView.ts         # ItemView con pestañas (ADR-033) que monta Preact; refresh() al cambiar ajustes
+│       ├── App.tsx, ViewHost.ts, hooks.ts, DangerousModeDialog.tsx, tabs.ts (indicadores de pestañas)
 │       ├── agentIdentity.ts, logos.ts, diffLines.ts, markdownBlocks.ts, renderQueue.ts
 │       └── components/             # Header, ConfigOptions, OptionPicker (pastillas y panel), MessageList, Markdown,
 │                                   # ToolCallCard, DiffView, PermissionCard, PlanView, NoticeItem, Composer,
-│                                   # ContextChips, StatusBar, HistoryPanel, DebugPanel, AgentBadge, Icon
+│                                   # ContextChips, StatusBar, HistoryPanel, DebugPanel, AgentBadge, Icon, TabBar
 ├── tests/
 │   ├── __mocks__/obsidian.ts, setup.ts, helpers/ (stubAgent, viewHost)
 │   ├── fixtures/acp/<agente>/, fixtures/claude/, fixtures/codex/  # salidas reales grabadas
@@ -1171,7 +1182,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 ## 11. Roadmap y tareas
 
 > Cada tarea: ID, descripción, dependencias, criterio de aceptación (CA). Marcar `[x]` al completar.
-> Las funciones futuras aún sin planificar (p. ej. pestañas con varios agentes) están en [`next.md`](next.md).
+> Las funciones futuras aún sin planificar están en [`next.md`](next.md) (las pestañas ya pasaron a la Fase 8).
 
 ### Fase 0 — Fundaciones
 
@@ -1304,6 +1315,26 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.13** Ajustes de apariencia (sección *Apariencia*, ADR-032): estilo de mensajes (burbujas/tarjetas/sin formato), densidad, tamaño del texto, color de acento (agente/tema), ubicación de las opciones (cuadro de mensaje por defecto/cabecera), desplegar herramientas y mostrar consumo. Se aplican al momento en las vistas abiertas. Las opciones del agente que el usuario cambia (modo, modelo, esfuerzo…) se guardan como valores iniciales del agente (`AgentConfig.config`) cuando surten efecto; los modos sin restricciones se siguen confirmando en cada inicio (ADR-030). Revisado por el usuario en Obsidian.
 - [x] **T6.14** Historial de prompts en el cuadro de mensaje: ↑ en la primera línea recupera el prompt anterior y ↓ en la última avanza hasta volver al borrador sin enviar; editar un prompt recuperado lo convierte en el nuevo borrador. Solo en memoria (`PromptHistory`, compartido por las vistas, máx. 100, sin duplicados consecutivos): se vacía al reiniciar Obsidian, a pedido del usuario. *CA:* tests de navegación y de texto multilínea.
 
+### Fase 8 — Varias conversaciones en una vista (0.3.0)
+
+Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
+
+- [x] **T8.1** Pestañas en `AgentHubView`: lista de `ChatSession` y pestaña activa; nueva/cerrar/seleccionar/ciclar;
+  la cabecera reemplaza la sesión solo en la pestaña activa; el historial abre en pestaña nueva (o en la activa si está
+  vacía); cerrar una pestaña termina su proceso salvo que otra vista la muestre. *CA:* dos pestañas con agentes distintos
+  trabajan a la vez y cambiar de pestaña no interrumpe a ninguna (`tests/unit/Tabs.test.tsx`).
+- [x] **T8.2** Persistencia: `getState/setState` guardan `{tabs, activeTab}` (y `sessionId` = activa, para volver a 0.2.x);
+  `parseViewState` acepta el `{sessionId}` de 0.2.x. Solo la pestaña visible arranca su agente al restaurar. *CA:* al
+  reiniciar vuelven las mismas pestañas con su historial.
+- [x] **T8.3** `TabBar` e indicadores (`TabActivity`): permiso, trabajando, error, terminado sin leer; `Notice` de 10 s
+  cuando una pestaña oculta pide permiso (nunca se aprueba nada solo); el diálogo de modo sin restricciones nombra la
+  pestaña (`DangerousModeRequest.sessionTitle`); renombrar con doble clic/F2 (`ChatSession.rename`, también desde el
+  historial). *CA:* auditoría axe del `TabBar` sin violaciones.
+- [x] **T8.4** Comandos `new-tab`, `close-tab`, `next-tab`, `previous-tab` sin atajos; i18n es/en; README y CHANGELOG.
+- [ ] **T8.5** Revisión del usuario en Obsidian (aspecto del `TabBar` en el sidebar estrecho, temas claro/oscuro).
+- [ ] **T8.6** *(pendiente, ver `next.md`)* Aviso cuando dos pestañas editan el mismo archivo; límite configurable de
+  pestañas trabajando a la vez; reordenar arrastrando.
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1348,6 +1379,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-029 | La Fase 7 (modo terminal), T7.1, T7.2 y RF-21 quedan fuera del alcance y cancelados. | El usuario decidió que no realizará la Fase 7. | Mantener el modo terminal como tarea opcional pendiente. | Aceptada (decidido por el usuario; matiza ADR-008) |
 | ADR-030 | Codex ACP usa `read-only` por defecto; las opciones explícitas prevalecen. Confirmación por activación/inicio/reanudación de los cuatro modos sin restricciones y distintivo rojo; rechazo o cierre bloquean el cambio. | Resolver Q8 y cumplir §10 y §4.9 también al restaurar sesiones. | Mantener Auto review como valor implícito; confiar solo en el selector. | Aceptada; resuelve Q8 |
 | ADR-031 | Normalizar `modes`/`models` ACP antiguos a `ConfigOption` cuando falta su equivalente moderno. Cambios mediante `session/set_mode` y `session/set_model`; `configOptions` tiene prioridad. | Gemini 0.62 real anuncia estas opciones y no ofrece esfuerzo por ACP. | Inventar una lista de modelos/esfuerzos; usar `set_config_option` con agentes que no lo implementan. | Aceptada; completa ADR-015 |
+| ADR-033 | Pestañas en la vista: `AgentHubView` guarda una lista de `ChatSession` (una por pestaña, cada una con su proceso, ADR-005) y la activa; el núcleo no cambia salvo `ChatSession.rename()` y `sessionTitle` en la petición de modo sin restricciones. Todas las pestañas quedan montadas y las ocultas llevan `hidden` (conservan borrador y scroll); `TabActivity` vigila estado y título de cada una para los indicadores y el `Notice` de permisos en segundo plano. Estado de vista `{tabs, activeTab, sessionId}`, compatible con 0.2.x; al restaurar, solo la pestaña visible arranca su agente y el reaper (T4.5) libera las olvidadas. Sin límite de pestañas trabajando a la vez por ahora. *Open AgentHub in a new pane* se mantiene. | Varias conversaciones a la vez sin ocupar más paneles (RF-25, `next.md` §1). | Solo varias vistas (RF-11: ocupa espacio, hay que cambiar de panel para ver quién terminó); montar solo la pestaña activa (pierde borrador y scroll); un `SessionManager` por vista. | Aceptada |
 | ADR-032 | Apariencia configurable: ajustes planos validados campo a campo (`messageStyle`, `density`, `chatFontSize`, `accentColor`, `optionsPlacement`, `expandToolCalls`, `showUsage`) que la vista expone como atributos `data-*` en `.agenthub-app`; `styles.css` solo cambia tokens propios derivados de variables de Obsidian. Formas de componentes según shadcn/ui y las apps oficiales, sin copiar a Claudian: las opciones del agente son pastillas con panel propio (lista con descripciones o medidor de niveles) y se ubican por defecto en el cuadro de mensaje. Amplía ADR-018. | Personalización sin romper temas ni la revisión de la comunidad; menos selectores nativos en el sidebar. | Temas CSS propios (rompen temas de Obsidian); variables CSS editables por el usuario (difícil de mantener); copiar el selector combinado de Claudian. | Aceptada |
 
 ---
@@ -1746,3 +1778,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — Creado `next.md` para funciones futuras, a pedido del usuario. Primera entrada: **pestañas** para varios agentes en paralelo en la misma vista (indicadores de estado, permisos en segundo plano con aviso, persistencia en el estado de la vista, encaje con `SessionManager`/ADR-005/ADR-022, riesgos y CA en borrador). Sin código. Puntero añadido en §11.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fix y release 0.2.1** a pedido del usuario: el botón de un permiso nuevo quedaba oculto bajo el cuadro de mensaje. `MessageList` fuerza el seguimiento al llegar una petición de permiso no vista (aunque el usuario haya subido) y observa con `ResizeObserver` una columna interna (`.agenthub-messages-content`) para seguir abajo mientras el contenido crece tras dibujarse (Markdown por bloques). Prueba nueva `MessageScroll.test.tsx`. 215 pruebas, lint (1 aviso intencionado) y build correctos. Publicada con autorización explícita del usuario («cuando termines lanza la release»).
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fase 8: pestañas** (T8.1–T8.4, ADR-033, RF-25) a pedido del usuario, desde `next.md` §1. `AgentHubView` pasa de una sesión a una lista de pestañas con la activa; `TabBar.tsx` (logo, título, indicador, cerrar, `+`, doble clic/F2 para renombrar, clic central cierra) y `ui/tabs.ts` (`TabActivity`: indicadores permiso/trabajando/error/sin leer y `Notice` cuando una pestaña oculta pide permiso). Núcleo: `ChatSession.rename()` y `sessionTitle` en `DangerousModeRequest` (el diálogo nombra la pestaña). Estado de vista `{tabs, activeTab, sessionId}` compatible con 0.2.x; solo la pestaña visible arranca su agente al restaurar. El historial abre en pestaña nueva (o en la activa si está vacía) y renombrar en el historial renombra la pestaña abierta. Comandos `new-tab`, `close-tab`, `next-tab`, `previous-tab`. Pruebas nuevas en `Tabs.test.tsx`, axe del `TabBar`, `rename` y título en la confirmación; el helper de vista tiene un segundo agente (`codex-acp`) y el mock de `Notice` registra los mensajes. 230 pruebas, lint (1 aviso intencionado) y build correctos. Pendiente: T8.5 (revisión visual del usuario), release 0.3.0 con confirmación y T8.6 (conflictos de edición entre pestañas, límite de concurrencia, reordenar).

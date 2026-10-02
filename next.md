@@ -7,7 +7,8 @@ aborde, se pasa a §11 como tarea con ID, criterio de aceptación y, si cambia l
 
 ## 1. Pestañas: varios agentes en paralelo en la misma vista
 
-**Estado:** propuesta (2026-10-02).
+**Estado:** implementada el 2026-10-02 (plan §11 Fase 8, ADR-033), salvo lo que sigue abierto en T8.6: aviso de
+conflictos de edición entre pestañas, límite de pestañas trabajando a la vez y reordenar arrastrando.
 
 ### Problema
 

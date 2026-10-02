@@ -4,6 +4,19 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Tabs: several conversations side by side in one view, each with its own agent and process. Switching tabs does not interrupt any of them, and each tab keeps its draft.
+- Tab indicators for working, waiting for permission, error, and finished-but-unread; a permission request from a hidden tab also shows a notice. Nothing is ever approved automatically.
+- Commands to open, close, and switch tabs (no default hotkeys). Double-click a tab to rename it.
+- The unrestricted mode confirmation names the tab that asks for it.
+
+### Changed
+
+- Sessions opened from history open in their own tab (or in the current one while it is still empty) instead of replacing the conversation you are in.
+- The view saves its list of tabs; layouts saved by 0.2.x reopen as a single tab.
+- Renaming a session in the history panel also renames its open tab.
+
 ## [0.2.1] - 2026-10-02
 
 ### Fixed
