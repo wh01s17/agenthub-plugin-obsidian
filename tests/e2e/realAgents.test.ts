@@ -59,7 +59,7 @@ describe.skipIf(!enabled)('real agents (e2e)', () => {
         await session.send([
           {
             type: 'text',
-            text: 'Read Notas/Ideas.md and create resumen.md in the vault root with a one-line summary. Reply in one sentence.',
+            text: 'Read Meetings/Kickoff.md and create resumen.md in the vault root with a one-line summary. Reply in one sentence.',
           },
         ]);
         const state = session.getState();

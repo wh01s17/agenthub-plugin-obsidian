@@ -28,7 +28,7 @@ cpSync(join(root, 'test-vault'), vault, {
 });
 
 const PROMPT =
-  'Lee el archivo Notas/Ideas.md y crea un archivo nuevo llamado resumen.md en la raíz ' +
+  'Lee el archivo Meetings/Kickoff.md y crea un archivo nuevo llamado resumen.md en la raíz ' +
   'con un resumen de una sola línea de esa nota. Responde en una frase al terminar.';
 const TIMEOUT_MS = Number(process.env.PROBE_TIMEOUT_MS ?? 240_000);
 

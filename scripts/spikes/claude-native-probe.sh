@@ -26,7 +26,7 @@ scrub() { sed -e "s#$vault#/VAULT#g" -e "s#${vault#/}#VAULT#g" -e "s#$HOME#~#g" 
 cd "$vault"
 
 # 1) Prompt por stdin, parciales activados, escritura denegada (manual + sin prompts).
-echo 'Lee Notas/Ideas.md y crea resumen.md con un resumen de una línea. Responde en una frase.' |
+echo 'Lee Meetings/Kickoff.md y crea resumen.md con un resumen de una línea. Responde en una frase.' |
   claude -p --output-format stream-json --verbose --include-partial-messages \
     --session-id "$sid" --permission-mode manual --permission-prompts none \
     2>"$out/denied.stderr" | scrub >"$out/denied.jsonl" || echo "exit $? (denied)"

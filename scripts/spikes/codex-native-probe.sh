@@ -30,7 +30,7 @@ echo "exit $? (no-git)"
 sed -i -e "s#$vault#/VAULT#g" "$out/no-git.stderr"
 
 # 1) Prompt por stdin, sandbox workspace-write.
-echo 'Lee Notas/Ideas.md y crea resumen.md con un resumen de una línea. Responde en una frase.' |
+echo 'Lee Meetings/Kickoff.md y crea resumen.md con un resumen de una línea. Responde en una frase.' |
   codex exec --json --skip-git-repo-check -C "$vault" -s workspace-write - 2>/dev/null | scrub >"$out/basic.jsonl"
 echo "exit $? (basic)"
 thread="$(grep -m1 -o '"thread_id":"[^"]*"' "$out/basic.jsonl" | cut -d'"' -f4)"
