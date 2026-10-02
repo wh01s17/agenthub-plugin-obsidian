@@ -106,7 +106,8 @@ acp
       .filter((block) => block.type === 'text')
       .map((block) => block.text)
       .join('\n');
-    const scenario = /^\/scenario (\S+)/.exec(text)?.[1] ?? defaultScenario;
+    // Anywhere in the prompt: the first message may start with the vault instructions.
+    const scenario = /(?:^|\n)\/scenario (\S+)/.exec(text)?.[1] ?? defaultScenario;
     const update = (u) =>
       ctx.client.notify(acp.methods.client.session.update, {
         sessionId: ctx.params.sessionId,

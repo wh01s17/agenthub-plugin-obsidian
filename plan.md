@@ -1171,7 +1171,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 - [x] **S4 Codex directo** — Grabar fixtures `exec --json` fuera de un repo git
   (`--skip-git-repo-check`), con comando, con `file_change`, y `exec resume` con prompt por stdin.
   *CA:* §3.5/§5.3 confirmados.
-- [ ] **S5 Render** — En el vault de pruebas, medir `MarkdownRenderer.render` re-renderizando un
+- [x] **S5 Render** — En el vault de pruebas, medir `MarkdownRenderer.render` re-renderizando un
   mensaje de 20 KB cada 100 ms. *CA:* decidir throttle y si hace falta render incremental.
 
 ### Fase 2 — Núcleo + ACP (MVP)
@@ -1291,6 +1291,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-023 | Identidad por agente: monograma + color de la paleta del tema (`--color-orange`, `--color-green`…): Claude naranja «C», Codex verde «Cx», Gemini azul «G», OpenCode morado «O»; los personalizados, color estable por hash del id e iniciales. Sin logotipos de marca. | Distinguir de un vistazo qué agente se usa, respetando temas claro/oscuro (ADR-018). | Logotipos oficiales (restricciones de marca, no se adaptan al tema). | Aceptada |
 | ADR-024 | El agente arranca en segundo plano al mostrar una sesión (no con el primer mensaje), para que modo/modelo/esfuerzo se elijan **antes** de conversar. Mientras arranca se muestran las opciones que anunció al iniciar la última vez (`knownConfigOptions` en `data.json`, solo valores iniciales: un modo peligroso nunca queda fijado); un cambio hecho antes o durante el arranque se aplica al iniciar. Arrancar no bloquea el envío. | Pedido del usuario: configurar antes de iniciar la conversación. | Arranque perezoso (las opciones no aparecían hasta el primer mensaje). | Aceptada — revisar consumo con el reaper (T4.5) |
 | ADR-025 | La Fase 5 (adaptadores directos `stream-json` / `exec --json`) pasa a **opcional y condicional**, con tres disparadores (adaptador ACP roto o abandonado, entorno sin Node/npm, función del CLI ausente en ACP). | ACP ya da todo lo necesario con mejores permisos y streaming; dos formatos extra que mantener no compensan hoy. Se conserva la investigación (S3/S4). | Implementarla ya (coste de una fase para una segunda vía a lo mismo); borrarla (perder el trabajo previo y la salida de emergencia). | Aceptada (decidido con el usuario) |
+| ADR-026 | El Markdown de los agentes se renderiza **por bloques** (párrafos fuera de bloques de código) y con una **cola de ≤ 8 ms por tarea**. | S5 en Obsidian real: renderizar el mensaje entero bloqueaba la UI hasta 603 ms; con bloques + cola, 0 tareas largas y 33 ms de hueco máximo. | Renderizar entero con throttle (bloqueos visibles); texto plano durante el streaming (pierde formato mientras escribe). | Aceptada |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1589,3 +1590,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **T3.7 completa:** modo de directorio de trabajo "carpeta de la nota actual"
   (`cwdMode: 'active-note-folder'`: la carpeta de la nota abierta al crear la sesión; notas en la raíz usan el vault).
   La bienvenida muestra el `cwd` real de la sesión. 168 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — **S5 completado** (`docs/spikes/S5-render.md`) en una instancia aislada de
+  Obsidian 1.13.7 (perfil y vault temporales, sin tocar la del usuario). El render del mensaje entero bloqueaba la UI
+  (603 ms, hueco de 667 ms); ahora se renderiza por bloques con una cola de 8 ms (ADR-026): **0 tareas largas, hueco
+  máximo 33 ms**. El agente simulado busca `/scenario` en cualquier línea (el primer mensaje empieza con las
+  instrucciones del vault). 174 tests. Con S5 y T3.7, **no queda nada pendiente de las fases 0–4**; la Fase 5 sigue
+  condicional (ADR-025).

@@ -777,3 +777,16 @@
   padding: 2px var(--size-4-3);
   font-size: var(--font-ui-smaller);
 }
+
+/* Block-wise Markdown (spike S5): blocks carry their own margins; keep the outer ones tight. */
+.agenthub-markdown-block > :first-child {
+  margin-top: 0;
+}
+
+.agenthub-markdown-block > :last-child {
+  margin-bottom: 0;
+}
+
+.agenthub-markdown-block + .agenthub-markdown-block {
+  margin-top: var(--p-spacing, 1em);
+}
