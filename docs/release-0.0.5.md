@@ -1,5 +1,7 @@
 # Verificación de 0.0.5
 
+[Release 0.0.5 publicada](https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5) como Latest, con autor `wh01s17`.
+
 Fecha: 2026-10-01 (Chile). Obsidian 1.13.7, Linux, perfil y vault temporales en `/tmp`.
 
 ## Cambios
@@ -40,8 +42,9 @@ La revisión manual histórica del proyecto está en §17 de `plan.md`.
   orden del foco y vuelta al selector. Este entorno no tiene lector instalado.
 - Alto contraste nativo y revisión de los resultados incompletos de contraste con el tema del usuario.
 - Repetir el recorrido del diálogo al 200 % y la checklist de §9 con los agentes reales disponibles.
-- Publicar 0.0.5 y verificar su actualización por BRAT. La instalación/actualización ya comprobada
-  corresponde a 0.0.3 → 0.0.4; no implica que 0.0.5 esté publicada.
+- Verificar la actualización a 0.0.5 por BRAT. La instalación/actualización comprobada
+  corresponde a 0.0.3 → 0.0.4. 0.0.5 está publicada; sus tres archivos se descargaron y coinciden
+  por SHA-256 con el build local. Autor y versión del manifest descargado verificados.
 - Envío a la comunidad: opcional; no realizado. Fase 7: descartada.
 
 ## Reproducir Gemini

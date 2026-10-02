@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.4 publicada; 0.0.5 preparada |
-| Próxima tarea | Revisión con lector de pantalla y alto contraste nativo; publicar 0.0.5. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
+| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release **0.0.5 publicada** con mensajes destacados y autor `wh01s17` |
+| Próxima tarea | Revisión con lector de pantalla y alto contraste nativo; completar la checklist manual y comprobar actualización 0.0.5 en BRAT. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — T6.10: mensajes del usuario destacados y separados de la salida del agente, Codex |
+| Última actualización | 2026-10-01 — Release 0.0.5 publicada; T6.10 incluida y autor corregido a wh01s17, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1296,7 +1296,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
-- [~] **T6.6** *(release **0.0.4** publicada; BRAT 2.2.0 verificó instalación 0.0.3 y actualización a 0.0.4; 0.0.5 preparada. Falta publicación y el cierre de la checklist manual; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(release **0.0.5** publicada con los 3 archivos y autor wh01s17; BRAT 2.2.0 verificó instalación 0.0.3 y actualización a 0.0.4. Falta comprobar la actualización a 0.0.5 y cerrar la checklist manual; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 - [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
 - [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
@@ -1684,3 +1684,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   sin prefijo `v`; en 0.x, MINOR para funciones y cambios de datos o de `minAppVersion`, PATCH para arreglos y estilo;
   hitos 0.1.0 (funcionalmente completa: falta `CHANGELOG.md`, capturas y prueba con BRAT) y 1.0.0 (tienda de la
   comunidad); pre-releases `-beta.N`; procedimiento paso a paso con la publicación sujeta a confirmación del usuario.
+
+- **2026-10-01 · Codex** — **Release 0.0.5 publicada como Latest**: incluye T6.8/T6.9/T6.10, logos y animaciones, con `author: wh01s17` en el manifest. El borrador inicial se regeneró antes de publicarlo para que el tag incluyera la corrección de autor (commit `d29f034`). Workflow Release `36954228850` en verde. Descargados y comparados por SHA-256 `main.js`, `manifest.json` y `styles.css`: coinciden con el build local; autor y versión verificados. Release: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5. La revisión manual pendiente de T6.3/T6.6 permanece documentada.
