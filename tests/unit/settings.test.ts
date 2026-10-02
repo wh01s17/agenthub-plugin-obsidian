@@ -105,3 +105,12 @@ describe('settings tab helpers', () => {
     );
   });
 });
+
+describe('working directory modes (T3.7)', () => {
+  it('accepts the active-note-folder mode and rejects unknown ones', () => {
+    expect(migrate({ ...defaultSettings(), cwdMode: 'active-note-folder' }).cwdMode).toBe(
+      'active-note-folder',
+    );
+    expect(migrate({ ...defaultSettings(), cwdMode: 'elsewhere' }).cwdMode).toBe('vault');
+  });
+});

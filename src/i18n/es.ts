@@ -48,6 +48,7 @@ export const es: Messages = {
   settingsCwd: 'Directorio de trabajo',
   settingsCwdDesc: 'Carpeta donde se ejecutan los agentes.',
   settingsCwdVault: 'Raíz del vault',
+  settingsCwdActiveFolder: 'Carpeta de la nota actual',
   settingsCwdCustom: 'Carpeta personalizada',
   settingsCustomCwd: 'Carpeta personalizada',
   settingsCustomCwdDesc: 'Ruta absoluta.',

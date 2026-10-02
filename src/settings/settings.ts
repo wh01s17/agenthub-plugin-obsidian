@@ -40,7 +40,8 @@ const SettingsSchema = z.object({
   schemaVersion: z.literal(1),
   defaultAgentId: z.string(),
   agents: z.array(AgentConfigSchema),
-  cwdMode: z.enum(['vault', 'custom']),
+  /** Where agents run: the vault root, the folder of the note open when the session starts, or a fixed folder. */
+  cwdMode: z.enum(['vault', 'active-note-folder', 'custom']),
   customCwd: z.string(),
   vaultInstructions: z.string(),
   /** Attach the active note to each message by default (it can be toggled per message). */

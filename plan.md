@@ -1210,8 +1210,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T3.4** Sugeridor `/` alimentado por `available_commands_update`. *CA:* RF-09.
 - [x] **T3.5** Comandos (§4.13) + entrada en menú contextual del editor ("Enviar selección a AgentHub"). *CA:* RF-14.
 - [x] **T3.6** Rutas y wikilinks clicables en mensajes y tool cards. *CA:* RF-17.
-- [x] **T3.7** Modos de directorio de trabajo + instrucciones del vault configurables. *(Hecho: raíz del vault / carpeta
-  personalizada + instrucciones con `{{configDir}}`. Pendiente menor: modo "carpeta de la nota activa".)* *CA:* RF-16.
+- [x] **T3.7** Modos de directorio de trabajo + instrucciones del vault configurables. *(Hecho: raíz del vault, carpeta de la
+  nota actual y carpeta personalizada + instrucciones con `{{configDir}}`.)* *CA:* RF-16.
 
 ### Fase 4 — Persistencia e historial
 
@@ -1586,3 +1586,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `styles.css`. Publicarlo queda en manos del usuario.
 - **2026-10-01 · usuario** — Verificado **T4.3**: tras reiniciar Obsidian la vista recupera su conversación. Con esto
   toda la Fase 4 (T4.1–T4.5) está verificada en Obsidian.
+- **2026-10-01 · Claude (Opus 5.5)** — **T3.7 completa:** modo de directorio de trabajo "carpeta de la nota actual"
+  (`cwdMode: 'active-note-folder'`: la carpeta de la nota abierta al crear la sesión; notas en la raíz usan el vault).
+  La bienvenida muestra el `cwd` real de la sesión. 168 tests.

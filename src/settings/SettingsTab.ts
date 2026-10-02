@@ -284,11 +284,12 @@ export class AgentHubSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) =>
         dropdown
           .addOption('vault', t('settingsCwdVault'))
+          .addOption('active-note-folder', t('settingsCwdActiveFolder'))
           .addOption('custom', t('settingsCwdCustom'))
           .setValue(settings.cwdMode)
           .onChange((value) =>
             this.save((s) => {
-              s.cwdMode = value === 'custom' ? 'custom' : 'vault';
+              s.cwdMode = value === 'custom' || value === 'active-note-folder' ? value : 'vault';
             }, true),
           ),
       );

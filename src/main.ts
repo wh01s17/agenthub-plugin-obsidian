@@ -238,7 +238,14 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
 
   workingDirectory(): string {
     const { cwdMode, customCwd } = this.settings;
-    return cwdMode === 'custom' && customCwd ? customCwd : (vaultBasePath(this.app) ?? '');
+    const base = vaultBasePath(this.app) ?? '';
+    if (cwdMode === 'custom' && customCwd) return customCwd;
+    if (cwdMode === 'active-note-folder') {
+      // Folder of the note open when the session starts; notes at the root use the vault itself.
+      const folder = this.notes.activeNotePath()?.split('/').slice(0, -1).join('/');
+      if (folder) return `${base}/${folder}`;
+    }
+    return base;
   }
 
   // ── internals ──────────────────────────────────────────────────────────────

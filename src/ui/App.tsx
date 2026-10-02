@@ -135,7 +135,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         <div class="agenthub-empty">
           <p class="agenthub-empty-title">{t('welcomeTitle')}</p>
           <p class="agenthub-empty-body">
-            {t('welcomeBody', { agent: agentLabel, cwd: host.workingDirectory() })}
+            {t('welcomeBody', { agent: agentLabel, cwd: state.cwd })}
           </p>
         </div>
       ) : (

@@ -46,6 +46,7 @@ export const en = {
   settingsCwd: 'Working directory',
   settingsCwdDesc: 'Folder where agents run.',
   settingsCwdVault: 'Vault root',
+  settingsCwdActiveFolder: 'Folder of the current note',
   settingsCwdCustom: 'Custom folder',
   settingsCustomCwd: 'Custom folder',
   settingsCustomCwdDesc: 'Absolute path.',
