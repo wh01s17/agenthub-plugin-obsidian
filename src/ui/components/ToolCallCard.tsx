@@ -84,6 +84,8 @@ interface ToolCallCardProps {
   onOpenPath?: (path: string) => boolean;
   /** How to show a path (vault-relative when possible). */
   pathLabel?: (path: string) => string;
+  /** How to show the title, which may contain paths. */
+  textLabel?: (text: string) => string;
 }
 
 export function ToolCallCard({
@@ -91,13 +93,16 @@ export function ToolCallCard({
   expanded = false,
   onOpenPath,
   pathLabel = (path) => path,
+  textLabel = (text) => text,
 }: ToolCallCardProps) {
   const status = t(STATUS_TEXT[call.status]);
   return (
     <details class={`agenthub-tool agenthub-tool-${call.status}`} open={expanded}>
       <summary class="agenthub-tool-summary">
         <Icon name={KIND_ICONS[call.kind]} />
-        <span class="agenthub-tool-title">{call.title}</span>
+        <span class="agenthub-tool-title" title={call.title}>
+          {textLabel(call.title)}
+        </span>
         <span class="agenthub-tool-status" title={status}>
           <Icon name={STATUS_ICONS[call.status]} class={`agenthub-status-${call.status}`} />
           <span class="agenthub-visually-hidden">{status}</span>

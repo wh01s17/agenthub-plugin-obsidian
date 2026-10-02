@@ -165,6 +165,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
           onPermission={(id, outcome) => session.resolvePermission(id, outcome)}
           onOpenPath={(path) => host.notes.openPath(path)}
           pathLabel={(path) => host.notes.displayPath(path)}
+          textLabel={(text) => host.notes.displayText(text)}
         />
       )}
       {settings.debugPanel && <DebugPanel lines={session.debugLog()} />}

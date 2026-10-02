@@ -15,6 +15,8 @@ export interface NoteContext {
   listNotes(): string[];
   /** Vault-relative form of an absolute path inside the vault; other paths are returned unchanged. */
   displayPath(path: string): string;
+  /** Free text (a tool title, a command) with absolute paths inside the vault made vault-relative. */
+  displayText(text: string): string;
   /** Opens a vault-relative or absolute path inside the vault; returns false if it is outside. */
   openPath(path: string): boolean;
 }
@@ -54,6 +56,8 @@ export function createNoteContext(app: App): NoteContext {
       base && path.startsWith(`${base}/`) && isInside(base, path)
         ? path.slice(base.length + 1)
         : path,
+
+    displayText: (text) => (base ? text.replaceAll(`${base}/`, '') : text),
 
     openPath(path) {
       let vaultPath = path;

@@ -20,6 +20,8 @@ interface MessageListProps {
   onOpenPath: (path: string) => boolean;
   /** How to show a path (vault-relative when possible). */
   pathLabel?: (path: string) => string;
+  /** How to show free text that may contain paths (tool and permission titles). */
+  textLabel?: (text: string) => string;
 }
 
 /** Items rendered at first, and how many more each "show earlier" adds (plan T6.4). */
@@ -58,6 +60,7 @@ function Item({
   onPermission,
   onOpenPath,
   pathLabel,
+  textLabel,
 }: Omit<MessageListProps, 'items'> & { item: TranscriptItem }) {
   switch (item.kind) {
     case 'user':
@@ -91,6 +94,7 @@ function Item({
           expanded={expandToolCalls}
           onOpenPath={onOpenPath}
           pathLabel={pathLabel}
+          textLabel={textLabel}
         />
       );
     case 'plan':
@@ -100,6 +104,7 @@ function Item({
         <PermissionCard
           request={item.request}
           resolved={item.resolved}
+          textLabel={textLabel}
           onAnswer={(outcome) => onPermission(item.request.id, outcome)}
         />
       );
@@ -129,6 +134,7 @@ export function MessageList({
   onPermission,
   onOpenPath,
   pathLabel,
+  textLabel,
 }: MessageListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const following = useRef(true);
@@ -182,6 +188,7 @@ export function MessageList({
           onPermission={onPermission}
           onOpenPath={onOpenPath}
           pathLabel={pathLabel}
+          textLabel={textLabel}
         />
       ))}
     </div>

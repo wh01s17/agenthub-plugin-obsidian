@@ -6,6 +6,8 @@ interface PermissionCardProps {
   request: PermissionRequest;
   resolved?: PermissionOutcome;
   onAnswer: (outcome: PermissionOutcome) => void;
+  /** How to show the title, which may contain paths. */
+  textLabel?: (text: string) => string;
 }
 
 function answerText(request: PermissionRequest, resolved: PermissionOutcome): string {
@@ -27,7 +29,12 @@ function buttonClass(
   return option.id === primary?.id ? 'mod-cta' : 'agenthub-button';
 }
 
-export function PermissionCard({ request, resolved, onAnswer }: PermissionCardProps) {
+export function PermissionCard({
+  request,
+  resolved,
+  onAnswer,
+  textLabel = (text) => text,
+}: PermissionCardProps) {
   return (
     <section
       class={`agenthub-permission ${resolved ? 'is-resolved' : 'is-pending'}`}
@@ -37,7 +44,7 @@ export function PermissionCard({ request, resolved, onAnswer }: PermissionCardPr
         <Icon name="shield-alert" />
         <span>{t('permissionTitle')}</span>
       </div>
-      <div class="agenthub-permission-title">{request.toolCall.title}</div>
+      <div class="agenthub-permission-title">{textLabel(request.toolCall.title)}</div>
       {resolved ? (
         <div class="agenthub-permission-answer">{answerText(request, resolved)}</div>
       ) : (

@@ -14,6 +14,7 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ### Fixed
 
+- Tool and permission titles show paths relative to the vault instead of full system paths.
 - Reopening a conversation no longer stops the agent when it cannot continue the saved session (Gemini after restarting Obsidian): a new session starts and the view says that the earlier context was not restored.
 - The suggestion list follows the highlighted item while moving with the arrow keys, and long descriptions are limited to two lines.
 

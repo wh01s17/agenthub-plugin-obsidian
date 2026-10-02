@@ -222,4 +222,39 @@ describe('appearance settings (ADR-032)', () => {
       'agenthub-button is-danger',
     );
   });
+
+  it('shows vault-relative paths in tool and permission titles', () => {
+    const relative = (text: string) => text.replaceAll('/home/me/vault/', '');
+    render(
+      <MessageList
+        app={{} as ObsidianApp}
+        items={[
+          {
+            kind: 'tool',
+            call: {
+              id: 't1',
+              title: 'Read /home/me/vault/Meetings/Kickoff.md',
+              kind: 'read',
+              status: 'completed',
+            },
+          },
+          {
+            kind: 'permission',
+            request: {
+              id: 'p1',
+              toolCall: { id: 't2', title: 'Edit /home/me/vault/Projects/Plan.md', kind: 'edit' },
+              options: [{ id: 'ok', label: 'Allow', kind: 'allow_once' }],
+            },
+          },
+        ]}
+        showThoughts={false}
+        onPermission={vi.fn()}
+        onOpenPath={() => false}
+        textLabel={relative}
+      />,
+    );
+    expect(screen.getByText('Read Meetings/Kickoff.md')).toBeTruthy();
+    expect(screen.getByText('Edit Projects/Plan.md')).toBeTruthy();
+    expect(screen.queryByText(/\/home\/me/)).toBeNull();
+  });
 });

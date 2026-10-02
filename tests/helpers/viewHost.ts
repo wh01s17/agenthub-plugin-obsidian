@@ -44,6 +44,7 @@ export function makeViewHost(
       listNotes: () => [],
       openPath: () => false,
       displayPath: (path: string) => path,
+      displayText: (text: string) => text,
     },
     prompts: new PromptHistory(),
     history: store,
