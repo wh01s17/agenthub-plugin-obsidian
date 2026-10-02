@@ -4,9 +4,17 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-02
+
 ### Changed
 
 - README discloses external processes, network use, adapter downloads by `npx`, required accounts, and file access outside the vault, as required by the Obsidian developer policies.
+- Release assets include GitHub artifact attestations to prove they were built from this repository.
+
+### Fixed
+
+- Timers in the agent connection, process cleanup, and session saving use `window` timers, for compatibility with Obsidian popout windows.
+- The visually hidden text used for screen readers no longer relies on `clip-path`, which older Obsidian versions only partially support.
 
 ## [0.1.0] - 2026-10-02
 

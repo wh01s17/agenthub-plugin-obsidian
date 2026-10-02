@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.1.0 publicada como Latest**. Fases 0–4 y 6 cerradas; revisión manual aceptada por el usuario y BRAT final comprobado. Preparando el envío al directorio de la comunidad (T6.11). |
-| Próxima tarea | **T6.11:** el usuario envía el plugin en [community.obsidian.md](https://community.obsidian.md) (requiere su cuenta de Obsidian y vincular GitHub) y se atiende la revisión automática. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **0.1.0 publicada y en el directorio de la comunidad** (entrada *live*; revisión automática completada sin errores, build reproducido byte a byte). **0.1.1** preparada con las correcciones de los avisos. |
+| Próxima tarea | Publicar 0.1.1 con confirmación del usuario y pulsar **Check for new releases** en community.obsidian.md; comprobar que desaparecen los avisos de timers, `clip-path` y attestations. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
-| Bloqueos | El envío exige iniciar sesión con la cuenta de Obsidian del usuario: no lo puede hacer un agente. |
-| Última actualización | 2026-10-02 — Repo listo para el envío a la comunidad: divulgaciones del README según las políticas de desarrollador, id libre, lint sin avisos en tests, test-vault depurado; e2e de Claude pasan. Claude (Opus 5.5). |
+| Bloqueos | Ninguno. |
+| Última actualización | 2026-10-02 — Entrada de la comunidad publicada por el usuario; avisos de la revisión corregidos en 0.1.1 (borrador). Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1125,10 +1125,12 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
 7. Anotar la release en la bitácora (§17).
 
 **Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4 y 0.0.5 publicadas.
-La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. La próxima release es **0.1.0**.
+La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 publicada; 0.1.1 corrige los avisos de la revisión de la comunidad.
 
-**Tienda de la comunidad (camino a 1.0.0):** PR a `obsidianmd/obsidian-releases` añadiendo el plugin a
-`community-plugins.json`.
+**Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
+[community.obsidian.md](https://community.obsidian.md) con la cuenta de Obsidian del usuario y GitHub vinculado (T6.11).
+Cada release nueva pasa una revisión automática (comportamiento, lint del código y del CSS, dependencias, build reproducible,
+attestations); se lanza con **Check for new releases**.
 
 ---
 
@@ -1303,7 +1305,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.10** Mensajes del usuario con etiqueta «Tú»/«You», tarjeta de fondo propio, borde de acento y espacio entre turnos; estilos del tema de Obsidian y texto seleccionable con el mouse.
 
-- [~] **T6.11** Envío al directorio de la comunidad (Q3). Hecho: id `agenthub` libre, LICENSE, manifest y release 0.1.0 válidos, divulgaciones del README (procesos externos, red, descargas de `npx`, cuentas, archivos fuera del vault) según las *Developer policies*. Falta: el usuario inicia sesión en community.obsidian.md, vincula GitHub y añade el plugin; corregir lo que indique la revisión automática con una release de versión incrementada. *CA:* plugin instalable desde Obsidian.
+- [~] **T6.11** Envío al directorio de la comunidad (Q3). Hecho: id `agenthub` libre, LICENSE, manifest y release válidos, divulgaciones del README según las *Developer policies*; el usuario envió y publicó la entrada (live) el 2026-10-02; revisión automática de 0.1.0 completada **sin errores** (build reproducido byte a byte). Avisos corregidos en 0.1.1: timers de `window` en `AcpSession`/`ProcessRunner`/`SessionStore`, `clip-path` sustituido, attestations de los assets en `release.yml`. Se mantienen, por diseño y divulgados: acceso `fs` y `child_process` (núcleo del plugin), enumeración del vault (sugerencias `@`) y `display()` (ADR-027). Falta: publicar 0.1.1 y relanzar la revisión. *CA:* plugin instalable desde Obsidian.
 
 ### Fase 7 — Descartada: modo terminal
 
@@ -1706,3 +1708,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Codex** — El usuario autoriza publicar 0.1.0. Release publicada como **Latest**, sin draft ni prerelease: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0. BRAT 2.2.0 en Obsidian aislado verificó instalación limpia de 0.1.0, actualización 0.0.5 → 0.1.0, plugin/vista cargados y autor wh01s17. Ajustes y contenido de transcripts conservados. T6.6 y Fase 6 cerradas; no queda trabajo obligatorio para este hito. Documentación pública en inglés; sin modificaciones de las notas de prueba del usuario.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — Análisis del proyecto y preparación del envío a la comunidad **[T6.11]**. Revisadas las *Developer policies* y *Submission requirements* actuales: el envío ya no es un PR a `obsidian-releases`, sino desde community.obsidian.md con cuenta de Obsidian y GitHub vinculado, y revisión automática; el directorio lee el `manifest.json` de la rama por defecto y los assets de la release con el mismo tag. Id `agenthub` libre (8301 plugins comprobados). README: nueva sección *Disclosures* (procesos externos, red de los agentes, descarga de adaptadores por `npx` con versión fijada, cuentas necesarias, archivos fuera del vault; el canal ACP `fs/*` solo permite el vault). Q1 y Q3 resueltas; ADR-012/013 reordenados; §0.1 corregida (texto cortado). Lint: reglas `hardcoded-config-path` y `no-deprecated` desactivadas solo en tests (datos de prueba y respaldo `display()` intencionado); queda 1 aviso intencionado en `SettingsTab.ts` (ADR-027). Vitest con `pool: 'vmThreads'`: 21 s → 11 s. E2e reales de Claude (`claude-acp`): 2/2 pasan (antes fallaban por cuota). test-vault depurado: restauradas `Bienvenida.md` y `Notas/Proyecto Alfa.md`; restos de pruebas manuales (`Prueba-AgentHub.md`, `Notas/Fibonacci.md`, export `AgentHub/`, sesiones del plugin) movidos a una copia fuera del repo. Sin cambios de código ejecutable: no hace falta nueva release. Lint/build correctos; 198 pruebas pasan, 2 omitidas. Pendiente: envío por el usuario.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **T6.11:** el usuario publicó la entrada en community.obsidian.md. Revisión automática de 0.1.0 (commit `88967dc`) completada sin errores: dependencias sin vulnerabilidades y build reproducido byte a byte. Avisos atendidos para **0.1.1** (PATCH): `setTimeout`/`clearTimeout` → `window.*` en `AcpSession`, `ProcessRunner` y `SessionStore` (eliminada la excepción de `prefer-window-timers`; `tests/setup.ts` define `window` para los tests en Node); `.agenthub-visually-hidden` usa `clip: rect(0 0 0 0)` en lugar de `clip-path`; `release.yml` genera attestations (`actions/attest-build-provenance@v4`, permisos `id-token`/`attestations`). Sin cambiar, por diseño y divulgados en el README: `fs`, `child_process`, enumeración del vault y `display()` (ADR-027). §8.4 actualizado con el nuevo proceso de envío. Lint (1 aviso intencionado), build y 198 pruebas correctos. Pendiente: publicar 0.1.1 con confirmación y relanzar la revisión.
