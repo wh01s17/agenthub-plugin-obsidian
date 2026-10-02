@@ -40,6 +40,8 @@ export interface ChatSessionInit {
   /** Called with the options an agent announces when it starts (to remember them). */
   onAgentReady?: (configOptions: ConfigOption[]) => void;
   confirmDangerousMode?: ConfirmDangerousMode;
+  /** Called when the user's change of an option takes effect, so it can be kept for new sessions. */
+  onConfigChosen?: (id: string, value: string) => void;
   now?: () => number;
 }
 
@@ -186,12 +188,14 @@ export class ChatSession {
         // Not started: apply it at start-up. Starting: it began with the old value, so set it after.
         if (!this.starting) {
           this.pendingConfig[id] = value;
+          this.init.onConfigChosen?.(id, value);
           return;
         }
         await this.starting;
         if (!this.agent) return;
       }
       await this.agent.setConfigOption?.(id, value);
+      this.init.onConfigChosen?.(id, value);
     } catch (error) {
       this.reportError(error);
     } finally {

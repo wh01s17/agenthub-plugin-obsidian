@@ -7,14 +7,16 @@ import { StubAdapter, hostServices } from '../helpers/stubAgent';
 function setup(allowed = true, config?: SessionOptions['config']) {
   const adapter = new StubAdapter(() => 'end_turn');
   const confirm = vi.fn<ConfirmDangerousMode>(() => Promise.resolve(allowed));
+  const chosen = vi.fn();
   const session = new ChatSession({
     localId: 's1',
     adapter,
     host: hostServices,
     options: { cwd: '/vault', config },
     confirmDangerousMode: confirm,
+    onConfigChosen: chosen,
   });
-  return { adapter, session, confirm };
+  return { adapter, session, confirm, chosen };
 }
 
 describe('permission modes', () => {
@@ -72,6 +74,23 @@ describe('permission modes', () => {
     expect(set).not.toHaveBeenCalled();
     expect(session.getState().status).toBe('idle');
     expect(session.busy).toBe(false);
+  });
+
+  it('remembers choices that take effect, but not rejected or failed ones', async () => {
+    const { session, adapter, chosen } = setup(false);
+    // Before the agent starts the choice is applied at start-up, so it counts already.
+    await session.setConfigOption('model', 'fast-model');
+    expect(chosen).toHaveBeenLastCalledWith('model', 'fast-model');
+
+    await session.prepare();
+    adapter.sessions[0]!.setConfigOption = vi.fn(() => Promise.resolve());
+    await session.setConfigOption('mode', 'plan');
+    expect(chosen).toHaveBeenLastCalledWith('mode', 'plan');
+
+    await session.setConfigOption('mode', 'agent-full-access'); // confirmation declined
+    adapter.sessions[0]!.setConfigOption = vi.fn(() => Promise.reject(new Error('nope')));
+    await session.setConfigOption('model', 'broken-model');
+    expect(chosen).toHaveBeenCalledTimes(2);
   });
 
   it('applies an approved live change and does not prompt for ordinary choices', async () => {

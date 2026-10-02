@@ -70,6 +70,17 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       ),
     onCreate: (session) => this.sessionStore?.track(session),
     knownConfigOptions: (agentId) => this.settings.knownConfigOptions[agentId],
+    // The options chosen in the view become the agent's initial values (unrestricted modes are
+    // still confirmed at every start, ADR-030).
+    rememberConfigChoice: (agentId, id, value) => {
+      if (this.agents.config(agentId)?.config[id] === value) return;
+      this.run(
+        this.updateSettings((s) => {
+          const agent = s.agents.find((a) => a.id === agentId);
+          if (agent) agent.config = { ...agent.config, [id]: value };
+        }),
+      );
+    },
     rememberConfigOptions: (agentId, options) => {
       if (JSON.stringify(this.settings.knownConfigOptions[agentId]) === JSON.stringify(options))
         return;

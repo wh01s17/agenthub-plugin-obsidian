@@ -8,6 +8,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 - Appearance settings: message style (bubbles, cards, or plain), density, text size, accent color (agent or theme), placement of the agent options, expanded tool calls, and usage display. Changes apply to open views at once.
 - Agent options (mode, model, effort…) as pills in the message box, with a panel that lists each choice and its description; effort levels show as a level meter, and unrestricted modes are highlighted in red.
+- The mode, model, and other agent options you choose are kept for new sessions and after restarting Obsidian. Unrestricted modes still ask for confirmation each time the agent starts.
+- Two-state agent options, such as fast mode, appear as switches with their name.
 
 ### Changed
 

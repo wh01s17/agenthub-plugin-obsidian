@@ -15,6 +15,8 @@ export interface SessionManagerDeps {
   /** Options each agent announced when it last started (shown before it starts again). */
   knownConfigOptions?: (agentId: AgentId) => ConfigOption[] | undefined;
   rememberConfigOptions?: (agentId: AgentId, options: ConfigOption[]) => void;
+  /** Keeps an option the user chose (mode, model…) as the agent's initial value for new sessions. */
+  rememberConfigChoice?: (agentId: AgentId, id: string, value: string) => void;
   confirmDangerousMode?: ConfirmDangerousMode;
 }
 
@@ -73,6 +75,8 @@ export class SessionManager {
       initialConfigOptions: this.deps.knownConfigOptions?.(agentId),
       onAgentReady: (options: ConfigOption[]) =>
         this.deps.rememberConfigOptions?.(agentId, options),
+      onConfigChosen: (id: string, value: string) =>
+        this.deps.rememberConfigChoice?.(agentId, id, value),
     };
   }
 
