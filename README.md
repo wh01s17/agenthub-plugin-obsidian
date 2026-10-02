@@ -26,9 +26,16 @@ Versión pública: **0.0.5**. **0.1.0 en preparación**, con comprobaciones pend
 
 ## Capturas
 
-Codex trabajando con una nota del vault, opciones del agente, herramientas y permiso aprobado:
+Codex trabajando con una nota del vault, mensaje propio destacado, opciones del agente y herramientas:
 
 ![Nota de Fibonacci en Obsidian junto a la conversación de Codex y sus herramientas](docs/images/codex-note.png)
+
+<details>
+<summary>Solicitud de permiso antes de crear una nota</summary>
+
+![Mensaje propio, herramientas de Codex y botones para aprobar o denegar la creación de una nota](docs/images/codex-permission.png)
+
+</details>
 
 <details>
 <summary>Ajustes de agentes, sesiones, contexto y entorno</summary>

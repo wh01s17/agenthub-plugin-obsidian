@@ -6,8 +6,9 @@ Fecha: 2026-10-01 (Chile). Checklist de cierre: [checklist-0.1.0.md](checklist-0
 ## Cambios preparados
 
 - CHANGELOG.md con historial de las releases 0.0.3–0.0.5 y sección Unreleased para 0.1.0.
-- Capturas aportadas por el usuario: nota con conversación Codex y cuatro vistas de ajustes.
+- Capturas aportadas por el usuario: nota y conversación Codex con mensaje propio, solicitud de permiso y cuatro vistas de ajustes.
 - Corrección de botones de permisos con comandos largos: texto adaptable al panel, sin scroll horizontal.
+- Mensajes propios seleccionables con el mouse: la tarjeta declara user-select: text para sustituir el none heredado de Obsidian.
 - Instrucciones del script de versiones alineadas con el bump manual de plan §8.4.
 - package.json y manifest.json en 0.1.0; entrada añadida a versions.json. Autor wh01s17 y minAppVersion 1.8.7.
 
@@ -58,5 +59,5 @@ No equivale a una nueva interacción de permisos con un proveedor real.
 ## Pendientes
 
 Lector de pantalla, alto contraste nativo, contraste inconcluso con el tema del usuario, pasada visual final
-de los agentes, capturas adicionales solicitadas y Claude con cuota disponible. Después: cierre del changelog,
+de los agentes y Claude con cuota disponible. Capturas del README incorporadas. Después: cierre del changelog,
 commit/tag de release, borrador, confirmación de publicación y comprobación final con BRAT.

@@ -16,6 +16,7 @@ Preparación del hito **0.1.0**. La fecha y sección definitiva se añadirán al
 
 - Instrucciones del script de sincronización de versiones: indican el bump manual, sin crear tags con prefijo `v`.
 - Los botones de permisos con comandos largos ajustan el texto al ancho del panel, también con zoom.
+- Los mensajes del usuario permiten seleccionar y copiar texto con el mouse, incluidos sus adjuntos.
 
 ## [0.0.5] - 2026-10-01
 

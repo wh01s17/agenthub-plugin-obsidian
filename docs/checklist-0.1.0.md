@@ -19,10 +19,11 @@ Versión pública actual: 0.0.5. Fecha de comprobación: 2026-10-01 (Chile).
 | Conservación de datos con BRAT | Pasa en el caso probado | data.json idéntico y cuatro elementos de la conversación conservados. Las marcas de tiempo de guardado del JSONL cambian al recargar. |
 | Diálogo al 200 %: teclado | Pasa | Build local 0.1.0: foco inicial en cancelar; Tab recorre ambos botones y vuelve al primero; Escape conserva modo y devuelve foco a Mode. Diálogo de 510 px sin desborde; pasada previa de 196 px también comprobada. |
 | Botones de permisos largos | Corregido y comprobado | Texto envuelto, incluso argumentos sin espacios. Temas claro/oscuro, zoom 100/200 %; tarjeta de 250/238 px con scrollWidth idéntico al ancho. |
+| Selección del mensaje propio con mouse | Corregido y comprobado | Arrastre nativo en Obsidian: antes user-select none y selección vacía; después text y texto seleccionado. |
 | Axe en Obsidian | Sin violaciones en el estado probado | Quedan resultados de contraste inconclusos; no equivale a lector de pantalla. |
 | Permiso Codex en Obsidian | Evidencia del usuario | Capturas muestran solicitud, aprobación «Yes, proceed» y respuesta terminada; no comprueban denegación. |
 | Changelog | Hecho | CHANGELOG.md; 0.1.0 sigue en Unreleased hasta publicar. |
-| Capturas README | Incorporadas; selección final parcial | Nota y conversación, agentes, sesiones, contexto y entorno; falta chat con mensaje propio visible y permiso tras corregir el desborde. |
+| Capturas README | Incorporadas | Chat con mensaje propio, nota, herramientas y solicitud de permiso; cuatro vistas de ajustes. El permiso de la captura tiene etiquetas cortas. |
 | Metadatos 0.1.0 | Preparados | package.json, manifest.json y versions.json; minAppVersion 1.8.7 y autor wh01s17. |
 
 ## Lo que requiere revisión humana
@@ -31,9 +32,10 @@ Usar un vault de prueba. Anotar versión de Obsidian, agente, sistema, resultado
 
 ### 1. Capturas para el README
 
-- [ ] Chat: mensaje propio destacado y respuesta breve; plegar Reasoning si ocupa demasiado espacio.
+- [x] Chat: mensaje propio destacado, respuesta, opciones y herramientas visibles.
 - [x] Ajustes: agentes detectados, sesiones, contexto y entorno; cuatro capturas incorporadas.
-- [ ] Permisos: repetir la captura con un texto largo después de cargar el CSS corregido; todos los botones deben caber.
+- [x] Permisos: captura con solicitud y botones de aprobar/denegar incorporada.
+- [ ] Permisos largos: comprobar visualmente con el tema del usuario después de cargar el CSS corregido; todos los botones deben caber. La prueba automatizada de ancho ya pasa.
 
 Enviar las imágenes al agente para incorporarlas. La captura de nota y conversación ya está en docs/images/codex-note.png.
 
@@ -88,7 +90,7 @@ AGENTHUB_E2E_AGENTS=claude-acp pnpm test:e2e
 
 ## Cierre que puede ejecutar el agente
 
-- [ ] Incorporar las capturas restantes enviadas por el usuario.
+- [x] Incorporar las capturas enviadas por el usuario.
 - [ ] Registrar resultados humanos y corregir los fallos encontrados.
 - [ ] Cerrar T6.3/T6.6 cuando los criterios estén realmente comprobados.
 - [ ] Pasar lint/tests/build, cerrar notas de 0.1.0 y crear commit/tag anotado sin v.

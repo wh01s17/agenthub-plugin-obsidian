@@ -41,10 +41,10 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas; **0.1.0 preparada localmente**, 0.0.5 sigue publicada. Changelog y capturas del usuario incorporados; BRAT 0.0.5 comprobado. |
-| Próxima tarea | Cerrar revisión humana T6.3/T6.6 según `docs/checklist-0.1.0.md`; completar selección de capturas con el usuario, repetir Claude cuando haya cuota y preparar tag/borrador tras cerrar criterios. Publicar con confirmación. Envío a comunidad opcional; Fase 7 descartada. |
+| Próxima tarea | Cerrar revisión humana T6.3/T6.6 según `docs/checklist-0.1.0.md`; repetir Claude cuando haya cuota y preparar tag/borrador tras cerrar criterios. Capturas del usuario incorporadas. Publicar con confirmación. Envío a comunidad opcional; Fase 7 descartada. |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Pruebas reales de Claude bloqueadas por límite de sesión del proveedor. Lector de pantalla y alto contraste nativo requieren revisión humana en un entorno disponible. |
-| Última actualización | 2026-10-01 — Preparación local 0.1.0, changelog, capturas del usuario, BRAT y e2e reales; pendientes detallados en la checklist, Codex |
+| Última actualización | 2026-10-01 — Arreglada selección con mouse de mensajes propios para 0.1.0; pendientes detallados en la checklist, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1303,7 +1303,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
 - [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
 
-- [x] **T6.10** Mensajes del usuario con etiqueta «Tú»/«You», tarjeta de fondo propio, borde de acento y espacio entre turnos; estilos del tema de Obsidian.
+- [x] **T6.10** Mensajes del usuario con etiqueta «Tú»/«You», tarjeta de fondo propio, borde de acento y espacio entre turnos; estilos del tema de Obsidian y texto seleccionable con el mouse.
 
 ### Fase 7 — Descartada: modo terminal
 
@@ -1692,3 +1692,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Codex** — Revisadas las adiciones del usuario a §8.4 y AGENTS.md: próxima release 0.1.0; MINOR para funciones/comportamiento/datos y PATCH para arreglos/estilo/rendimiento/docs. README y comentario del workflow sincronizados con el bump manual y tag sin `v`; procedimiento de beta documentado como pre-release sin Latest. Añadida 0.0.5 al historial y corregido el estado del hito: T6.3/T6.6 mantienen sus comprobaciones manuales pendientes. §0.1 incorpora changelog y capturas como requisitos de 0.1.0. Publicación solo con confirmación del usuario. Sin cambios de código ejecutable ni nueva release. Lint/build sin errores y 198 pruebas pasan (2 e2e omitidas).
 
 - **2026-10-01 · usuario + Codex** — Preparación local de **0.1.0 [T6.3/T6.5/T6.6]**: creado CHANGELOG.md con releases publicadas y Unreleased; metadatos sincronizados sin tag ni publicación; instrucciones del script corregidas. A pedido del usuario, capturas exclusivamente aportadas por él: nota con conversación Codex y cuatro vistas de ajustes incorporadas al README; pendientes chat con mensaje propio visible y nueva captura de permisos. La captura de permisos mostró un botón largo que desbordaba: CSS corregido con texto envuelto, comprobado en Obsidian 1.13.7 claro/oscuro al 100/200 %, tarjeta sin desborde. Recorrido nativo del diálogo al 200 %: Tab dentro de los dos botones, Escape conserva modo y devuelve foco. BRAT 2.2.0 verificó instalación limpia 0.0.5 y actualización 0.0.4 → 0.0.5; ajustes y cuatro elementos del transcript conservados (timestamps de guardado cambian). E2e reales: OpenCode/Codex pasan lectura/escritura y reanudación (4 pruebas); Claude falla sus dos pruebas con cuota agotada del proveedor. Suite normal: 198 pasan, 2 optativas omitidas; lint/build sin errores, 7 avisos existentes. Evidencia y guía humana en `docs/release-0.1.0.md` y `docs/checklist-0.1.0.md`. T6.3/T6.6 siguen parciales por lector de pantalla, alto contraste nativo, contraste inconcluso y pasada visual final; después tag/borrador, confirmación y BRAT final 0.1.0. Cambios del usuario en test-vault se dejan fuera del commit de preparación. Fase 7 descartada.
+
+- **2026-10-01 · usuario + Codex** — **T6.10:** corregido el texto del mensaje propio no seleccionable. Reproducción nativa en Obsidian 1.13.7: estilo calculado `user-select: none`, arrastre con mouse sin selección. La tarjeta declara `user-select: text`, también para autor/adjuntos; tras corregir, el mismo arrastre selecciona «Seleccionar este mensaje». Changelog y evidencias actualizados; paquete local 0.1.0 regenerado. Lint/build correctos, 198 pruebas pasan y 2 optativas omitidas; 7 avisos existentes. Sin publicación.
