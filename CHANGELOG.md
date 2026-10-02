@@ -4,6 +4,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Changed
+
+- README discloses external processes, network use, adapter downloads by `npx`, required accounts, and file access outside the vault, as required by the Obsidian developer policies.
+
 ## [0.1.0] - 2026-10-02
 
 ### Added

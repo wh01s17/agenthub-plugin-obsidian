@@ -110,7 +110,16 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 
 ## Privacy and security
 
-- AgentHub launches your installed agents as local processes. The plugin does not make its own network requests or send telemetry; each agent connects to its provider independently.
+### Disclosures
+
+- **External processes:** AgentHub runs the agent commands configured in its settings as local child processes. It does not bundle or run any agent itself.
+- **Network use:** the plugin makes no network requests and sends no telemetry. The agents you run connect to their own providers (for example Anthropic for Claude Code, OpenAI for Codex, Google for Gemini CLI, or the provider configured in OpenCode) to generate responses, under those providers' terms.
+- **Adapter downloads:** AgentHub never installs or updates itself, the agents, or their adapters. The default Claude Code and Codex commands call `npx` with a **pinned adapter version**; on first use, `npx` (not AgentHub) fetches that version from the npm registry. To avoid any download at runtime, install the adapters globally (see [Requirements](#requirements)) and change the command to the installed binary, or use any other command you trust.
+- **Accounts:** an account with each agent's provider is required, signed in through the agent's own CLI. Depending on the provider, this may require a paid subscription or API usage. AgentHub never sees or stores your credentials.
+- **Files outside the vault:** agents run with the vault (or the working directory you choose) as their working directory, but they are regular programs: depending on their permission mode they can read or write files and run commands anywhere your user account can. When an agent reads or writes through AgentHub itself (the ACP file channel), access is limited to the vault, and writes to the Obsidian configuration folder are blocked. AgentHub also looks up the agents' executables in your `PATH` and, when the login shell PATH fallback is enabled, runs your login shell once to read its `PATH`.
+
+### Security
+
 - Agents can **read and modify vault files and execute commands** according to their permission mode. Codex starts in **read-only** mode unless you configure another initial mode.
 - Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header. OpenCode uses its own mode: check its selector.
 - Notes can contain malicious instructions that an agent might follow. Review permission requests before approving them.
