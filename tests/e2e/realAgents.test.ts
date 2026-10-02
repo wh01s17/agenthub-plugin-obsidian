@@ -1,9 +1,9 @@
 // @vitest-environment node
 // End-to-end against real agents. Costs tokens/time: runs only with AGENTHUB_E2E=1 (`pnpm test:e2e`),
 // and only for the agents listed in AGENTHUB_E2E_AGENTS (default: opencode).
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { AgentRegistry } from '../../src/agents/AgentRegistry';
 import { ChatSession } from '../../src/core/ChatSession';
@@ -13,6 +13,27 @@ import { AGENT_PRESETS } from '../../src/settings/settings';
 import { hostServices } from '../helpers/stubAgent';
 
 const enabled = process.env.AGENTHUB_E2E === '1';
+
+/**
+ * Host whose ACP file channel really reads and writes the disposable vault, as Obsidian does. Agents
+ * that write through the client (Gemini) need it; Claude and Codex write to disk themselves (ADR-014).
+ */
+function diskHost(vault: string) {
+  return {
+    ...hostServices,
+    vaultBasePath: vault,
+    readTextFile: (path: string, line?: number, limit?: number) => {
+      const lines = readFileSync(path, 'utf8').split('\n');
+      const start = Math.max(0, (line ?? 1) - 1);
+      return Promise.resolve(lines.slice(start, limit ? start + limit : undefined).join('\n'));
+    },
+    writeTextFile: (path: string, content: string) => {
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, content, 'utf8');
+      return Promise.resolve();
+    },
+  };
+}
 const agentIds = (process.env.AGENTHUB_E2E_AGENTS ?? 'opencode').split(',');
 const processes = new ProcessRegistry();
 
@@ -40,7 +61,7 @@ describe.skipIf(!enabled)('real agents (e2e)', () => {
         localId: 'e2e',
         adapter,
         // Approve whatever the agent asks for; this is a disposable copy of the vault.
-        host: hostServices,
+        host: diskHost(vault),
         options: { cwd: vault, config: agentId === 'codex-acp' ? { mode: 'workspace-write' } : {} },
       });
       const answerPermissions = session.subscribe((state) => {
