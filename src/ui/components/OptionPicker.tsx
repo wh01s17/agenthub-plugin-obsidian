@@ -16,6 +16,7 @@ export function optionIcon(option: ConfigOption): string {
   if (/fast|speed/.test(text)) return 'zap';
   if (isLevelOption(option)) return 'gauge';
   if (option.category === 'model' || /model/.test(text)) return 'sparkles';
+  if (/collaborat/.test(text)) return 'users';
   if (option.category === 'mode' || /\bmode\b|permission|access/.test(text)) return 'shield';
   return 'sliders-horizontal';
 }
@@ -48,7 +49,7 @@ export function TogglePill({ option, label, busy, onChange }: OptionPickerProps)
       onClick={() => onChange(on ? values.off : values.on)}
     >
       <Icon name={optionIcon(option)} />
-      <span class="agenthub-pill-value">{label}</span>
+      <span class="agenthub-visually-hidden">{label}</span>
     </button>
   );
 }

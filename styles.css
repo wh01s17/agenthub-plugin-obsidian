@@ -114,18 +114,24 @@
 .agenthub-config.is-inline {
   display: flex;
   flex: 1 1 auto;
-  flex-wrap: wrap;
-  gap: var(--size-4-1);
+  gap: 4px;
   min-width: 0;
+  /* One row: extra pills scroll sideways instead of pushing the send button down. */
+  overflow-x: auto;
+}
+
+.agenthub-config.is-inline::-webkit-scrollbar {
+  display: none;
 }
 
 .agenthub-app button.agenthub-pill {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 6px;
-  max-width: 11rem;
-  height: 26px;
-  padding: 0 var(--size-4-2);
+  gap: 4px;
+  max-width: 9rem;
+  height: 22px;
+  padding: 0 7px;
   border: var(--border-width) solid var(--agenthub-border);
   border-radius: 999px;
   background: transparent;
@@ -171,13 +177,26 @@
   white-space: nowrap;
 }
 
-.agenthub-pill-caret {
-  opacity: 0.6;
+.agenthub-pill .agenthub-icon svg {
+  width: 13px;
+  height: 13px;
 }
 
-.agenthub-pill-caret svg {
-  width: 12px;
-  height: 12px;
+.agenthub-pill .agenthub-pill-caret {
+  margin-right: -2px;
+  opacity: 0.5;
+}
+
+.agenthub-pill .agenthub-pill-caret svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Switches show only their icon; the name is in the tooltip and the accessible name. */
+.agenthub-app button.agenthub-pill.is-toggle {
+  justify-content: center;
+  width: 22px;
+  padding: 0;
 }
 
 /* The panel spans the composer, like a sheet coming out of the message box. */
@@ -857,7 +876,6 @@
 
 .agenthub-composer-toolbar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--size-4-1);
   padding: var(--size-4-1) var(--size-4-2) var(--size-4-2) var(--size-4-3);
@@ -877,8 +895,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   margin-left: auto;
   padding: 0;
   border-radius: 50%;

@@ -142,6 +142,9 @@ describe('appearance settings (ADR-032)', () => {
     fireEvent.click(pill);
     expect(onChange).toHaveBeenCalledWith('fast_mode', 'on');
     expect(optionIcon(fast)).toBe('zap');
+    expect(optionIcon({ ...fast, id: 'collaboration_mode', name: 'Collaboration mode' })).toBe(
+      'users',
+    );
   });
 
   it('shows effort-like options as a level meter and flags unrestricted modes', () => {
