@@ -3,12 +3,6 @@
 Plugin de Obsidian (solo escritorio) para conversar con agentes de código como **Claude Code**,
 **Codex** u **OpenCode** desde una vista lateral, con el contexto de tus notas.
 
-> Estado: Fases 0–4 completas y Fase 6 (pulido) en curso. Ver [`plan.md`](plan.md) para la
-> arquitectura, el roadmap y la bitácora.
-
-Versión pública: **0.0.5**. **0.1.0 en preparación**, con comprobaciones pendientes en
-[`docs/checklist-0.1.0.md`](docs/checklist-0.1.0.md). Historial en [`CHANGELOG.md`](CHANGELOG.md).
-
 ## Qué hace
 
 - **Chat con el agente en el sidebar**, con respuestas en streaming renderizadas con el Markdown de Obsidian.
