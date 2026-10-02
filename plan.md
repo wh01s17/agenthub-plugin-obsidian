@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.2 en borrador |
-| Próxima tarea | Publicar la release 0.0.2 y probar con BRAT (usuario) → T6.7 (decidir `minAppVersion`) → checklist manual con lector de pantalla (T6.3) |
+| Próxima tarea | Probar la release 0.0.3 con BRAT (usuario) → T6.7 (decidir `minAppVersion`) → envío a la comunidad (opcional) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1254,7 +1254,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
-- [~] **T6.6** *(workflow y README listos; release **0.0.2** creada como borrador con sus 3 archivos; falta publicarla, probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(release **0.0.3** publicada en GitHub con sus 3 archivos; falta probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
 
@@ -1596,3 +1596,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   máximo 33 ms**. El agente simulado busca `/scenario` en cualquier línea (el primer mensaje empieza con las
   instrucciones del vault). 174 tests. Con S5 y T3.7, **no queda nada pendiente de las fases 0–4**; la Fase 5 sigue
   condicional (ADR-025).
+- **2026-10-01 · Claude (Opus 5.5)** — **Release 0.0.3 publicada** (`github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.3`,
+  marcada como *Latest*): versión subida en `package.json`/`manifest.json`/`versions.json`, tag `0.0.3`, workflow
+  `release.yml` en verde y borrador publicado con `gh release edit --draft=false --latest`. Incluye S5, T3.7 y los
+  enlaces en la exportación. El borrador antiguo de 0.0.2 sigue sin publicar (pendiente de decidir si se borra).
