@@ -9,6 +9,8 @@ export interface ExportLabels {
   plan: string;
   permission: string;
   notice: (item: TranscriptItem & { kind: 'notice' }) => string;
+  /** Vault-relative path for a file inside the vault, or `null` for paths outside it. */
+  vaultPath?: (path: string) => string | null;
 }
 
 /** Prefixes every line so multi-line text stays inside a callout. */
@@ -37,13 +39,13 @@ function fenced(text: string): string[] {
   return [fence, text, fence];
 }
 
-function toolMarkdown(call: ToolCall): string {
+function toolMarkdown(call: ToolCall, link: (path: string) => string): string {
   const body: string[] = [];
-  for (const location of call.locations ?? []) body.push(`- ${location.path}`);
+  for (const location of call.locations ?? []) body.push(`- ${link(location.path)}`);
   for (const content of call.content ?? []) {
     if (content.type === 'text') body.push(...fenced(content.text));
     if (content.type === 'terminal') body.push(...fenced(content.output));
-    if (content.type === 'diff') body.push(`\`${content.path}\``, ...fenced(content.newText));
+    if (content.type === 'diff') body.push(link(content.path), ...fenced(content.newText));
   }
   const header = `[!tool]- ${call.title} (${call.status})`;
   return quote([header, ...body].join('\n'));
@@ -64,6 +66,11 @@ export function sessionToMarkdown(
     `# ${state.title || state.localId}`,
     '',
   ];
+  // Files inside the vault become [[links]] (vault-relative); anything else stays as code.
+  const link = (path: string) => {
+    const inVault = labels.vaultPath?.(path);
+    return inVault ? `[[${inVault}]]` : `\`${path}\``;
+  };
   const body = state.items.map((item): string => {
     switch (item.kind) {
       case 'user':
@@ -73,7 +80,7 @@ export function sessionToMarkdown(
       case 'thought':
         return quote(`[!note]- ${labels.thinking}\n${item.text}`);
       case 'tool':
-        return toolMarkdown(item.call);
+        return toolMarkdown(item.call, link);
       case 'plan':
         return quote(
           [

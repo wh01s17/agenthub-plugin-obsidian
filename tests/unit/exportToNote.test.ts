@@ -9,6 +9,7 @@ const labels = {
   plan: 'Plan',
   permission: 'Permission requested',
   notice: () => 'Stopped.',
+  vaultPath: (path: string) => (path.startsWith('/v/') ? path.slice(3) : null),
 };
 
 describe('sessionToMarkdown', () => {
@@ -101,5 +102,31 @@ describe('tool output that already contains code fences', () => {
     });
     const md = sessionToMarkdown(state, labels, new Date('2026-10-01T12:00:00Z'));
     expect(md).toContain('> ````\n> ```\n> 1\tcode\n> ```\n> ````');
+  });
+});
+
+describe('paths in exported notes', () => {
+  it('links vault files and keeps outside paths as code', () => {
+    const state = createInitialState({
+      localId: 's3',
+      agentId: 'claude-acp',
+      cwd: '/v',
+      items: [
+        {
+          kind: 'tool',
+          call: {
+            id: 'c',
+            title: 'Edit',
+            kind: 'edit',
+            status: 'completed',
+            locations: [{ path: '/v/Notas/A.md' }, { path: '/etc/hosts' }],
+            content: [{ type: 'diff', path: '/v/Notas/A.md', oldText: 'a', newText: 'b' }],
+          },
+        },
+      ],
+    });
+    const md = sessionToMarkdown(state, labels, new Date('2026-10-01T12:00:00Z'));
+    expect(md).toContain('> - [[Notas/A.md]]\n> - `/etc/hosts`');
+    expect(md).toContain('> [[Notas/A.md]]\n> ```\n> b\n> ```');
   });
 });

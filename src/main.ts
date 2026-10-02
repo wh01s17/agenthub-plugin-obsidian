@@ -216,6 +216,10 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
         plan: t('planTitle'),
         permission: t('permissionTitle'),
         notice: (item) => noticeText(item.notice),
+        vaultPath: (path) => {
+          const relative = this.notes.displayPath(path);
+          return relative !== path || !path.startsWith('/') ? relative : null;
+        },
       },
       now,
     );

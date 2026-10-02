@@ -1574,3 +1574,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   de sus capturas: la exportación usa un delimitador de código más largo que cualquiera del texto (la salida de `Read`
   de Claude ya trae ``` y rompía el callout); las rutas de herramientas y diffs se muestran relativas al vault
   (`NoteContext.displayPath`). Para cerrar un panel extra: clic derecho en su pestaña (icono del robot) → Close.
+- **2026-10-01 · Claude (Opus 5.5)** — Exportación verificada sobre la nota que generó el usuario: 6 bloques de código
+  en callouts, todos cerrados, 4 con delimitador largo. Ajuste: las rutas de archivos del vault se exportan como
+  `[[enlaces]]` relativos (`ExportLabels.vaultPath`) y las de fuera del vault como código. 167 tests.
