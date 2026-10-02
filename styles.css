@@ -1059,8 +1059,8 @@
   align-items: center;
   gap: var(--size-4-1);
   padding: 0 var(--size-4-1) 0 var(--size-4-2);
-  border-left: 2px solid transparent;
-  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  border-radius: var(--radius-m);
+  transition: background-color 120ms ease;
 }
 
 .agenthub-history-entry:hover,
@@ -1068,11 +1068,13 @@
   background: var(--background-modifier-hover);
 }
 
+/* The current session: a soft accent bar inside the rounded row instead of a square border. */
 .agenthub-history-entry.is-current {
-  border-left-color: var(--interactive-accent);
+  box-shadow: inset 2px 0 0 var(--interactive-accent);
 }
 
-.agenthub-history-open {
+/* Beat Obsidian's default button look (border, shadow, hover fill): the whole row is the target. */
+.agenthub-app button.agenthub-history-open {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -1088,8 +1090,26 @@
   cursor: pointer;
 }
 
-.agenthub-history-open:hover {
+.agenthub-app button.agenthub-history-open:hover,
+.agenthub-app button.agenthub-history-open:active {
+  border: none;
   background: none;
+  box-shadow: none;
+}
+
+.agenthub-app button.agenthub-history-open:focus-visible {
+  outline: none;
+}
+
+/* Keyboard focus rings the whole row, following its rounded corners. */
+.agenthub-history-entry:has(.agenthub-history-open:focus-visible) {
+  box-shadow: inset 0 0 0 2px var(--agenthub-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agenthub-history-entry {
+    transition: none;
+  }
 }
 
 .agenthub-history-title {
