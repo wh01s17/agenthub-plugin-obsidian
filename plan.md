@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.4.0 preparada** (Fase 8 completa, T8.6): commit y tag locales, a la espera de la confirmación del usuario para el push y la publicación. 0.3.0 sigue como Latest. |
-| Próxima tarea | Con la confirmación del usuario: push de `main` y del tag `0.4.0` juntos, verificar el borrador (SHA-256, attestation) y publicarlo como Latest (§8.4); después *Check for new releases* en community.obsidian.md. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **0.4.0 publicada como Latest** (Fase 8 completa: pestañas, límite de agentes a la vez, aviso de ediciones compartidas, reordenar). |
+| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.4.0. Sin tareas abiertas en la Fase 8. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Release 0.4.0 preparada (límite de agentes, ediciones compartidas, reordenar pestañas). Claude (Opus 5.5). |
+| Última actualización | 2026-10-02 — Release 0.4.0 publicada (límite de agentes, ediciones compartidas, reordenar pestañas). Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 242 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1129,7 +1129,7 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
    automática analice la versión nueva.
 
 **Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1,
-0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) preparada.
+0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) publicada.
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1797,4 +1797,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **T8.6 cerrada** (ADR-034) tras la observación del usuario de que 0.3.0 salió con tareas abiertas: límite de agentes trabajando a la vez (`TurnLimiter`, estado `queued`, ajuste `maxWorkingAgents`), aviso de ediciones compartidas (`EditConflictWatcher`, ajuste `warnEditConflicts`) y reordenar pestañas (arrastrar o Ctrl/Cmd+Shift+←/→). Un test antiguo de `ChatSession` dependía del número de microtareas de `send`: sin límite configurado `send` conserva exactamente el flujo anterior y `queued` solo aparece si hay que esperar. 242 pruebas, lint y build correctos. **E2e de Gemini repetida a pedido del usuario:** los 2 tests agotaron 240 s. No es el plugin: `gemini -p` directo, sin AgentHub, recibe **503 UNAVAILABLE** («high demand… try again later») en todos los reintentos, y Gemini CLI reintenta con backoff hasta el timeout. Además, Gemini CLI 0.62 en modo `-p` exige carpeta de confianza (`GEMINI_CLI_TRUST_WORKSPACE=true` o `--skip-trust`); por ACP no se pudo comprobar si afecta mientras dure el 503. El usuario descarta repetirla (no usa Gemini): deja de figurar como pendiente.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Preparación de 0.4.0** a pedido del usuario. MINOR por §8.4 (funciones nuevas y dos ajustes nuevos, `maxWorkingAgents` y `warnEditConflicts`, que `migrate()` completa con sus valores por defecto). CHANGELOG 0.4.0; `package.json`, `manifest.json` y `versions.json` en 0.4.0; commit `chore(release): 0.4.0` y tag anotado `0.4.0` **solo locales**, a la espera de la confirmación del usuario para el push conjunto y la publicación. 242 pruebas, lint (1 aviso intencionado) y build correctos.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **Release 0.4.0 publicada como Latest** con confirmación del usuario: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.0. Push conjunto de `main` y del tag `0.4.0`; CI y Release correctos; `main.js`, `manifest.json` y `styles.css` del borrador coinciden por SHA-256 con el build local; `gh attestation verify` de `main.js` correcto; notas tomadas del CHANGELOG. Pendiente: *Check for new releases* en el directorio de la comunidad.
 
