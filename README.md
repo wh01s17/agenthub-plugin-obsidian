@@ -31,23 +31,23 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 
 ### Chat
 
-Codex working with a vault note, highlighted user messages, agent options, and tool calls:
+Claude Code summarizing the open note and a linked one, with a tool call, an answered permission request, and the agent options in the message box:
 
-![A Fibonacci note in Obsidian beside a Codex conversation with a highlighted user message](docs/images/codex-note.png)
+![Obsidian with a project note open and an AgentHub conversation that reads a linked meeting note and summarizes both](docs/images/chat.png)
 
-### Permission requests
+### Permissions, options, and context
 
-| The agent asks before changing a note | Long permission labels wrap to fit the panel |
+| Permission requests | Agent options and context |
 |---|---|
-| ![Codex requesting permission to create a note, with approve and deny buttons](docs/images/codex-permission.png) | ![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png) |
+| ![A pending permission card for editing a note, with Yes, allow all edits, and No buttons](docs/images/permission.png) | ![The effort panel of the message box, a level meter from Default to Max](docs/images/options-panel.png) <br> ![A selection and the current note attached to a message, with an @ suggestion for a meeting note](docs/images/context.png) |
 
 ### Settings screens
 
 | Agents | Sessions |
 |---|---|
-| ![Available agents and the default agent selector](docs/images/settings-agents.png) | ![Session history, retention, idle timeout, and export folder settings](docs/images/settings-sessions.png) |
-| **Context** | **Environment** |
-| ![Vault instructions, current note context, send key, and reasoning settings](docs/images/settings-context.png) | ![Debug panel and environment PATH settings](docs/images/settings-environment.png) |
+| ![Default agent, agent detection, and the list of available agents](docs/images/settings-agents.png) | ![Session history, retention, idle timeout, export folder, working directory, vault instructions, and message settings](docs/images/settings-sessions.png) |
+| **Appearance** | **Environment** |
+| ![Message style, density, text size, accent color, agent options placement, tool calls, and usage settings](docs/images/settings-appearance.png) | ![Login shell PATH fallback and extra PATH folders](docs/images/settings-environment.png) |
 
 ## Requirements
 

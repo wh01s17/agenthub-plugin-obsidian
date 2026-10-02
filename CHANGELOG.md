@@ -23,6 +23,7 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 - Refreshed design: message bubbles, rounded message box with a round send button and context at the top, softer cards for tools and plans, and a permission card with one primary action.
 - Agent options appear in the message box by default; the previous selectors above the conversation remain available in settings.
+- README screenshots retaken for the new design, including the agent options panel, context, and appearance settings.
 - README adds a table of contents and installation from the community plugin directory; screenshots are shown expanded, two per row.
 
 ## [0.1.1] - 2026-10-02

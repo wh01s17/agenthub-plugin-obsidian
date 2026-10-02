@@ -84,7 +84,7 @@ La bitácora §17 ya contiene verificaciones históricas de Claude sobre context
 Evidencia aportada por el usuario el 2026-10-02: [permisos](images/verification-0.1.0/codex-permissions.png),
 [cancelación](images/verification-0.1.0/codex-cancel.png), [sugerencia @](images/verification-0.1.0/codex-mention.png),
 [selección adjunta](images/verification-0.1.0/codex-selection.png), [reanudación](images/verification-0.1.0/codex-resume.png),
-[exportación](images/verification-0.1.0/codex-export.png) y [permiso largo](images/codex-permission-long.png).
+[exportación](images/verification-0.1.0/codex-export.png) y [permiso largo](images/verification-0.1.0/codex-permission-long.png).
 La selección mostrada corresponde a «Edición autorizada: ALFA-27.», no al fragmento de ejemplo de la guía.
 La nueva [captura de respuesta a @](images/verification-0.1.0/codex-mention-response.png) muestra la nota mencionada adjunta y una respuesta acorde a su contenido.
 
