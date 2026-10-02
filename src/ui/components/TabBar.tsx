@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { t } from '../../i18n';
 import { agentIdentity } from '../agentIdentity';
 import type { TabIndicator } from '../tabs';
@@ -100,9 +100,18 @@ function Tab(props: {
 
 /** One tab per conversation of the view (ADR-033): logo, title and what needs attention. */
 export function TabBar(props: TabBarProps) {
+  const list = useRef<HTMLDivElement>(null);
+  // The bar is rebuilt inside the newly active tab, starting scrolled to the left: bring the
+  // active tab back into view before painting, so tabs far to the right stay where they were.
+  useLayoutEffect(() => {
+    list.current
+      ?.querySelector('.agenthub-tab.is-active')
+      ?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [props.activeId, props.tabs.length]);
+
   return (
     <div class="agenthub-tabs" role="group" aria-label={t('tabsLabel')}>
-      <div class="agenthub-tab-list">
+      <div class="agenthub-tab-list" ref={list}>
         {props.tabs.map((tab) => (
           <Tab
             key={tab.id}

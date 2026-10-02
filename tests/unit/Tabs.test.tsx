@@ -223,6 +223,30 @@ describe('tabs and history', () => {
 });
 
 describe('TabBar', () => {
+  it('keeps the active tab in view when the bar is rebuilt', async () => {
+    const scrolled: string[] = [];
+    const scrollIntoView = vi.fn(function (this: Element) {
+      scrolled.push(this.textContent ?? '');
+    });
+    Element.prototype.scrollIntoView = scrollIntoView;
+    try {
+      const { view } = await openView();
+      const first = view.active!;
+      view.newTab('codex-acp');
+      view.newTab();
+      const last = view.active!;
+      view.selectTab(first.localId);
+      view.selectTab(last.localId);
+      expect(scrollIntoView).toHaveBeenLastCalledWith({ block: 'nearest', inline: 'nearest' });
+      expect(scrolled.at(-1)).toContain('Claude Code');
+      expect(
+        view.contentEl.querySelector('.agenthub-tab.is-active')?.isSameNode(tabs(view)[2] ?? null),
+      ).toBe(true);
+    } finally {
+      delete (Element.prototype as Partial<Element>).scrollIntoView;
+    }
+  });
+
   const infos: TabInfo[] = [
     {
       id: 'a',
