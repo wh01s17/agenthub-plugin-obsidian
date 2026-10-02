@@ -1,71 +1,70 @@
 # Changelog
 
-Cambios relevantes de AgentHub. Las versiones siguen la política de `plan.md` §8.4.
-`Unreleased` contiene trabajo futuro. La sección 0.1.0 corresponde a la release preparada, pendiente de publicación.
+Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8.4.
 
 ## [Unreleased]
 
 ## [0.1.0] - 2026-10-02
 
-### Añadido
+### Added
 
-- Historial de cambios de las versiones publicadas.
-- Checklist de aceptación y guía de cierre para 0.1.0.
+- Changelog covering published releases.
+- Release acceptance checklist and completion guide.
 
-### Corregido
+### Fixed
 
-- Instrucciones del script de sincronización de versiones: indican el bump manual, sin crear tags con prefijo `v`.
-- Los botones de permisos con comandos largos ajustan el texto al ancho del panel, también con zoom.
-- Los mensajes del usuario permiten seleccionar y copiar texto con el mouse, incluidos sus adjuntos.
+- Version synchronization instructions now use a manual version bump without creating tags with a `v` prefix.
+- Permission buttons with long command labels wrap to fit the panel, including when zoomed.
+- User messages and attachment labels support mouse text selection and copying.
 
 ## [0.0.5] - 2026-10-01
 
-### Añadido
+### Added
 
-- Confirmación y aviso visible para activar modos sin restricciones.
-- Compatibilidad con selectores de modelo y modo de agentes que usan los campos antiguos de ACP, incluido Gemini CLI.
+- Confirmation dialog and visible warning for unrestricted modes.
+- Model and mode selectors for agents using older ACP fields, including Gemini CLI.
 
-### Cambiado
+### Changed
 
-- Codex inicia en solo lectura salvo configuración inicial explícita.
-- Mensajes del usuario destacados con etiqueta «Tú»/«You», fondo, borde de acento y separación entre turnos.
-- Logos originales de Claude, Codex, Gemini y OpenCode; monogramas para agentes personalizados.
-- Animaciones de actividad, compatibles con la preferencia de movimiento reducido.
-- Contraste de etiquetas y estado; adaptación del diálogo a paneles estrechos.
+- Codex starts in read-only mode unless an initial mode is explicitly configured.
+- User messages have a visible author label, background, accent border, and spacing between turns.
+- Original Claude, Codex, Gemini, and OpenCode logos; monograms for custom agents.
+- Activity animations respect reduced motion preferences.
+- Improved label/status contrast and dialog layout in narrow panels.
 
-### Corregido
+### Fixed
 
-- Autor del manifest: `wh01s17`.
+- Plugin manifest author set to `wh01s17`.
 
 ## [0.0.4] - 2026-10-01
 
-### Añadido
+### Added
 
-- Ajustes buscables mediante la API declarativa de Obsidian 1.13+, conservando compatibilidad con versiones anteriores.
+- Searchable settings through the Obsidian 1.13+ declarative API, with compatibility for older versions.
 
-### Corregido
+### Fixed
 
-- El estado «Starting the agent…» vuelve a «Ready» al terminar el inicio anticipado de una sesión.
+- The startup status returns to Ready after early agent initialization finishes.
 
 ## [0.0.3] - 2026-10-01
 
-### Añadido
+### Added
 
-- Primera release pública documentada: chat ACP, streaming, herramientas, permisos y opciones del agente.
-- Contexto de nota activa, selecciones, menciones y autocompletado de comandos.
-- Historial persistente, reanudación, exportación a notas y vistas adicionales.
-- Diffs de ediciones, traducciones español/inglés y carga de mensajes anteriores por páginas.
-- Directorio de trabajo configurable como carpeta de la nota activa.
+- First documented public release: ACP chat, streaming, tools, permissions, and agent options.
+- Active note context, selections, mentions, and command autocomplete.
+- Persistent history, session resumption, note exports, and additional views.
+- Edit diffs, English/Spanish localization, and paginated conversation history.
+- Working directory option for the current note's folder.
 
-### Cambiado
+### Changed
 
-- Renderizado de Markdown por bloques para mantener la interfaz fluida durante respuestas largas.
+- Markdown rendering runs in blocks to keep the interface responsive during long responses.
 
-### Corregido
+### Fixed
 
-- Delimitadores de código y enlaces relativos al vault en las notas exportadas.
+- Code fences and vault-relative links in exported notes.
 
-La versión 0.0.1 fue scaffolding y 0.0.2 tuvo un tag y un borrador posteriormente eliminado; no fueron releases públicas.
+Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
 [Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.1.0...HEAD
 [0.1.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0

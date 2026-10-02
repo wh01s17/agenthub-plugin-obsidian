@@ -104,9 +104,9 @@ AGENTHUB_E2E_AGENTS=claude-acp pnpm test:e2e
 
 - [x] Incorporar las capturas enviadas por el usuario.
 - [x] Registrar resultados humanos y aprobación general del usuario.
-- [ ] Cerrar T6.3/T6.6 cuando los criterios estén realmente comprobados.
-- [ ] Pasar lint/tests/build, cerrar notas de 0.1.0 y crear commit/tag anotado sin v.
-- [ ] Subir el tag y comprobar el borrador y sus tres assets.
+- [x] Cerrar T6.3 por aceptación manual del usuario; T6.6 conserva publicación y BRAT final.
+- [x] Pasar lint/tests/build, cerrar notas de 0.1.0 y crear commit/tag anotado sin v.
+- [x] Subir el tag y comprobar el borrador y sus tres assets: workflow 36959592684 correcto; SHA-256, versión y autor coinciden con el build local.
 - [ ] Publicar con confirmación explícita del usuario, según AGENTS.md y plan §8.4.
 - [ ] Instalar/actualizar a la release pública 0.1.0 con BRAT y registrar resultados.
 

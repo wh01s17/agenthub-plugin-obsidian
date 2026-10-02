@@ -1,183 +1,159 @@
 # AgentHub
 
-Plugin de Obsidian (solo escritorio) para conversar con agentes de código como **Claude Code**,
-**Codex** u **OpenCode** desde una vista lateral, con el contexto de tus notas.
+A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini CLI**, **OpenCode**, and other coding agents from a sidebar, with your notes as context.
 
-## Qué hace
+## Features
 
-- **Chat con el agente en el sidebar**, con respuestas en streaming renderizadas con el Markdown de Obsidian.
-- **Herramientas visibles:** cada lectura, edición o comando del agente aparece como una fila; las
-  ediciones muestran el **diff** y la ruta abre la nota.
-- **Permisos interactivos:** cuando el agente pide permiso (p. ej. para editar una nota) eliges
-  permitir una vez, siempre o rechazar. Botón **Stop** para cortar un turno.
-- **Contexto de Obsidian:** la nota actual viaja con el mensaje (desactivable con su chip), puedes
-  enviar una **selección** y mencionar notas con **`@`**. Los comandos del agente se autocompletan con **`/`**.
-- **Opciones del agente** (modo, modelo, esfuerzo…) elegibles antes de empezar a conversar.
-- **Historial:** las conversaciones se guardan, se buscan, renombran, borran y **se reanudan** con
-  el contexto del agente. La vista recuerda su conversación tras reiniciar Obsidian.
-- **Exportar** una sesión a una nota Markdown.
-- Cada agente se identifica con su **logo original** (Claude, Codex, Gemini, OpenCode); los agentes personalizados, con un monograma de color.
+- **Agent chat:** streaming responses rendered with Obsidian's Markdown engine.
+- **Visible tools:** file reads, edits, and commands appear in the conversation. Edits show a diff, and file links open the corresponding note.
+- **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
+- **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
+- **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent before sending a message.
+- **Session history:** save, search, rename, delete, and resume conversations. Restore your conversation after restarting Obsidian.
+- **Export to Markdown:** save a conversation as a note.
+- **Agent identity:** original logos for supported agents and colored monograms for custom agents.
 
-## Capturas
+## Screenshots
 
-Codex trabajando con una nota del vault, mensaje propio destacado, opciones del agente y herramientas:
+Codex working with a vault note, highlighted user messages, agent options, and tool calls:
 
-![Nota de Fibonacci en Obsidian junto a la conversación de Codex y sus herramientas](docs/images/codex-note.png)
+![A Fibonacci note in Obsidian beside a Codex conversation with a highlighted user message](docs/images/codex-note.png)
 
 <details>
-<summary>Solicitud de permiso antes de crear una nota</summary>
+<summary>Permission requests before changing a note</summary>
 
-![Mensaje propio, herramientas de Codex y botones para aprobar o denegar la creación de una nota](docs/images/codex-permission.png)
+![Codex requesting permission to create a note, with approve and deny buttons](docs/images/codex-permission.png)
 
-Las opciones de permiso con comandos largos ajustan el texto al ancho del panel:
+Long permission labels wrap to fit the panel:
 
-![Solicitud real de Codex con un permiso largo distribuido en varias líneas y sus tres botones completos](docs/images/codex-permission-long.png)
+![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png)
 
 </details>
 
 <details>
-<summary>Ajustes de agentes, sesiones, contexto y entorno</summary>
+<summary>Agent, session, context, and environment settings</summary>
 
-![Agentes disponibles y selector del agente predeterminado](docs/images/settings-agents.png)
+![Available agents and the default agent selector](docs/images/settings-agents.png)
 
-![Guardado de historial, retención, inactividad y carpeta de exportación](docs/images/settings-sessions.png)
+![Session history, retention, idle timeout, and export folder settings](docs/images/settings-sessions.png)
 
-![Instrucciones del vault, nota activa, tecla de envío y razonamiento](docs/images/settings-context.png)
+![Vault instructions, current note context, send key, and reasoning settings](docs/images/settings-context.png)
 
-![Panel de depuración y configuración del PATH del entorno](docs/images/settings-environment.png)
+![Debug panel and environment PATH settings](docs/images/settings-environment.png)
 
 </details>
 
-## Requisitos
+## Requirements
 
-- Obsidian **de escritorio** 1.8.7 o superior (no funciona en móvil: necesita lanzar procesos).
-- Los agentes que quieras usar, **instalados y con sesión iniciada** en tu equipo.
-- **Node.js** (incluye `npx`) para Claude Code y Codex, que se conectan mediante adaptadores ACP
-  que `npx` descarga la primera vez.
+- **Desktop Obsidian 1.8.7 or newer.** Mobile is not supported because the plugin launches local processes.
+- The agents you want to use, **installed and authenticated** on your computer.
+- **Node.js**, including `npx`, for the Claude Code and Codex ACP adapters. `npx` downloads each adapter on first use.
 
-| Agente      | Comando que usa AgentHub                                                    | Antes de usarlo                                                                                   |
-| ----------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0`                       | Inicia sesión en `claude` (`/login`).                                                             |
-| Codex       | `npx -y @agentclientprotocol/codex-acp@2.1.1`                               | `codex login`.                                                                                    |
-| OpenCode    | `opencode acp`                                                              | `opencode auth login`.                                                                            |
-| Gemini CLI  | `gemini --acp`                                                              | Desactivado por defecto: las cuentas personales de Gemini Code Assist ya no admiten este cliente. |
-| Otros       | Cualquier agente que hable [ACP](https://agentclientprotocol.com) por stdio | Añádelo en los ajustes.                                                                           |
+| Agent | Command used by AgentHub | Before using it |
+|---|---|---|
+| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0` | Sign in with `claude` (`/login`). |
+| Codex | `npx -y @agentclientprotocol/codex-acp@2.1.1` | Run `codex login`. |
+| OpenCode | `opencode acp` | Run `opencode auth login`. |
+| Gemini CLI | `gemini --acp` | Disabled by default: personal Gemini Code Assist accounts do not support this client. |
+| Custom agents | Any agent that speaks [ACP](https://agentclientprotocol.com) over stdio | Add it in settings. |
 
-Para que el primer arranque sea más rápido puedes instalar los adaptadores de forma global:
-`npm i -g @agentclientprotocol/claude-agent-acp @agentclientprotocol/codex-acp`.
+To reduce the first startup delay, you can install the adapters globally:
 
-## Instalación
+```bash
+npm i -g @agentclientprotocol/claude-agent-acp @agentclientprotocol/codex-acp
+```
 
-El plugin aún no está en la tienda de la comunidad. Hasta entonces:
+## Installation
 
-Con **BRAT**, usa el comando **BRAT: Add a beta plugin** y añade
-`wh01s17/agenthub-plugin-obsidian`. BRAT descarga los archivos de la release y gestiona las actualizaciones.
+AgentHub is not yet available in the community plugin directory.
 
-Para instalarlo manualmente:
+### BRAT
 
-1. Compila (ver [Desarrollo](#desarrollo)) o descarga `main.js`, `manifest.json` y `styles.css`.
-2. Cópialos en `<tu-vault>/.obsidian/plugins/agenthub/`.
-3. En **Settings → Community plugins**, activa **AgentHub**.
+1. Install and enable BRAT in Obsidian.
+2. Run **BRAT: Add a beta plugin** and enter `wh01s17/agenthub-plugin-obsidian`.
+3. Enable **AgentHub** under **Settings → Community plugins**.
 
-Ten el vault bajo control de versiones o con copia de seguridad antes de dejar que un agente lo edite
-(ver [Privacidad y seguridad](#privacidad-y-seguridad)).
+BRAT downloads the release files and manages updates.
 
-## Uso
+### Manual installation
 
-- Abre la vista con el **icono del robot** de la cinta o el comando **Open AgentHub**.
-- Elige el agente y sus opciones en la cabecera, escribe y pulsa **Intro** (Mayús+Intro para nueva línea;
-  configurable a Ctrl/Cmd+Intro).
-- **`@`** para mencionar una nota, **`/`** al inicio para los comandos del agente.
-- Icono de **reloj**: historial de sesiones. Icono de **lápiz**: sesión nueva.
+1. Download `main.js`, `manifest.json`, and `styles.css` from a [release](https://github.com/wh01s17/agenthub-plugin-obsidian/releases), or build them locally.
+2. Copy them into `<your-vault>/.obsidian/plugins/agenthub/`.
+3. Enable **AgentHub** under **Settings → Community plugins**.
 
-Comandos de la paleta (sin atajos por defecto; asígnalos en **Settings → Hotkeys**):
+Back up your vault or keep it under version control before allowing an agent to edit it.
 
-| Comando                               | Qué hace                                                                                     |
-| ------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Open AgentHub                         | Abre o muestra la vista.                                                                     |
-| Open AgentHub in a new pane           | Otra vista con su propia sesión.                                                             |
-| Send selection to AgentHub            | Adjunta el texto seleccionado al próximo mensaje (también en el menú contextual del editor). |
-| Ask AgentHub about the current note   | Abre la vista con la nota actual adjunta.                                                    |
-| Start a new AgentHub session          | Sesión nueva con el mismo agente.                                                            |
-| Stop the current AgentHub turn        | Detiene al agente.                                                                           |
-| Export the AgentHub session to a note | Crea una nota con la conversación en la carpeta de exportación.                              |
+## Usage
 
-## Ajustes
+- Open the sidebar using the **robot ribbon icon** or the **Open AgentHub** command.
+- Choose an agent and its options, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
+- Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
+- Use the **clock icon** for session history and the **pencil icon** for a new session.
 
-- **Agentes:** activar o desactivar, ver si se encontraron, editar comando, argumentos, variables de
-  entorno y opciones iniciales, añadir agentes ACP propios, volver a detectar.
-- **Sesiones:** directorio de trabajo (raíz del vault o carpeta propia), instrucciones para el vault,
-  incluir la nota actual por defecto, tecla de envío, mostrar el razonamiento, panel de depuración,
-  guardado y retención del historial, carpeta de exportación, minutos de inactividad antes de detener
-  un agente (15 por defecto; la conversación continúa al volver a escribir).
-- **Entorno:** usar el `PATH` de tu shell de inicio si un comando no aparece, y carpetas extra de `PATH`.
+Commands have no default keyboard shortcuts. Assign them under **Settings → Hotkeys**.
 
-## Privacidad y seguridad
+| Command | Action |
+|---|---|
+| Open AgentHub | Open or reveal the sidebar. |
+| Open AgentHub in a new pane | Open another view with its own session. |
+| Send selection to AgentHub | Attach selected text to the next message; also available in the editor context menu. |
+| Ask AgentHub about the current note | Open the sidebar with the current note attached. |
+| Start a new AgentHub session | Start a conversation with the same agent. |
+| Stop the current AgentHub turn | Cancel the current turn. |
+| Export the AgentHub session to a note | Create a conversation note in the configured export folder. |
 
-- AgentHub lanza como procesos locales los agentes que tú ya tienes instalados. No hace llamadas de red
-  propias ni envía telemetría; cada agente se conecta a su proveedor por su cuenta.
-- Los agentes pueden **leer y modificar archivos del vault y ejecutar comandos** según el modo de
-  permisos que elijas. Codex empieza en **solo lectura** salvo que hayas configurado otro modo inicial.
-  Los modos `bypassPermissions`, `danger-full-access`, `agent-full-access` y `yolo` requieren
-  confirmación al activarse y muestran un aviso rojo en la cabecera. OpenCode conserva su modo
-  propio: revisa el selector. Ten el vault bajo control de versiones o con copia de seguridad.
-- Las notas pueden contener instrucciones maliciosas que un agente podría seguir; los permisos
-  interactivos son tu control.
-- Las conversaciones se guardan en `<configDir>/plugins/agenthub/sessions/` (normalmente dentro de
-  `.obsidian`), con las notas y selecciones adjuntas. La sincronización del vault o Git puede incluirlas.
-  Puedes desactivar el guardado y cambiar la retención (200 sesiones por defecto) en los ajustes.
-- Las variables de entorno que definas por agente se guardan en texto plano en los datos del plugin.
+## Settings
 
-## Problemas comunes
+- **Agents:** enable or disable agents, check detection results, edit commands, arguments, environment variables, and initial options, add custom ACP agents, and run detection again.
+- **Sessions:** working directory (vault root, current note folder, or a custom folder), vault instructions, current note context, send key, reasoning display, debug panel, history and retention, export folder, and idle timeout. The default idle timeout is 15 minutes; the conversation resumes when you send another message.
+- **Environment:** use the login shell PATH as a fallback when a command cannot be found, and configure additional PATH folders.
 
-- **"No se encontró el comando del agente":** instala el agente o fija su ruta absoluta en los ajustes.
-  Si lo instalaste con mise, nvm o similar y abres Obsidian desde el lanzador del escritorio, activa
-  "Usar el PATH del shell de inicio" o añade la carpeta en "Carpetas extra de PATH".
-- **"El agente necesita que inicies sesión":** ejecuta en una terminal el comando de login de la tabla.
-- **La primera respuesta tarda:** `npx` está descargando el adaptador ACP; instálalo de forma global.
-- **Opciones de Gemini:** modelo y modo aparecen después de iniciar la sesión ACP, también en
-  versiones que usan los campos antiguos `models`/`modes`. Gemini 0.62 no ofrece un selector de
-  esfuerzo por ACP. Si falla el inicio de sesión, revisa el aviso de autenticación del chat.
-- **Errores al cargar:** consola de desarrollador con `Ctrl+Shift+I` (`Cmd+Opt+I` en macOS), filtra por
-  `AgentHub`. Activa el **panel de depuración** en los ajustes para ver la salida cruda del agente.
+## Privacy and security
 
-## Desarrollo
+- AgentHub launches your installed agents as local processes. The plugin does not make its own network requests or send telemetry; each agent connects to its provider independently.
+- Agents can **read and modify vault files and execute commands** according to their permission mode. Codex starts in **read-only** mode unless you configure another initial mode.
+- Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header. OpenCode uses its own mode: check its selector.
+- Notes can contain malicious instructions that an agent might follow. Review permission requests before approving them.
+- Conversations, attached notes, and selections are stored in `<configDir>/plugins/agenthub/sessions/`, usually inside `.obsidian`. Vault sync or Git may include these files. You can disable history or change its retention limit in settings; the default is 200 sessions.
+- Per-agent environment variables are stored as plain text in the plugin's settings data.
 
-Requisitos: Node.js 22 o superior y pnpm.
+## Troubleshooting
+
+- **Agent command not found:** install the agent or configure its absolute path. If you use mise, nvm, or another version manager and launch Obsidian from your desktop, enable the login shell PATH fallback or add the relevant PATH folder.
+- **Authentication required:** run the agent's sign-in command in a terminal.
+- **Slow first startup:** `npx` may be downloading the ACP adapter. Install the adapter globally to avoid that delay.
+- **Gemini options:** model and mode selectors appear after ACP initialization, including agents using the older `models` and `modes` fields. Gemini 0.62 does not expose a reasoning effort selector through ACP. Authentication failures appear in the chat.
+- **Loading errors:** open developer tools with **Ctrl+Shift+I** (**Cmd+Opt+I** on macOS) and filter for `AgentHub`. Enable the debug panel in settings to inspect raw agent output.
+
+## Development
+
+Requirements: Node.js 22 or newer and pnpm.
 
 ```bash
 pnpm install
-pnpm build         # tsc + esbuild → main.js
-pnpm link-vault    # enlaza el build en test-vault/.obsidian/plugins/agenthub/
-pnpm dev           # recompila en cada cambio
+pnpm build         # Type-check and build main.js with esbuild
+pnpm link-vault    # Link the build into the test vault
+pnpm dev           # Rebuild on changes
 pnpm lint
-pnpm test          # Vitest; pnpm test:coverage para cobertura
-pnpm test:e2e      # contra agentes reales (AGENTHUB_E2E_AGENTS=opencode,claude-acp,codex-acp)
-pnpm fake-agent    # agente ACP simulado para probar sin gastar tokens
+pnpm test          # Vitest; use pnpm test:coverage for coverage
+pnpm test:e2e      # Real agents: AGENTHUB_E2E_AGENTS=opencode,claude-acp,codex-acp
+pnpm fake-agent    # Simulated ACP agent; no model tokens required
 ```
 
-Para probar en Obsidian: abre `test-vault/` como vault (**Manage vaults → Open folder as vault**),
-activa los plugins de la comunidad y AgentHub. Con el plugin **Hot Reload** (pjeby) instalado en ese
-vault, `pnpm dev` recarga AgentHub en cada cambio. La guía para agentes de código está en
-[`AGENTS.md`](AGENTS.md) y el plan completo en [`plan.md`](plan.md).
+Open `test-vault/` through **Manage vaults → Open folder as vault**, then enable community plugins and AgentHub. With **Hot Reload** by pjeby installed in that vault, `pnpm dev` reloads AgentHub after changes.
 
-## Publicar una versión
+Contributor instructions are in [`AGENTS.md`](AGENTS.md); architecture and development decisions are in [`plan.md`](plan.md).
 
-Sigue la política de [`plan.md` §8.4](plan.md#84-versionado-y-releases). En 0.x, **MINOR** para funciones
-nuevas o cambios de comportamiento/datos; **PATCH** para arreglos, estilo, rendimiento o documentación.
-La próxima release prevista es **0.1.0**, tras completar sus requisitos del plan.
+## Releasing
 
-1. Con `main` limpio y sincronizado, ejecutar `pnpm lint && pnpm test && pnpm build` y añadir las notas
-   en `CHANGELOG.md` (Añadido / Cambiado / Corregido).
-2. Cambiar la versión en `package.json` y ejecutar `npm_package_version=X.Y.Z node scripts/version-bump.mjs`
-   para sincronizar `manifest.json` y `versions.json`. No usar `pnpm version`.
-3. Crear el commit `chore(release): X.Y.Z` y el tag anotado **sin `v`**:
-   `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`. Subir `main` y ese tag.
-4. El workflow `release.yml` valida, compila y crea un **borrador** con `main.js`, `manifest.json` y `styles.css`.
-5. Publicar con la confirmación del usuario y las notas del changelog; registrar la release en la bitácora.
-   Las versiones beta (`X.Y.Z-beta.N`) se publican como **pre-release**, sin marcar **Latest**, y se prueban con BRAT.
+Follow the version policy in [`plan.md` §8.4](plan.md#84-versionado-y-releases). During 0.x development, use a **MINOR** version for new features or behavior/data changes, and a **PATCH** version for fixes, styling, performance, or documentation.
 
-## Licencia
+1. Start from a clean checkout synchronized with `origin`. Run `pnpm lint && pnpm test && pnpm build`, and update `CHANGELOG.md`.
+2. Edit the version in `package.json`, then run `npm_package_version=X.Y.Z node scripts/version-bump.mjs` to update `manifest.json` and `versions.json`. Do not use `pnpm version`.
+3. Commit as `chore(release): X.Y.Z`, create an annotated tag **without a `v` prefix** using `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, then push the commit and tag.
+4. The release workflow validates and builds the plugin, then creates a **draft** containing `main.js`, `manifest.json`, and `styles.css`.
+5. Publish after the maintainer confirms, using the changelog notes. Record the release in the development log. Beta versions (`X.Y.Z-beta.N`) are **prereleases**, are not marked **Latest**, and are tested with BRAT.
 
-MIT. Los logos de los agentes provienen de [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT); las marcas
-pertenecen a sus respectivos dueños y se usan solo para identificar cada herramienta.
+## License
+
+MIT. Agent logos come from [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT). Trademarks belong to their respective owners and are used to identify the corresponding tools.

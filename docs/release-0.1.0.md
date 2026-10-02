@@ -1,6 +1,6 @@
 # Preparación de 0.1.0
 
-Estado: **build local preparado, sin tag ni release pública**. 0.0.5 sigue siendo la versión publicada.
+Estado: **tag 0.1.0 creado y borrador verificado; publicación pendiente de confirmación**. 0.0.5 sigue siendo la versión publicada. Workflow Release 36959592684 correcto; sus tres assets coinciden por SHA-256 con el build local, con versión 0.1.0 y autor wh01s17.
 Fecha: 2026-10-01 (Chile). Checklist de cierre: [checklist-0.1.0.md](checklist-0.1.0.md).
 
 ## Cambios preparados
@@ -71,4 +71,4 @@ El usuario aprueba el cierre general de la revisión manual el 2026-10-02 («ta 
 La mención @ queda además comprobada con captura de la nota adjunta y respuesta sobre su contenido.
 Se mantiene la distinción entre esa aceptación y las pruebas individuales observadas: no se añade
 una certificación automática de lector de pantalla/alto contraste ni una repetición de Claude con cuota.
-Pendiente: tag/borrador, confirmación de publicación y BRAT final hacia 0.1.0.
+Pendiente: confirmación de publicación y BRAT final hacia 0.1.0. README, changelog y notas del borrador en inglés; documentos internos y UI bilingüe conservados por elección del usuario.
