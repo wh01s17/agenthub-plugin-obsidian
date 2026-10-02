@@ -19,7 +19,7 @@ Plugin de Obsidian (solo escritorio) para conversar con agentes de código como 
 - **Historial:** las conversaciones se guardan, se buscan, renombran, borran y **se reanudan** con
   el contexto del agente. La vista recuerda su conversación tras reiniciar Obsidian.
 - **Exportar** una sesión a una nota Markdown.
-- Cada agente tiene su **color y monograma** (Claude «C» naranja, Codex «Cx» verde, OpenCode «O» morado…).
+- Cada agente se identifica con su **logo original** (Claude, Codex, Gemini, OpenCode); los agentes personalizados, con un monograma de color.
 
 ## Requisitos
 
@@ -133,4 +133,5 @@ vault, `pnpm dev` recarga AgentHub en cada cambio. La guía para agentes de cód
 
 ## Licencia
 
-MIT
+MIT. Los logos de los agentes provienen de [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT); las marcas
+pertenecen a sus respectivos dueños y se usan solo para identificar cada herramienta.

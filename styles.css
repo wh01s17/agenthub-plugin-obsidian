@@ -848,3 +848,15 @@
     animation: none;
   }
 }
+
+/* Original agent logos (ADR-028): no tinted background, the logo carries its own colors. */
+.agenthub-agent-badge.is-logo {
+  padding: 0;
+  background: transparent;
+}
+
+.agenthub-agent-logo {
+  width: 20px;
+  height: 20px;
+  color: var(--text-normal); /* monochrome logos (OpenCode) follow the theme */
+}
