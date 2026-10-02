@@ -15,12 +15,15 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 
 ## Screenshots
 
+### Chat
+
 Codex working with a vault note, highlighted user messages, agent options, and tool calls:
 
 ![A Fibonacci note in Obsidian beside a Codex conversation with a highlighted user message](docs/images/codex-note.png)
 
-<details>
-<summary>Permission requests before changing a note</summary>
+### Permission requests
+
+The agent asks before changing a note:
 
 ![Codex requesting permission to create a note, with approve and deny buttons](docs/images/codex-permission.png)
 
@@ -28,10 +31,9 @@ Long permission labels wrap to fit the panel:
 
 ![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png)
 
-</details>
+### Settings
 
-<details>
-<summary>Agent, session, context, and environment settings</summary>
+Agents, sessions, context, and environment:
 
 ![Available agents and the default agent selector](docs/images/settings-agents.png)
 
@@ -40,8 +42,6 @@ Long permission labels wrap to fit the panel:
 ![Vault instructions, current note context, send key, and reasoning settings](docs/images/settings-context.png)
 
 ![Debug panel and environment PATH settings](docs/images/settings-environment.png)
-
-</details>
 
 ## Requirements
 
