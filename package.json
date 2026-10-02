@@ -1,6 +1,6 @@
 {
   "name": "agenthub",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Use coding agents like Claude Code and Codex from an Obsidian sidebar.",
   "main": "main.js",
   "private": true,

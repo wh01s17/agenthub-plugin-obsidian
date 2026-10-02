@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-02
+
 ### Added
 
 - Setting to limit how many agents work at once across tabs and panes (off by default). Extra messages wait their turn, shown as "Waiting for another tab to finish…" and a hollow dot on the tab; **Stop** takes a waiting message out of the queue without sending it.
@@ -131,7 +133,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.0
 [0.3.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.3.0
 [0.2.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.1
 [0.2.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.0
