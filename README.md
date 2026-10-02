@@ -136,10 +136,19 @@ vault, `pnpm dev` recarga AgentHub en cada cambio. La guía para agentes de cód
 
 ## Publicar una versión
 
-1. `pnpm version patch` (o `minor`/`major`): actualiza `package.json`, `manifest.json` y `versions.json`.
-2. `git push && git push --tags`: el workflow `release.yml` valida, compila y crea un **borrador** de
-   release con `main.js`, `manifest.json` y `styles.css`. Revísalo y publícalo.
-3. Para probar versiones beta antes de la tienda, instala el plugin con **BRAT** apuntando al repositorio.
+Sigue la política de [`plan.md` §8.4](plan.md#84-versionado-y-releases). En 0.x, **MINOR** para funciones
+nuevas o cambios de comportamiento/datos; **PATCH** para arreglos, estilo, rendimiento o documentación.
+La próxima release prevista es **0.1.0**, tras completar sus requisitos del plan.
+
+1. Con `main` limpio y sincronizado, ejecutar `pnpm lint && pnpm test && pnpm build` y añadir las notas
+   en `CHANGELOG.md` (Añadido / Cambiado / Corregido).
+2. Cambiar la versión en `package.json` y ejecutar `npm_package_version=X.Y.Z node scripts/version-bump.mjs`
+   para sincronizar `manifest.json` y `versions.json`. No usar `pnpm version`.
+3. Crear el commit `chore(release): X.Y.Z` y el tag anotado **sin `v`**:
+   `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`. Subir `main` y ese tag.
+4. El workflow `release.yml` valida, compila y crea un **borrador** con `main.js`, `manifest.json` y `styles.css`.
+5. Publicar con la confirmación del usuario y las notas del changelog; registrar la release en la bitácora.
+   Las versiones beta (`X.Y.Z-beta.N`) se publican como **pre-release**, sin marcar **Latest**, y se prueban con BRAT.
 
 ## Licencia
 

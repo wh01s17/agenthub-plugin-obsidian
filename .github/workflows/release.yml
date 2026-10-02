@@ -1,7 +1,7 @@
 name: Release
 
 # Push a tag equal to the manifest version (e.g. `0.1.0`, no "v" prefix: Obsidian requires it)
-# after running `pnpm version <patch|minor|major>`.
+# Update package.json, then run `npm_package_version=X.Y.Z node scripts/version-bump.mjs` (plan §8.4).
 on:
   push:
     tags:

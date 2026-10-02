@@ -41,10 +41,10 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release **0.0.5 publicada** con mensajes destacados y autor `wh01s17` |
-| Próxima tarea | Revisión con lector de pantalla y alto contraste nativo; completar la checklist manual y comprobar actualización 0.0.5 en BRAT. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
+| Próxima tarea | Preparar **0.1.0** según §8.4: cerrar la revisión manual de T6.3/T6.6, probar instalación/actualización con BRAT, crear CHANGELOG.md y añadir capturas al README. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — Release 0.0.5 publicada; T6.10 incluida y autor corregido a wh01s17, Codex |
+| Última actualización | 2026-10-01 — Política §8.4 incorporada al README y al procedimiento; próximo hito 0.1.0, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1096,9 +1096,10 @@ exactamente la versión, sin prefijo `v`** (Obsidian y BRAT lo exigen; `release.
 
 **Hitos:**
 
-- **0.1.0 — primera versión funcionalmente completa.** Fases 0–4 y 6 cerradas y verificadas en Obsidian (hecho), más:
+- **0.1.0 — primera versión funcionalmente completa.** Fases 0–4 y 6 cerradas y verificadas en Obsidian
+  (Fases 0–4 hechas; cierre manual de Fase 6 pendiente), más:
   `CHANGELOG.md` creado, capturas en el README y la instalación desde la release probada con BRAT. Es la versión que
-  sigue a 0.0.4.
+  sigue a 0.0.5.
 - **1.0.0 — versión estable.** Aceptada en la tienda de plugins de la comunidad de Obsidian, con el formato de ajustes y
   de sesiones guardadas estable (todo cambio posterior lleva migración).
 
@@ -1120,10 +1121,11 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
 4. Commit `chore(release): X.Y.Z`, tag anotado `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, push de `main` y del tag.
 5. El workflow `release.yml` valida, compila y crea el **borrador** con `main.js`, `manifest.json` y `styles.css`.
 6. Con la confirmación del usuario: `gh release edit X.Y.Z --draft=false --latest`, con las notas del `CHANGELOG.md`.
+   Para una beta: `gh release edit X.Y.Z-beta.N --draft=false --prerelease --latest=false`.
 7. Anotar la release en la bitácora (§17).
 
-**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3 y 0.0.4 publicadas. Las
-versiones 0.0.x se numeraron sin esta regla; desde aquí se aplica. La próxima release es **0.1.0**.
+**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4 y 0.0.5 publicadas.
+La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. La próxima release es **0.1.0**.
 
 **Tienda de la comunidad (camino a 1.0.0):** PR a `obsidianmd/obsidian-releases` añadiendo el plugin a
 `community-plugins.json`.
@@ -1686,3 +1688,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   comunidad); pre-releases `-beta.N`; procedimiento paso a paso con la publicación sujeta a confirmación del usuario.
 
 - **2026-10-01 · Codex** — **Release 0.0.5 publicada como Latest**: incluye T6.8/T6.9/T6.10, logos y animaciones, con `author: wh01s17` en el manifest. El borrador inicial se regeneró antes de publicarlo para que el tag incluyera la corrección de autor (commit `d29f034`). Workflow Release `36954228850` en verde. Descargados y comparados por SHA-256 `main.js`, `manifest.json` y `styles.css`: coinciden con el build local; autor y versión verificados. Release: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5. La revisión manual pendiente de T6.3/T6.6 permanece documentada.
+
+- **2026-10-01 · Codex** — Revisadas las adiciones del usuario a §8.4 y AGENTS.md: próxima release 0.1.0; MINOR para funciones/comportamiento/datos y PATCH para arreglos/estilo/rendimiento/docs. README y comentario del workflow sincronizados con el bump manual y tag sin `v`; procedimiento de beta documentado como pre-release sin Latest. Añadida 0.0.5 al historial y corregido el estado del hito: T6.3/T6.6 mantienen sus comprobaciones manuales pendientes. §0.1 incorpora changelog y capturas como requisitos de 0.1.0. Publicación solo con confirmación del usuario. Sin cambios de código ejecutable ni nueva release. Lint/build sin errores y 198 pruebas pasan (2 e2e omitidas).
