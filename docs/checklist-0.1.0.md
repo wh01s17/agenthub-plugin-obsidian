@@ -42,7 +42,7 @@ Usar un vault de prueba. Anotar versión de Obsidian, agente, sistema, resultado
 - [x] Permisos: captura con solicitud y botones de aprobar/denegar incorporada.
 - [x] Permisos largos: captura del usuario con etiqueta larga envuelta y botones completos en su tema oscuro. Zoom 100/200 % y ambos temas comprobados automáticamente; no se infiere zoom de la captura.
 
-Enviar las imágenes al agente para incorporarlas. La captura de nota y conversación ya está en docs/images/codex-note.png.
+Enviar las imágenes al agente para incorporarlas. La captura de nota y conversación ya está en docs/images/codex-note.png. (En 0.2.0 se reemplazó por `docs/images/chat.png`.)
 
 ### 2. Lector de pantalla
 

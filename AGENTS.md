@@ -20,12 +20,14 @@ Todo debe estar en verde antes de empezar y antes de cada commit.
 ## Reglas rápidas
 
 - `src/core/` y `src/adapters/` no importan `obsidian` (ver plan §4.2).
-- Ningún archivo de código supera 1000 líneas salvo justificación (no aplica a `plan.md`).
+- Ningún archivo de código supera 1000 líneas salvo justificación (no aplica a `plan.md` ni a `styles.css`, la única
+  hoja que carga Obsidian).
 - Nunca devolver un `Setting` ni componentes de Obsidian desde callbacks de promesa o funciones `async`: son
   *thenables* (Obsidian 1.13) y congelan la app. Usa cuerpos de bloque.
-- Sin `innerHTML`; estilos solo en `styles.css` con prefijo `agenthub-` y variables CSS de Obsidian.
+- Sin `innerHTML`; estilos solo en `styles.css` con prefijo `agenthub-` y variables CSS de Obsidian. La apariencia
+  configurable cambia tokens `--agenthub-*` mediante atributos `data-*` de `.agenthub-app` (ADR-032).
 - Textos de UI vía `t()` (`src/i18n/`), con las mismas claves en `en.ts` y `es.ts`.
 - Commits: Conventional Commits con el ID de tarea, p. ej. `feat(ui): permission card [T2.8]`.
 - Versiones y releases: seguir la política de `plan.md` §8.4 (SemVer, tag sin `v`, no usar `pnpm version`,
-  publicar solo con confirmación del usuario).
+  push de `main` y del tag juntos, publicar solo con confirmación del usuario).
 - Los datos marcados con ⚠️ en `plan.md` se verifican contra la herramienta real antes de usarlos.

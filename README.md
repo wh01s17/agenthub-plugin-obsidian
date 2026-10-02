@@ -22,10 +22,12 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 - **Visible tools:** file reads, edits, and commands appear in the conversation. Edits show a diff, and file links open the corresponding note.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
 - **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
-- **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent before sending a message.
+- **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
+- **Prompt history:** press **Up** and **Down** in the message box to recall the prompts sent since Obsidian started.
 - **Session history:** save, search, rename, delete, and resume conversations. Restore your conversation after restarting Obsidian.
 - **Export to Markdown:** save a conversation as a note.
 - **Agent identity:** original logos for supported agents and colored monograms for custom agents.
+- **Appearance:** bubbles, cards, or plain messages, compact or comfortable spacing, text size, and the agent's color or your theme accent. Everything uses your Obsidian theme.
 
 ## Screenshots
 
@@ -100,7 +102,7 @@ Back up your vault or keep it under version control before allowing an agent to 
 ## Usage
 
 - Open the sidebar using the **robot ribbon icon** or the **Open AgentHub** command.
-- Choose an agent and its options, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
+- Choose an agent in the header and its options with the pills in the message box, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
 - Use the **clock icon** for session history and the **pencil icon** for a new session.
@@ -119,8 +121,9 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 
 ## Settings
 
-- **Agents:** enable or disable agents, check detection results, edit commands, arguments, environment variables, and initial options, add custom ACP agents, and run detection again.
+- **Agents:** enable or disable agents, check detection results, edit commands, arguments, environment variables, and initial options, add custom ACP agents, and run detection again. The options you choose in the message box are saved as the agent's initial options.
 - **Sessions:** working directory (vault root, current note folder, or a custom folder), vault instructions, current note context, send key, reasoning display, debug panel, history and retention, export folder, and idle timeout. The default idle timeout is 15 minutes; the conversation resumes when you send another message.
+- **Appearance:** message style, density, text size, accent color, where the agent options appear (message box or above the conversation), expanded tool calls, and usage display. Changes apply at once.
 - **Environment:** use the login shell PATH as a fallback when a command cannot be found, and configure additional PATH folders.
 
 ## Privacy and security
@@ -136,7 +139,8 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 ### Security
 
 - Agents can **read and modify vault files and execute commands** according to their permission mode. Codex starts in **read-only** mode unless you configure another initial mode.
-- Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header. OpenCode uses its own mode: check its selector.
+- Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header; the mode pill also turns red. If such a mode is saved as your choice, AgentHub asks again every time the agent starts. OpenCode uses its own mode: check its selector.
+- The prompt history used by **Up** and **Down** stays in memory and is cleared when Obsidian restarts.
 - Notes can contain malicious instructions that an agent might follow. Review permission requests before approving them.
 - Conversations, attached notes, and selections are stored in `<configDir>/plugins/agenthub/sessions/`, usually inside `.obsidian`. Vault sync or Git may include these files. You can disable history or change its retention limit in settings; the default is 200 sessions.
 - Per-agent environment variables are stored as plain text in the plugin's settings data.
@@ -174,9 +178,9 @@ Follow the version policy in [`plan.md` §8.4](plan.md#84-versionado-y-releases)
 
 1. Start from a clean checkout synchronized with `origin`. Run `pnpm lint && pnpm test && pnpm build`, and update `CHANGELOG.md`.
 2. Edit the version in `package.json`, then run `npm_package_version=X.Y.Z node scripts/version-bump.mjs` to update `manifest.json` and `versions.json`. Do not use `pnpm version`.
-3. Commit as `chore(release): X.Y.Z`, create an annotated tag **without a `v` prefix** using `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, then push the commit and tag.
-4. The release workflow validates and builds the plugin, then creates a **draft** containing `main.js`, `manifest.json`, and `styles.css`.
-5. Publish after the maintainer confirms, using the changelog notes. Record the release in the development log. Beta versions (`X.Y.Z-beta.N`) are **prereleases**, are not marked **Latest**, and are tested with BRAT.
+3. Commit as `chore(release): X.Y.Z`, create an annotated tag **without a `v` prefix** using `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, then push the commit and the tag **together** (`git push origin main X.Y.Z`). Obsidian reads the version from `manifest.json` on `main`, so a manifest pushed without its release breaks installs and updates.
+4. The release workflow validates and builds the plugin, then creates a **draft** containing `main.js`, `manifest.json`, and `styles.css`, with GitHub artifact attestations for their provenance.
+5. Publish after the maintainer confirms, using the changelog notes. Record the release in the development log, then select **Check for new releases** on the [community directory listing](https://community.obsidian.md/plugins/agenthub) so the automated review checks the new version. Beta versions (`X.Y.Z-beta.N`) are **prereleases**, are not marked **Latest**, and are tested with BRAT.
 
 ## License
 

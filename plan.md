@@ -45,7 +45,7 @@
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
 | Última actualización | 2026-10-02 — Release 0.2.0 preparada: CHANGELOG cerrado, versiones sincronizadas. Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 198 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 214 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -154,6 +154,9 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | RF-19 | Panel de depuración opcional con eventos crudos y stderr del agente. | Should | 2 |
 | RF-20 | Agentes ACP personalizados definidos solo por configuración (comando, args, env). | Must | 2 |
 | RF-21 | Modo terminal: TUI original del agente en el sidebar vía xterm.js. **Descartado por decisión del usuario (ADR-029).** | Fuera de alcance | 7 (cancelada) |
+| RF-22 | Apariencia configurable (estilo de mensajes, densidad, tamaño de texto, acento, ubicación de opciones, herramientas desplegadas, consumo) respetando el tema de Obsidian. | Should | 6 (T6.13, ADR-032) |
+| RF-23 | Las opciones elegidas de cada agente (modo, modelo, esfuerzo…) se conservan entre sesiones y reinicios; los modos sin restricciones se confirman en cada inicio. | Should | 6 (T6.13) |
+| RF-24 | Historial de prompts con ↑/↓ en el compositor, solo en memoria. | Could | 6 (T6.14) |
 
 ### 2.2 No funcionales
 
@@ -719,31 +722,33 @@ explícito en los ajustes (ADR-030). Cancelar no aplica el cambio; cerrar la ses
 
 ### 4.11 UI
 
+Disposición a 0.2.0 (T6.12, ADR-032; ajustes por defecto):
+
 ```
 ┌──────────────────────────────────────┐
-│ [● Claude Code ▾]  [+] [🕘] [⚙]       │ cabecera: agente/estado, nueva sesión, historial, ajustes
-│ Refactor de notas de proyectos  ✎     │ título de sesión (editable)
+│ ✳ [Claude Code ▾]        [✎] [🕘] [⚙] │ cabecera: logo, agente, nueva sesión, historial, ajustes
 ├──────────────────────────────────────┤
-│ Tú                                    │
-│  Resume esta nota y propón etiquetas  │
-│  📎 Proyectos/Idea.md                 │
-│ Claude                                │
-│  La nota describe…  (Markdown)        │
-│ ▸ 🔍 Read  Proyectos/Idea.md      ✓   │ tarjeta de herramienta (colapsable)
-│ ▸ ✏️ Edit  Proyectos/Idea.md  [diff]  │
-│ ┌ ⚠ Permiso: ejecutar `git mv a b` ┐  │ tarjeta de permiso
-│ │ [Permitir] [Siempre] [Denegar]   │  │
+│        ╭ Summarize this note… ╮       │ mensaje propio: burbuja (o tarjeta / línea plana)
+│        ╰ Note: Projects/X.md  ╯       │
+│ 📄 Read Meetings/Kickoff.md       ✓   │ herramienta: fila compacta, detalle en tarjeta al abrir
+│ ┌ 🛡 Permission requested ─────────┐  │ permiso: tarjeta con una acción primaria
+│ │ Edit Website Redesign.md         │  │ (rutas relativas al vault)
+│ │ [Yes] [Allow all edits] [No]     │  │
 │ └──────────────────────────────────┘  │
-│ ☐ Plan: 1 ✓ Leer · 2 ◐ Mover · 3 ○    │
+│ La nota describe… (Markdown)          │ respuesta del agente: texto plano
 ├──────────────────────────────────────┤
-│ [📄 Idea.md ×] [✂ Selección ×]         │ chips de contexto
-│ ┌──────────────────────────────────┐ │
-│ │ Escribe… (@ notas, / comandos)   │ │ compositor (textarea autoajustable)
-│ └──────────────────────────────────┘ │
-│ Modo [Default ▾] Modelo [▾]   [➤/■]  │
-│ ● listo · 12,3k tokens · $0,04       │ barra de estado
+│ Ready                 Context 4% $0.23│ línea de estado (consumo opcional)
+│ ╭──────────────────────────────────╮ │
+│ │ [📄 Current note ×] [✂ Selection ×]│ │ contexto arriba, dentro del cuadro
+│ │ Message Claude Code…             │ │ textarea (@ notas, / comandos, ↑↓ historial)
+│ │ (🛡Manual)(✦Opus)(◔Medium)(⚡)   (↑)│ │ pastillas de opciones + enviar/parar redondo
+│ ╰──────────────────────────────────╯ │
 └──────────────────────────────────────┘
 ```
+
+Las pastillas abren un panel que sale del cuadro de mensaje: lista con descripciones, medidor de niveles para el
+esfuerzo, interruptor directo para opciones de dos estados y modo sin restricciones en rojo. Con
+`optionsPlacement: 'header'` los selectores vuelven a la cabecera como en 0.1.x.
 
 - **Tecnología:** Preact montado en `contentEl` del `ItemView` (desmontar en `onClose`).
   Estado: `ChatSession` expone `subscribe/getSnapshot`; hook `useSessionState()`.
@@ -755,42 +760,35 @@ explícito en los ajustes (ADR-030). Cancelar no aplica el cambio; cerrar la ses
 - **Pensamiento (thinking):** colapsado por defecto (ajuste `showThoughts`).
 - **Compositor:** `Enter` envía / `Shift+Enter` nueva línea (o `Mod+Enter` según ajuste);
   `@` abre sugeridor de archivos (fuzzy), `/` abre slash commands; historial de prompts con `↑`.
-- **Lista de mensajes:** auto-scroll solo si el usuario está al final; botón "ir al final".
-  Si el rendimiento lo exige (sesiones muy largas), virtualizar en Fase 6.
+- **Lista de mensajes:** auto-scroll solo si el usuario está al final. Las sesiones largas muestran solo el final y un
+  botón «Show earlier» (T6.4); no hubo que virtualizar.
 - **Sin `innerHTML`**: usar JSX/`createEl`; todo texto de agentes se trata como no confiable.
 - CSS: clases con prefijo `agenthub-`, solo variables de Obsidian (`--background-secondary`,
   `--text-muted`, `--interactive-accent`, …).
 
 ### 4.12 Ajustes (`src/settings/settings.ts`)
 
+Esquema real (Zod, plano, validado campo a campo por `migrate()`; el diseño inicial anidado se simplificó):
+
 ```ts
-export interface AgentConfig {
-  id: string;                      // único
-  label: string;
-  enabled: boolean;
-  transport: 'acp' | 'claude-native' | 'codex-native';
-  command: string;                 // 'npx', 'gemini', '/ruta/absoluta', ...
-  args: string[];
-  env: Record<string, string>;     // ⚠️ se guarda en data.json en texto plano: avisar en la UI
-  defaultModelId?: string;
-  defaultModeId?: string;          // permission mode / approval mode / sandbox según transporte
-  extraArgs?: string[];            // solo modo directo
+AgentConfig = {
+  id, label, enabled, transport: 'acp' | 'claude-native' | 'codex-native',
+  command, args: string[], env: Record<string, string>,   // env en texto plano: aviso en la UI
+  config: Record<string, string>,  // valores iniciales de las opciones; se actualiza con lo elegido en la vista
+  installCommand?, loginCommand?, builtin,
 }
 
-export interface AgentHubSettings {
-  schemaVersion: 1;
-  defaultAgentId: string;
-  agents: AgentConfig[];           // presets (§5.4) + personalizados
-  cwdMode: 'vault' | 'active-note-folder' | 'custom';
-  customCwd?: string;
-  context: { includeActiveNoteByDefault: boolean; maxEmbeddedBytes: number };
-  vaultInstructions: string;
-  composer: { sendWith: 'enter' | 'mod-enter' };
-  env: { resolveLoginShell: boolean; extraPath: string[] };
-  history: { enabled: boolean; maxSessions: number; exportFolder: string };
-  ui: { showThoughts: boolean; autoExpandTools: boolean; debugPanel: boolean };
-  processes: { idleTimeoutMin: number };
-  security: { protectConfigDir: boolean; allowWritesOutsideVault: boolean };
+AgentHubSettings = {
+  schemaVersion: 1, defaultAgentId, agents: AgentConfig[],
+  cwdMode: 'vault' | 'active-note-folder' | 'custom', customCwd, vaultInstructions,
+  includeActiveNote, sendWith: 'enter' | 'mod-enter', showThoughts, debugPanel,
+  historyEnabled, maxSessions, exportFolder, idleTimeoutMin,
+  knownConfigOptions,              // opciones anunciadas por cada agente (se muestran antes de arrancar)
+  resolveLoginShell, extraPath: string[],
+  // Apariencia (ADR-032)
+  messageStyle: 'bubbles' | 'cards' | 'plain', density: 'compact' | 'comfortable',
+  chatFontSize: 'small' | 'medium' | 'large', accentColor: 'agent' | 'theme',
+  optionsPlacement: 'composer' | 'header', expandToolCalls, showUsage,
 }
 ```
 
@@ -967,61 +965,50 @@ agenthub-plugin-obsidian/
 ├── styles.css
 ├── .github/workflows/ci.yml        # lint + test + build
 ├── .github/workflows/release.yml   # en tag: build y release con main.js, manifest.json, styles.css
-├── src/
-│   ├── main.ts                     # AgentHubPlugin
+├── src/                            # estructura real a 0.2.0 (difiere del diseño inicial: ADR-020, host/)
+│   ├── main.ts                     # AgentHubPlugin: SettingsHost + ViewHost, comandos, registro de la vista
 │   ├── constants.ts                # VIEW_TYPE, ids
-│   ├── i18n/                       # es.ts, en.ts, t()
+│   ├── i18n/                       # index.ts (t()), en.ts, es.ts
 │   ├── settings/
-│   │   ├── settings.ts             # tipos, defaults, presets, migrate()
-│   │   └── SettingsTab.ts
-│   ├── core/
-│   │   ├── types.ts                # §4.3
-│   │   ├── AgentAdapter.ts         # §4.4
-│   │   ├── AgentRegistry.ts        # presets → adaptadores, detección cacheada
-│   │   ├── ChatSession.ts          # orquesta un AgentSession + estado + permisos pendientes
+│   │   ├── settings.ts             # esquema Zod, defaults, presets, migrate() (incl. apariencia, ADR-032)
+│   │   └── SettingsTab.ts          # secciones Agents / Sessions / Appearance / Environment (ADR-027)
+│   ├── agents/AgentRegistry.ts     # presets → adaptadores, detección cacheada (ADR-020)
+│   ├── core/                       # sin `obsidian`
+│   │   ├── types.ts, AgentAdapter.ts, errors.ts, text.ts
+│   │   ├── ChatSession.ts          # orquesta un AgentSession + estado + permisos + opciones elegidas
 │   │   ├── reducer.ts              # (state, event) → state, puro
-│   │   ├── SessionManager.ts       # crea/reanuda/cierra sesiones, reaper de inactividad
+│   │   ├── SessionManager.ts       # crea/reanuda/cierra sesiones, hooks de configuración
 │   │   ├── PromptBuilder.ts        # §4.8
-│   │   └── HostBridgeImpl.ts       # implementación con Obsidian (única pieza de core que importa obsidian)
-│   ├── process/
-│   │   ├── ProcessRunner.ts
-│   │   ├── ProcessRegistry.ts
-│   │   ├── LineDecoder.ts          # JSONL robusto
-│   │   ├── ShellEnv.ts
-│   │   └── BinaryResolver.ts
-│   ├── adapters/
-│   │   ├── acp/AcpAdapter.ts, mapping.ts, pathGuard.ts
-│   │   ├── claude-native/ClaudeNativeAdapter.ts, args.ts, parser.ts, toolKinds.ts
-│   │   ├── codex-native/CodexNativeAdapter.ts, args.ts, parser.ts
-│   │   └── fake/FakeAdapter.ts     # en memoria, para UI/tests
-│   ├── bridge/                     # Fase 5: servidor MCP local
-│   ├── storage/
-│   │   ├── SessionStore.ts
-│   │   └── exportToNote.ts
-│   ├── ui/
-│   │   ├── AgentHubView.ts         # ItemView que monta Preact
-│   │   ├── App.tsx
-│   │   ├── components/             # Header, MessageList, AssistantMessage, Markdown, ToolCallCard,
-│   │   │                           # PermissionCard, PlanView, Composer, ContextChips, StatusBar, HistoryPanel, DebugPanel
-│   │   ├── hooks/                  # useSessionState, useThrottledValue
-│   │   └── suggest/                # FileMentionSuggest, SlashCommandSuggest
-│   └── utils/                      # logger, paths, throttle, ids
+│   │   ├── PromptHistory.ts        # historial de prompts en memoria (T6.14)
+│   │   ├── permissionModes.ts      # modos sin restricciones, config inicial (ADR-030)
+│   │   ├── pathGuard.ts            # guardia de rutas del canal fs/* (ADR-014)
+│   │   └── suggest.ts              # `@` y `/` en el compositor
+│   ├── host/                       # puente con Obsidian: ObsidianHost.ts, NoteContext.ts, openSettings.ts
+│   ├── process/                    # ProcessRunner.ts (incl. ProcessRegistry), LineDecoder.ts, ShellEnv.ts, BinaryResolver.ts
+│   ├── adapters/acp/               # AcpAdapter.ts, AcpSession.ts, mapping.ts, promptBlocks.ts
+│   ├── storage/                    # SessionStore.ts, sessionSchema.ts, exportToNote.ts
+│   └── ui/
+│       ├── AgentHubView.ts         # ItemView que monta Preact; refresh() al cambiar ajustes
+│       ├── App.tsx, ViewHost.ts, hooks.ts, DangerousModeDialog.tsx
+│       ├── agentIdentity.ts, logos.ts, diffLines.ts, markdownBlocks.ts, renderQueue.ts
+│       └── components/             # Header, ConfigOptions, OptionPicker (pastillas y panel), MessageList, Markdown,
+│                                   # ToolCallCard, DiffView, PermissionCard, PlanView, NoticeItem, Composer,
+│                                   # ContextChips, StatusBar, HistoryPanel, DebugPanel, AgentBadge, Icon
 ├── tests/
-│   ├── __mocks__/obsidian.ts
-│   ├── fixtures/acp/<agente>/*.jsonl
-│   ├── fixtures/claude/*.jsonl
-│   ├── fixtures/codex/*.jsonl
-│   ├── unit/*.test.ts
-│   └── integration/*.test.ts       # con fake-acp-agent; e2e reales tras AGENTHUB_E2E=1
+│   ├── __mocks__/obsidian.ts, setup.ts, helpers/ (stubAgent, viewHost)
+│   ├── fixtures/acp/<agente>/, fixtures/claude/, fixtures/codex/  # salidas reales grabadas
+│   ├── unit/, integration/         # integración con fake-acp-agent
+│   └── e2e/realAgents.test.ts      # agentes reales, solo con AGENTHUB_E2E=1
 ├── scripts/
-│   ├── fake-acp-agent.mjs          # agente ACP simulado con escenarios
-│   ├── record-fixture.sh           # graba salidas reales de CLIs a tests/fixtures
+│   ├── fake-acp-agent.mjs          # agente ACP simulado con escenarios (--no-resume, --broken-resume…)
 │   ├── link-test-vault.mjs         # enlaza el build a test-vault/.obsidian/plugins/agenthub
-│   └── version-bump.mjs
+│   ├── version-bump.mjs
+│   └── spikes/                     # sondas de los spikes S2–S4 y saneado de fixtures
 ├── docs/
 │   ├── spikes/S1-env.md … S5-render.md
-│   └── adr/                        # ADR largos si no caben en §12
-└── test-vault/                     # vault de desarrollo (notas de ejemplo; .obsidian parcialmente ignorado)
+│   ├── images/                     # capturas del README; verification-0.1.0/ = evidencias de 0.1.0
+│   └── release-*.md, checklist-0.1.0.md
+└── test-vault/                     # vault de desarrollo en inglés (Projects/, Meetings/; .obsidian parcialmente ignorado)
 ```
 
 ---
@@ -1118,13 +1105,18 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
    Añadido / Cambiado / Corregido).
 3. Cambiar la versión en `package.json` y ejecutar `npm_package_version=X.Y.Z node scripts/version-bump.mjs`
    (actualiza `manifest.json` y `versions.json`). **No usar `pnpm version`**: crea el tag con prefijo `v`.
-4. Commit `chore(release): X.Y.Z`, tag anotado `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, push de `main` y del tag.
-5. El workflow `release.yml` valida, compila y crea el **borrador** con `main.js`, `manifest.json` y `styles.css`.
+4. Commit `chore(release): X.Y.Z`, tag anotado `git tag -a X.Y.Z -m "AgentHub X.Y.Z"` y **push de `main` y del tag
+   juntos** (`git push origin main X.Y.Z`): Obsidian lee la versión del `manifest.json` de `main`, y un manifest sin su release
+   rompe instalaciones y actualizaciones (pasó brevemente con 0.1.1).
+5. El workflow `release.yml` valida, compila, genera las *attestations* y crea el **borrador** con `main.js`, `manifest.json` y
+   `styles.css`. Descargar los assets y comparar su SHA-256 con el build local; `gh attestation verify main.js`.
 6. Con la confirmación del usuario: `gh release edit X.Y.Z --draft=false --latest`, con las notas del `CHANGELOG.md`.
    Para una beta: `gh release edit X.Y.Z-beta.N --draft=false --prerelease --latest=false`.
-7. Anotar la release en la bitácora (§17).
+7. Anotar la release en la bitácora (§17) y pulsar **Check for new releases** en community.obsidian.md para que la revisión
+   automática analice la versión nueva.
 
-**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4 y 0.0.5 publicadas.
+**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0 y 0.1.1
+publicadas · 0.2.0 en borrador.
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1743,3 +1735,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **T6.5:** capturas del README rehechas con el nuevo diseño y el test-vault en inglés: `chat.png` (portada), `permission.png`, `options-panel.png` + `context.png` (misma celda), y ajustes Agents/Sessions/Appearance/Environment recortados por sección con ImageMagick a partir de capturas del usuario. Eliminadas `codex-note.png`, `codex-permission.png` y `settings-context.png`; `codex-permission-long.png` pasa a `docs/images/verification-0.1.0/` (evidencia enlazada desde `checklist-0.1.0.md`). Nota de demostración restaurada tras la edición de prueba. El README con las capturas nuevas no se sube hasta publicar 0.2.0: la ficha de la comunidad toma el README de `main`.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Release 0.2.0 (preparación):** el usuario pide la release. CHANGELOG cerrado en 0.2.0 (Added/Changed/Fixed), `package.json` 0.2.0 y `version-bump.mjs` para `manifest.json`/`versions.json`; T6.12 y T6.13 cerradas tras la revisión visual del usuario. Lint (1 aviso intencionado), build y 214 pruebas correctos. Siguiente: tag `0.2.0`, push, borrador del workflow, verificación de assets y publicación con confirmación.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **Auditoría de documentación para 0.2.0** a pedido del usuario. Revisados todos los `.md` (README, CHANGELOG, AGENTS, CLAUDE, plan, docs/): sin enlaces ni rutas rotas. README: funciones (pastillas de opciones persistentes, historial de prompts, apariencia), uso, sección de ajustes con *Appearance*, seguridad (modo sin restricciones guardado se reconfirma; historial solo en memoria) y pasos de release (push de `main` y tag juntos, *attestations*, *Check for new releases*). plan.md: §0.1, RF-22/23/24, §4.11 (disposición real), §4.12 (esquema real de ajustes), §6 (árbol real de `src/`, `tests/`, `scripts/`, `docs/`), §8.4 (procedimiento e historial). AGENTS.md: `styles.css` fuera del límite de 1000 líneas, tokens de apariencia (ADR-032) y push conjunto. `checklist-0.1.0.md`: nota sobre la captura reemplazada. Los documentos históricos (spikes, notas de 0.0.5/0.1.0, bitácora) se conservan como registro.
