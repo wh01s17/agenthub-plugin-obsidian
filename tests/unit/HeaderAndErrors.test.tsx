@@ -96,3 +96,22 @@ describe('agent errors are explained by kind (T6.2)', () => {
     expect(screen.queryByText('raw english text')).toBeNull();
   });
 });
+
+describe('animated status dots', () => {
+  it('animates the dots while working but keeps the plain text for screen readers', async () => {
+    const { StatusBar } = await import('../../src/ui/components/StatusBar');
+    const { container } = render(<StatusBar status="running" />);
+    expect(screen.getByRole('status').textContent).toContain('Working…');
+    expect(container.querySelectorAll('.agenthub-dots > span')).toHaveLength(3);
+    expect(
+      container.querySelector('.agenthub-dots')?.closest('[aria-hidden="true"]'),
+    ).not.toBeNull();
+  });
+
+  it('shows plain text when idle', async () => {
+    const { StatusBar } = await import('../../src/ui/components/StatusBar');
+    const { container } = render(<StatusBar status="idle" />);
+    expect(screen.getByRole('status').textContent).toBe('Ready');
+    expect(container.querySelector('.agenthub-dots')).toBeNull();
+  });
+});

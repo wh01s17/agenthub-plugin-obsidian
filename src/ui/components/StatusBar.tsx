@@ -10,6 +10,31 @@ const STATUS_TEXT: Record<SessionStatus, MessageKey> = {
   closed: 'statusClosed',
 };
 
+/** States that show animated "…" dots while the agent works. */
+const ANIMATED = new Set<SessionStatus>(['starting', 'running']);
+
+/**
+ * Text with a trailing ellipsis whose dots appear one by one. Screen readers get the plain text;
+ * the animated dots are decorative.
+ */
+function StatusText({ text, animated }: { text: string; animated: boolean }) {
+  const base = text.replace(/(…|\.\.\.)$/, '');
+  if (!animated || base === text) return <>{text}</>;
+  return (
+    <>
+      <span class="agenthub-visually-hidden">{text}</span>
+      <span aria-hidden="true">
+        {base}
+        <span class="agenthub-dots">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </span>
+      </span>
+    </>
+  );
+}
+
 export function contextPercent(usage: Usage | undefined): number | null {
   if (!usage?.contextSize || usage.contextUsed === undefined) return null;
   return Math.min(100, Math.round((usage.contextUsed / usage.contextSize) * 100));
@@ -21,7 +46,7 @@ export function StatusBar({ status, usage }: { status: SessionStatus; usage?: Us
     <div class={`agenthub-status is-${status}`}>
       {/* The only live region of the view: announces state changes, not streamed text. */}
       <span class="agenthub-status-text" role="status" aria-live="polite">
-        {t(STATUS_TEXT[status])}
+        <StatusText text={t(STATUS_TEXT[status])} animated={ANIMATED.has(status)} />
       </span>
       {percent !== null && (
         <span class="agenthub-status-usage">{t('contextUsage', { percent })}</span>
