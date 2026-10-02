@@ -323,7 +323,9 @@ export class AcpSession implements AgentSession {
 
   /**
    * Continues `resumeId` when asked: `session/resume` if supported (no replay), else `session/load`
-   * with its history replay ignored (the transcript is stored locally), else a new session.
+   * with its history replay ignored (the transcript is stored locally), else a new session. If the
+   * agent answers resume or load with an error (Gemini after a restart: -32603), the next way is tried
+   * and the conversation goes on in a new session; `restored` stays false, so the user is told.
    */
   private async openSession(
     caps: acp.InitializeResponse['agentCapabilities'],
@@ -331,30 +333,26 @@ export class AcpSession implements AgentSession {
     const { cwd, resumeId } = this.init;
     const agent = this.connection.agent;
     if (resumeId && caps?.sessionCapabilities?.resume) {
-      this.sessionId = resumeId;
-      const response = await this.withStartupGuard(
+      const response = await this.tryRestore(() =>
         agent.request(acp.methods.agent.session.resume, {
           sessionId: resumeId,
           cwd,
           mcpServers: [],
         }),
       );
-      this.restoredFlag = true;
-      return { ...response, sessionId: resumeId };
+      if (response) return { ...response, sessionId: resumeId };
     }
     if (resumeId && caps?.loadSession) {
-      this.sessionId = resumeId;
       this.replaying = true;
       try {
-        const response = await this.withStartupGuard(
+        const response = await this.tryRestore(() =>
           agent.request(acp.methods.agent.session.load, {
             sessionId: resumeId,
             cwd,
             mcpServers: [],
           }),
         );
-        this.restoredFlag = true;
-        return { ...response, sessionId: resumeId };
+        if (response) return { ...response, sessionId: resumeId };
       } finally {
         this.replaying = false;
       }
@@ -364,6 +362,22 @@ export class AcpSession implements AgentSession {
     );
     this.sessionId = created.sessionId;
     return created;
+  }
+
+  /** Runs a resume/load request; an error answer from the agent means "start fresh" (`undefined`). */
+  private async tryRestore<T>(request: () => Promise<T>): Promise<T | undefined> {
+    this.sessionId = this.init.resumeId;
+    try {
+      const response = await this.withStartupGuard(request());
+      this.restoredFlag = true;
+      return response;
+    } catch (error) {
+      // Timeouts, crashes and sign-in requests are real failures; anything else the agent answered
+      // only means this conversation cannot be continued.
+      if (!(error instanceof acp.RequestError) || error.code === AUTH_REQUIRED_CODE) throw error;
+      this.sessionId = undefined;
+      return undefined;
+    }
   }
 
   private withStartupGuard<T>(request: Promise<T>): Promise<T> {

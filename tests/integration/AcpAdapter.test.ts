@@ -274,4 +274,25 @@ describe('AcpAdapter.loadSession (T4.2)', () => {
     expect(fresh.restored).toBe(false);
     expect(fresh.nativeSessionId).not.toBe('sess_old');
   });
+
+  it('falls back to a new session when resume and load fail (Gemini after a restart)', async () => {
+    const { host } = makeHost();
+    const adapter = new AcpAdapter(
+      {
+        id: 'fake',
+        label: 'Fake',
+        command: process.execPath,
+        args: [fakeAgent, '--broken-resume', '--delay', '1'],
+      },
+      {
+        resolveCommand: () =>
+          Promise.resolve({ path: process.execPath, env: process.env, source: 'process' }),
+        registry,
+      },
+    );
+    const fresh = await adapter.loadSession('sess_old', { cwd: process.cwd() }, host);
+    sessions.push(fresh);
+    expect(fresh.restored).toBe(false);
+    expect(fresh.nativeSessionId).not.toBe('sess_old');
+  });
 });

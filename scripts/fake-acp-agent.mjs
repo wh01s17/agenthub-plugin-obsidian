@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Simulated ACP agent for development and tests (plan §9). No network, no tokens.
 //
-// Uso: node scripts/fake-acp-agent.mjs [--scenario <nombre>] [--delay <ms>] [--no-resume]
+// Uso: node scripts/fake-acp-agent.mjs [--scenario <nombre>] [--delay <ms>] [--no-resume] [--broken-resume]
+//   --broken-resume anuncia resume/load pero falla con un error interno (Gemini al reiniciar)
 // Escenarios (también se pueden pedir por prompt: "/scenario <nombre>"):
 //   echo           responde con el texto recibido, en chunks
 //   stream-long    ~20 KB de Markdown en chunks pequeños
@@ -24,6 +25,7 @@ const option = (name, fallback) => {
 const defaultScenario = option('scenario', 'echo');
 const delayMs = Number(option('delay', '15'));
 const resumable = !argv.includes('--no-resume');
+const brokenResume = argv.includes('--broken-resume');
 const legacyConfig = defaultScenario === 'legacy-config';
 
 const LEGACY_OPTIONS = () => ({
@@ -85,7 +87,7 @@ acp
   .onRequest(acp.methods.agent.initialize, () => ({
     protocolVersion: acp.PROTOCOL_VERSION,
     agentCapabilities: {
-      loadSession: false,
+      loadSession: brokenResume,
       sessionCapabilities: resumable ? { resume: {} } : {},
       promptCapabilities: { image: false, embeddedContext: true },
       mcpCapabilities: { http: false, sse: false },
@@ -106,7 +108,11 @@ acp
       ...(defaultScenario === 'mixed-config' ? LEGACY_OPTIONS() : {}),
     };
   })
+  .onRequest(acp.methods.agent.session.load, () => {
+    throw acp.RequestError.internalError();
+  })
   .onRequest(acp.methods.agent.session.resume, (ctx) => {
+    if (brokenResume) throw acp.RequestError.internalError();
     // A fresh process: pretend the conversation continues under the same id.
     state.sessions.set(ctx.params.sessionId, { abort: null });
     return legacyConfig ? LEGACY_OPTIONS() : { configOptions: CONFIG_OPTIONS() };
