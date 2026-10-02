@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release **0.0.5 publicada** con mensajes destacados y autor `wh01s17` |
-| Próxima tarea | Preparar **0.1.0** según §8.4: cerrar la revisión manual de T6.3/T6.6, probar instalación/actualización con BRAT, crear CHANGELOG.md y añadir capturas al README. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
+| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas; **0.1.0 preparada localmente**, 0.0.5 sigue publicada. Changelog y capturas del usuario incorporados; BRAT 0.0.5 comprobado. |
+| Próxima tarea | Cerrar revisión humana T6.3/T6.6 según `docs/checklist-0.1.0.md`; completar selección de capturas con el usuario, repetir Claude cuando haya cuota y preparar tag/borrador tras cerrar criterios. Publicar con confirmación. Envío a comunidad opcional; Fase 7 descartada. |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
-| Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — Política §8.4 incorporada al README y al procedimiento; próximo hito 0.1.0, Codex |
+| Bloqueos | Pruebas reales de Claude bloqueadas por límite de sesión del proveedor. Lector de pantalla y alto contraste nativo requieren revisión humana en un entorno disponible. |
+| Última actualización | 2026-10-01 — Preparación local 0.1.0, changelog, capturas del usuario, BRAT y e2e reales; pendientes detallados en la checklist, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1292,13 +1292,13 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [x] **T6.2** i18n es/en completo; textos en *sentence case*.
-- [~] **T6.3** *(axe-core y pruebas de teclado/foco, temas claro/oscuro, zoom 200 % y emulación de alto contraste/movimiento reducido realizadas; falta lector de pantalla y alto contraste nativo; ver `docs/release-0.0.5.md`)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
+- [~] **T6.3** *(axe-core y pruebas de teclado/foco, temas claro/oscuro, zoom 200 % y emulación de alto contraste/movimiento reducido realizadas; recorrido del diálogo al 200 % repetido; faltan lector de pantalla, alto contraste nativo y contraste inconcluso; ver `docs/checklist-0.1.0.md`)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
   orden de foco, tamaño de objetivos).
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
-- [~] **T6.6** *(release **0.0.5** publicada con los 3 archivos y autor wh01s17; BRAT 2.2.0 verificó instalación 0.0.3 y actualización a 0.0.4. Falta comprobar la actualización a 0.0.5 y cerrar la checklist manual; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(0.0.5 publicada; BRAT 2.2.0 verificó instalación limpia 0.0.5 y actualización 0.0.4 → 0.0.5 con ajustes y conversación conservados. Changelog, capturas y metadatos locales 0.1.0 preparados. OpenCode/Codex pasan lectura/escritura/reanudación reales; Claude bloqueado por cuota. Falta aceptación manual, tag/borrador/publicación y BRAT final 0.1.0; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 - [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
 - [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
@@ -1690,3 +1690,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Codex** — **Release 0.0.5 publicada como Latest**: incluye T6.8/T6.9/T6.10, logos y animaciones, con `author: wh01s17` en el manifest. El borrador inicial se regeneró antes de publicarlo para que el tag incluyera la corrección de autor (commit `d29f034`). Workflow Release `36954228850` en verde. Descargados y comparados por SHA-256 `main.js`, `manifest.json` y `styles.css`: coinciden con el build local; autor y versión verificados. Release: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5. La revisión manual pendiente de T6.3/T6.6 permanece documentada.
 
 - **2026-10-01 · Codex** — Revisadas las adiciones del usuario a §8.4 y AGENTS.md: próxima release 0.1.0; MINOR para funciones/comportamiento/datos y PATCH para arreglos/estilo/rendimiento/docs. README y comentario del workflow sincronizados con el bump manual y tag sin `v`; procedimiento de beta documentado como pre-release sin Latest. Añadida 0.0.5 al historial y corregido el estado del hito: T6.3/T6.6 mantienen sus comprobaciones manuales pendientes. §0.1 incorpora changelog y capturas como requisitos de 0.1.0. Publicación solo con confirmación del usuario. Sin cambios de código ejecutable ni nueva release. Lint/build sin errores y 198 pruebas pasan (2 e2e omitidas).
+
+- **2026-10-01 · usuario + Codex** — Preparación local de **0.1.0 [T6.3/T6.5/T6.6]**: creado CHANGELOG.md con releases publicadas y Unreleased; metadatos sincronizados sin tag ni publicación; instrucciones del script corregidas. A pedido del usuario, capturas exclusivamente aportadas por él: nota con conversación Codex y cuatro vistas de ajustes incorporadas al README; pendientes chat con mensaje propio visible y nueva captura de permisos. La captura de permisos mostró un botón largo que desbordaba: CSS corregido con texto envuelto, comprobado en Obsidian 1.13.7 claro/oscuro al 100/200 %, tarjeta sin desborde. Recorrido nativo del diálogo al 200 %: Tab dentro de los dos botones, Escape conserva modo y devuelve foco. BRAT 2.2.0 verificó instalación limpia 0.0.5 y actualización 0.0.4 → 0.0.5; ajustes y cuatro elementos del transcript conservados (timestamps de guardado cambian). E2e reales: OpenCode/Codex pasan lectura/escritura y reanudación (4 pruebas); Claude falla sus dos pruebas con cuota agotada del proveedor. Suite normal: 198 pasan, 2 optativas omitidas; lint/build sin errores, 7 avisos existentes. Evidencia y guía humana en `docs/release-0.1.0.md` y `docs/checklist-0.1.0.md`. T6.3/T6.6 siguen parciales por lector de pantalla, alto contraste nativo, contraste inconcluso y pasada visual final; después tag/borrador, confirmación y BRAT final 0.1.0. Cambios del usuario en test-vault se dejan fuera del commit de preparación. Fase 7 descartada.

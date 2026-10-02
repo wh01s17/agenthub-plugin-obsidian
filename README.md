@@ -6,6 +6,9 @@ Plugin de Obsidian (solo escritorio) para conversar con agentes de código como 
 > Estado: Fases 0–4 completas y Fase 6 (pulido) en curso. Ver [`plan.md`](plan.md) para la
 > arquitectura, el roadmap y la bitácora.
 
+Versión pública: **0.0.5**. **0.1.0 en preparación**, con comprobaciones pendientes en
+[`docs/checklist-0.1.0.md`](docs/checklist-0.1.0.md). Historial en [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Qué hace
 
 - **Chat con el agente en el sidebar**, con respuestas en streaming renderizadas con el Markdown de Obsidian.
@@ -20,6 +23,25 @@ Plugin de Obsidian (solo escritorio) para conversar con agentes de código como 
   el contexto del agente. La vista recuerda su conversación tras reiniciar Obsidian.
 - **Exportar** una sesión a una nota Markdown.
 - Cada agente se identifica con su **logo original** (Claude, Codex, Gemini, OpenCode); los agentes personalizados, con un monograma de color.
+
+## Capturas
+
+Codex trabajando con una nota del vault, opciones del agente, herramientas y permiso aprobado:
+
+![Nota de Fibonacci en Obsidian junto a la conversación de Codex y sus herramientas](docs/images/codex-note.png)
+
+<details>
+<summary>Ajustes de agentes, sesiones, contexto y entorno</summary>
+
+![Agentes disponibles y selector del agente predeterminado](docs/images/settings-agents.png)
+
+![Guardado de historial, retención, inactividad y carpeta de exportación](docs/images/settings-sessions.png)
+
+![Instrucciones del vault, nota activa, tecla de envío y razonamiento](docs/images/settings-context.png)
+
+![Panel de depuración y configuración del PATH del entorno](docs/images/settings-environment.png)
+
+</details>
 
 ## Requisitos
 

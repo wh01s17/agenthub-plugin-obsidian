@@ -1,8 +1,9 @@
-// Sincroniza manifest.json y versions.json con la versión de package.json (se usa en `pnpm version`).
+// After editing package.json, run with npm_package_version=X.Y.Z (plan §8.4).
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const targetVersion = process.env.npm_package_version;
-if (!targetVersion) throw new Error('Ejecutar mediante `pnpm version`.');
+if (!targetVersion)
+  throw new Error('Ejecutar con npm_package_version=X.Y.Z node scripts/version-bump.mjs.');
 
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
 manifest.version = targetVersion;
