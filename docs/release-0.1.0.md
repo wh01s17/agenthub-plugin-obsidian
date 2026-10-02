@@ -58,6 +58,15 @@ No equivale a una nueva interacción de permisos con un proveedor real.
 
 ## Pendientes
 
+### Verificación del usuario — 2026-10-02
+
+Codex real en Obsidian: rechazo y aprobación de permisos, cancelación seguida de CANCELACIÓN OK,
+reinicio completo confirmado por el usuario y recuperación de CLAVE-PUMA-83, exportación de esa
+conversación y permiso largo sin desborde en el tema oscuro. La nota de prueba leída localmente
+contiene la línea autorizada y la comprobación posterior del comando largo.
+Las capturas de @ y selección comprueban la sugerencia y el chip adjunto; queda por ver la respuesta
+del agente utilizando esos dos contextos. Evidencias enlazadas en la checklist.
+
 Lector de pantalla, alto contraste nativo, contraste inconcluso con el tema del usuario, pasada visual final
 de los agentes y Claude con cuota disponible. Capturas del README incorporadas. Después: cierre del changelog,
 commit/tag de release, borrador, confirmación de publicación y comprobación final con BRAT.

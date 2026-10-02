@@ -35,6 +35,10 @@ Codex trabajando con una nota del vault, mensaje propio destacado, opciones del 
 
 ![Mensaje propio, herramientas de Codex y botones para aprobar o denegar la creación de una nota](docs/images/codex-permission.png)
 
+Las opciones de permiso con comandos largos ajustan el texto al ancho del panel:
+
+![Solicitud real de Codex con un permiso largo distribuido en varias líneas y sus tres botones completos](docs/images/codex-permission-long.png)
+
 </details>
 
 <details>

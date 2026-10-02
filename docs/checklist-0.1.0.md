@@ -1,7 +1,7 @@
 # Cierre de AgentHub 0.1.0
 
 Estado: **preparada localmente; pendiente de aceptación manual y publicación**.
-Versión pública actual: 0.0.5. Fecha de comprobación: 2026-10-01 (Chile).
+Versión pública actual: 0.0.5. Última comprobación: 2026-10-02 (Chile).
 
 ## Resultados comprobados
 
@@ -21,7 +21,10 @@ Versión pública actual: 0.0.5. Fecha de comprobación: 2026-10-01 (Chile).
 | Botones de permisos largos | Corregido y comprobado | Texto envuelto, incluso argumentos sin espacios. Temas claro/oscuro, zoom 100/200 %; tarjeta de 250/238 px con scrollWidth idéntico al ancho. |
 | Selección del mensaje propio con mouse | Corregido y comprobado | Arrastre nativo en Obsidian: antes user-select none y selección vacía; después text y texto seleccionado. |
 | Axe en Obsidian | Sin violaciones en el estado probado | Quedan resultados de contraste inconclusos; no equivale a lector de pantalla. |
-| Permiso Codex en Obsidian | Evidencia del usuario | Capturas muestran solicitud, aprobación «Yes, proceed» y respuesta terminada; no comprueban denegación. |
+| Permisos Codex en Obsidian | Verificado por el usuario | Captura con permiso rechazado, herramienta fallida y turno detenido; siguiente intento aprobado y herramienta completada. Nota leída localmente con «Edición autorizada: ALFA-27.». |
+| Codex: cancelar y volver a enviar | Pasa | Capturas muestran respuesta cortada, Stopped, nuevo mensaje y respuesta CANCELACIÓN OK. |
+| Codex: reiniciar Obsidian y reanudar | Pasa | El usuario confirma cierre completo y reapertura antes de preguntar; recupera CLAVE-PUMA-83. |
+| Codex: exportar a nota | Pasa en el caso mostrado | Nota exportada con propiedades, mensajes ordenados, adjuntos enlazados y razonamiento plegable; captura y transcript coinciden. |
 | Changelog | Hecho | CHANGELOG.md; 0.1.0 sigue en Unreleased hasta publicar. |
 | Capturas README | Incorporadas | Chat con mensaje propio, nota, herramientas y solicitud de permiso; cuatro vistas de ajustes. El permiso de la captura tiene etiquetas cortas. |
 | Metadatos 0.1.0 | Preparados | package.json, manifest.json y versions.json; minAppVersion 1.8.7 y autor wh01s17. |
@@ -35,7 +38,7 @@ Usar un vault de prueba. Anotar versión de Obsidian, agente, sistema, resultado
 - [x] Chat: mensaje propio destacado, respuesta, opciones y herramientas visibles.
 - [x] Ajustes: agentes detectados, sesiones, contexto y entorno; cuatro capturas incorporadas.
 - [x] Permisos: captura con solicitud y botones de aprobar/denegar incorporada.
-- [ ] Permisos largos: comprobar visualmente con el tema del usuario después de cargar el CSS corregido; todos los botones deben caber. La prueba automatizada de ancho ya pasa.
+- [x] Permisos largos: captura del usuario con etiqueta larga envuelta y botones completos en su tema oscuro. Zoom 100/200 % y ambos temas comprobados automáticamente; no se infiere zoom de la captura.
 
 Enviar las imágenes al agente para incorporarlas. La captura de nota y conversación ya está en docs/images/codex-note.png.
 
@@ -65,16 +68,23 @@ Repetir con los agentes disponibles; marcar «no aplica» solo con explicación 
 |---|---|---|---|---|
 | Abrir, detectar y seleccionar opciones | Pendiente | Captura | Pendiente | Modelo/modo verificados |
 | Enviar y ver streaming/herramientas | Pendiente | Captura | Pendiente | Pendiente |
-| Aprobar permiso y comprobar edición | Pendiente | Captura | Pendiente | Pendiente |
-| Denegar permiso y comprobar que no edita | Pendiente | Pendiente | Pendiente | Pendiente |
-| Cancelar durante streaming y volver a enviar | Pendiente | Pendiente | Pendiente | Pendiente |
-| Reiniciar Obsidian y recuperar sesión | Pendiente | Pendiente | Pendiente | Pendiente |
-| Adjuntar @nota y selección | Pendiente | Pendiente | Pendiente | Pendiente |
-| Exportar conversación y comprobar nota | Pendiente | Pendiente | Pendiente | Pendiente |
+| Aprobar permiso y comprobar edición | Pendiente | Verificado | Pendiente | Pendiente |
+| Denegar permiso y comprobar que no edita | Pendiente | Rechazo de herramienta verificado | Pendiente | Pendiente |
+| Cancelar durante streaming y volver a enviar | Pendiente | Verificado | Pendiente | Pendiente |
+| Reiniciar Obsidian y recuperar sesión | Pendiente | Verificado y confirmado | Pendiente | Pendiente |
+| Adjuntar @nota y selección | Pendiente | Sugerencia @ y chip de selección verificados; falta respuesta usando ambos | Pendiente | Pendiente |
+| Exportar conversación y comprobar nota | Pendiente | Verificado en el caso mostrado | Pendiente | Pendiente |
 | Cerrar vista y comprobar limpieza del proceso propio | Pendiente | Pendiente | Pendiente | Pendiente |
 | Tema claro/oscuro, teclado y zoom en el uso real | Pendiente | Pendiente | Pendiente | Pendiente |
 
 La bitácora §17 ya contiene verificaciones históricas de Claude sobre contexto, edición, historial, reinicio y exportación. Esta matriz distingue la pasada final de la release de esa evidencia previa.
+
+Evidencia aportada por el usuario el 2026-10-02: [permisos](images/verification-0.1.0/codex-permissions.png),
+[cancelación](images/verification-0.1.0/codex-cancel.png), [sugerencia @](images/verification-0.1.0/codex-mention.png),
+[selección adjunta](images/verification-0.1.0/codex-selection.png), [reanudación](images/verification-0.1.0/codex-resume.png),
+[exportación](images/verification-0.1.0/codex-export.png) y [permiso largo](images/codex-permission-long.png).
+La selección mostrada corresponde a «Edición autorizada: ALFA-27.», no al fragmento de ejemplo de la guía.
+La captura de @ muestra la sugerencia, no un mensaje enviado ni su respuesta; no se marca ese flujo completo.
 
 Para permisos, pedir una edición de una nota desechable, denegar y comprobar que no cambió; repetir y aprobar.
 Para cancelar, solicitar una respuesta larga, detener durante el streaming y enviar otro mensaje.
