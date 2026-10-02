@@ -12,3 +12,6 @@ test-vault/.obsidian/*
 .agents/
 .claude/skills/
 skills-lock.json
+
+# Notas exportadas por AgentHub al probar en el vault de pruebas
+test-vault/AgentHub/
