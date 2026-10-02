@@ -1,4 +1,10 @@
-import { type App, PluginSettingTab, Setting } from 'obsidian';
+import {
+  type App,
+  PluginSettingTab,
+  requireApiVersion,
+  Setting,
+  type SettingDefinitionItem,
+} from 'obsidian';
 import type { DetectionResult } from '../core/AgentAdapter';
 import { t } from '../i18n';
 import { type AgentConfig, type AgentHubSettings, newCustomAgent } from './settings';
@@ -45,6 +51,32 @@ export function describeDetection(result: DetectionResult): string {
   }
 }
 
+/** One settings row: its name/description (indexed by Obsidian's settings search) and its controls. */
+interface Row {
+  name: string;
+  desc?: string;
+  /** Repeated per-agent detail rows stay out of the search index. */
+  searchable?: boolean;
+  /** Extra CSS class for the row (e.g. indented agent details). */
+  cls?: string;
+  /**
+   * Adds the row's controls. The return value is ignored on purpose: these callbacks often end with a
+   * fluent `Setting` call, and a `Setting` is a thenable in Obsidian 1.13, so it must never reach
+   * Obsidian (the wrappers below call this in a block body that returns nothing).
+   */
+  render: (setting: Setting) => unknown;
+}
+
+interface Section {
+  heading: string;
+  rows: Row[];
+}
+
+/**
+ * Settings defined once (`sections()`), shown two ways (T6.7, ADR-019): Obsidian 1.13+ reads
+ * `getSettingDefinitions()`, which also puts them in its settings search; older versions call
+ * `display()`, which draws the same rows imperatively.
+ */
 export class AgentHubSettingTab extends PluginSettingTab {
   private readonly expanded = new Set<string>();
 
@@ -56,338 +88,422 @@ export class AgentHubSettingTab extends PluginSettingTab {
     super(app, plugin);
   }
 
+  override getSettingDefinitions(): SettingDefinitionItem[] {
+    return this.sections().map((section) => ({
+      type: 'group',
+      heading: section.heading,
+      items: section.rows.map((row) => ({
+        name: row.name,
+        desc: row.desc,
+        searchable: row.searchable,
+        render: (setting: Setting) => {
+          if (row.cls) setting.settingEl.addClass(row.cls);
+          row.render(setting);
+        },
+      })),
+    }));
+  }
+
+  /** Fallback for Obsidian < 1.13 (never called when definitions are provided). */
   override display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    this.renderAgents(containerEl);
-    this.renderSessions(containerEl);
-    this.renderEnvironment(containerEl);
+    for (const section of this.sections()) {
+      new Setting(containerEl).setName(section.heading).setHeading();
+      for (const row of section.rows) {
+        const setting = new Setting(containerEl).setName(row.name);
+        if (row.desc) setting.setDesc(row.desc);
+        if (row.cls) setting.settingEl.addClass(row.cls);
+        row.render(setting);
+      }
+    }
+  }
+
+  /** Re-renders after the list of rows changes (agent added, removed, expanded…). */
+  private refresh(): void {
+    if (requireApiVersion('1.13.0')) this.update();
+    else this.display();
   }
 
   private save(change: (settings: AgentHubSettings) => void, redraw = false): void {
     void this.host.updateSettings(change).then(() => {
-      if (redraw) this.display();
+      if (redraw) this.refresh();
     });
   }
 
-  private renderAgents(el: HTMLElement): void {
-    const { settings } = this.host;
-    new Setting(el).setName(t('settingsAgents')).setHeading();
-
-    new Setting(el)
-      .setName(t('settingsDefaultAgent'))
-      .setDesc(t('settingsDefaultAgentDesc'))
-      .addDropdown((dropdown) => {
-        for (const agent of settings.agents) {
-          if (agent.enabled) dropdown.addOption(agent.id, agent.label);
-        }
-        dropdown.setValue(settings.defaultAgentId).onChange((value) =>
-          this.save((s) => {
-            s.defaultAgentId = value;
-          }),
-        );
-      });
-
-    new Setting(el)
-      .setName(t('settingsRedetect'))
-      .setDesc(t('settingsRedetectDesc'))
-      .addButton((button) =>
-        button.setButtonText(t('settingsRedetectButton')).onClick(() => {
-          this.host.redetectAgents();
-          this.display();
-        }),
-      );
-
-    settings.agents.forEach((agent, index) => this.renderAgent(el, agent, index));
-
-    new Setting(el)
-      .setName(t('settingsAddAgent'))
-      .setDesc(t('settingsAddAgentDesc'))
-      .addButton((button) =>
-        button.setButtonText(t('settingsAddAgentButton')).onClick(() => {
-          const agent = newCustomAgent(
-            settings.agents.map((a) => a.id),
-            (n) => t('settingsCustomAgentLabel', { n }),
-          );
-          this.expanded.add(agent.id);
-          this.save((s) => {
-            s.agents.push(agent);
-          }, true);
-        }),
-      );
+  private sections(): Section[] {
+    return [
+      { heading: t('settingsAgents'), rows: this.agentRows() },
+      { heading: t('settingsSessions'), rows: this.sessionRows() },
+      { heading: t('settingsEnvironment'), rows: this.environmentRows() },
+    ];
   }
 
-  private renderAgent(el: HTMLElement, agent: AgentConfig, index: number): void {
-    const row = new Setting(el).setName(agent.label);
-    if (agent.enabled) {
-      row.setDesc(t('settingsDetecting'));
-      // Block body on purpose: `Setting` has a fluent `then()` (Obsidian 1.13), so returning it from a
-      // promise callback makes the promise adopt it forever and freezes the app.
-      void this.host.detectAgent(agent.id).then((result) => {
-        row.setDesc(describeDetection(result));
-      });
-    } else {
-      row.setDesc(t('settingsDisabled'));
-    }
-    row.addToggle((toggle) =>
-      toggle.setValue(agent.enabled).onChange((enabled) =>
-        this.save((s) => {
-          const target = s.agents[index];
-          if (target) target.enabled = enabled;
-        }, true),
-      ),
-    );
-    row.addExtraButton((button) =>
-      button
-        .setIcon('pencil')
-        .setTooltip(t('settingsEdit'))
-        .onClick(() => {
-          if (this.expanded.has(agent.id)) this.expanded.delete(agent.id);
-          else this.expanded.add(agent.id);
-          this.display();
-        }),
-    );
-    if (!agent.builtin) {
-      row.addExtraButton((button) =>
-        button
-          .setIcon('trash')
-          .setTooltip(t('settingsDelete'))
-          .onClick(() =>
+  // ── Agents ─────────────────────────────────────────────────────────────────
+
+  private agentRows(): Row[] {
+    const { settings } = this.host;
+    const rows: Row[] = [
+      {
+        name: t('settingsDefaultAgent'),
+        desc: t('settingsDefaultAgentDesc'),
+        render: (setting) =>
+          setting.addDropdown((dropdown) => {
+            for (const agent of settings.agents) {
+              if (agent.enabled) dropdown.addOption(agent.id, agent.label);
+            }
+            dropdown.setValue(settings.defaultAgentId).onChange((value) =>
+              this.save((s) => {
+                s.defaultAgentId = value;
+              }),
+            );
+          }),
+      },
+      {
+        name: t('settingsRedetect'),
+        desc: t('settingsRedetectDesc'),
+        render: (setting) =>
+          setting.addButton((button) =>
+            button.setButtonText(t('settingsRedetectButton')).onClick(() => {
+              this.host.redetectAgents();
+              this.refresh();
+            }),
+          ),
+      },
+    ];
+    settings.agents.forEach((agent, index) => {
+      rows.push(this.agentRow(agent, index));
+      if (this.expanded.has(agent.id)) rows.push(...this.agentDetailRows(agent, index));
+    });
+    rows.push({
+      name: t('settingsAddAgent'),
+      desc: t('settingsAddAgentDesc'),
+      render: (setting) =>
+        setting.addButton((button) =>
+          button.setButtonText(t('settingsAddAgentButton')).onClick(() => {
+            const agent = newCustomAgent(
+              settings.agents.map((a) => a.id),
+              (n) => t('settingsCustomAgentLabel', { n }),
+            );
+            this.expanded.add(agent.id);
             this.save((s) => {
-              s.agents.splice(index, 1);
-              if (s.defaultAgentId === agent.id) s.defaultAgentId = s.agents[0]?.id ?? '';
+              s.agents.push(agent);
+            }, true);
+          }),
+        ),
+    });
+    return rows;
+  }
+
+  private agentRow(agent: AgentConfig, index: number): Row {
+    return {
+      name: agent.label,
+      desc: agent.enabled ? t('settingsDetecting') : t('settingsDisabled'),
+      render: (row) => {
+        if (agent.enabled) {
+          // Block body on purpose: `Setting` has a fluent `then()` (Obsidian 1.13), so returning it
+          // from a promise callback makes the promise adopt it forever and freezes the app.
+          void this.host.detectAgent(agent.id).then((result) => {
+            row.setDesc(describeDetection(result));
+          });
+        }
+        row.addToggle((toggle) =>
+          toggle.setValue(agent.enabled).onChange((enabled) =>
+            this.save((s) => {
+              const target = s.agents[index];
+              if (target) target.enabled = enabled;
             }, true),
           ),
-      );
-    }
-    if (this.expanded.has(agent.id)) this.renderAgentDetails(el, index, agent);
+        );
+        row.addExtraButton((button) =>
+          button
+            .setIcon('pencil')
+            .setTooltip(t('settingsEdit'))
+            .onClick(() => {
+              if (this.expanded.has(agent.id)) this.expanded.delete(agent.id);
+              else this.expanded.add(agent.id);
+              this.refresh();
+            }),
+        );
+        if (!agent.builtin) {
+          row.addExtraButton((button) =>
+            button
+              .setIcon('trash')
+              .setTooltip(t('settingsDelete'))
+              .onClick(() =>
+                this.save((s) => {
+                  s.agents.splice(index, 1);
+                  if (s.defaultAgentId === agent.id) s.defaultAgentId = s.agents[0]?.id ?? '';
+                }, true),
+              ),
+          );
+        }
+      },
+    };
   }
 
-  private renderAgentDetails(el: HTMLElement, index: number, agent: AgentConfig): void {
-    const details = el.createDiv({ cls: 'agenthub-settings-agent' });
+  private agentDetailRows(agent: AgentConfig, index: number): Row[] {
     const edit = (change: (target: AgentConfig) => void) =>
       this.save((s) => {
         const target = s.agents[index];
         if (target) change(target);
       });
+    const detail = (row: Omit<Row, 'searchable' | 'cls'>): Row => ({
+      ...row,
+      searchable: false,
+      cls: 'agenthub-settings-agent',
+    });
+    return [
+      detail({
+        name: t('settingsLabel'),
+        render: (setting) =>
+          setting.addText((text) =>
+            text.setValue(agent.label).onChange((value) =>
+              edit((a) => {
+                a.label = value.trim() || a.label;
+              }),
+            ),
+          ),
+      }),
+      detail({
+        name: t('settingsCommand'),
+        desc: t('settingsCommandDesc'),
+        render: (setting) =>
+          setting.addText((text) =>
+            text.setValue(agent.command).onChange((value) =>
+              edit((a) => {
+                a.command = value.trim();
+              }),
+            ),
+          ),
+      }),
+      detail({
+        name: t('settingsArgs'),
+        desc: t('settingsArgsDesc'),
+        render: (setting) =>
+          setting.addTextArea((area) =>
+            area.setValue(agent.args.join('\n')).onChange((value) =>
+              edit((a) => {
+                a.args = toLines(value);
+              }),
+            ),
+          ),
+      }),
+      detail({
+        name: t('settingsEnv'),
+        desc: t('settingsEnvDesc'),
+        render: (setting) =>
+          setting.addTextArea((area) =>
+            area.setValue(formatPairs(agent.env)).onChange((value) =>
+              edit((a) => {
+                a.env = parsePairs(value);
+              }),
+            ),
+          ),
+      }),
+      detail({
+        name: t('settingsConfig'),
+        desc: t('settingsConfigDesc'),
+        render: (setting) =>
+          setting.addTextArea((area) =>
+            area.setValue(formatPairs(agent.config)).onChange((value) =>
+              edit((a) => {
+                a.config = parsePairs(value);
+              }),
+            ),
+          ),
+      }),
+    ];
+  }
 
-    new Setting(details).setName(t('settingsLabel')).addText((text) =>
-      text.setValue(agent.label).onChange((value) =>
-        edit((a) => {
-          a.label = value.trim() || a.label;
+  // ── Sessions ───────────────────────────────────────────────────────────────
+
+  private sessionRows(): Row[] {
+    const { settings } = this.host;
+    const toggle = (
+      name: string,
+      desc: string,
+      value: boolean,
+      set: (s: AgentHubSettings, value: boolean) => void,
+    ): Row => ({
+      name,
+      desc,
+      render: (setting) =>
+        setting.addToggle((component) =>
+          component.setValue(value).onChange((next) => this.save((s) => set(s, next))),
+        ),
+    });
+    const integer = (
+      name: string,
+      desc: string,
+      value: number,
+      [min, max]: [number, number],
+      set: (s: AgentHubSettings, value: number) => void,
+    ): Row => ({
+      name,
+      desc,
+      render: (setting) =>
+        setting.addText((text) => {
+          text.inputEl.type = 'number';
+          text.inputEl.min = String(min);
+          text.inputEl.max = String(max);
+          text.setValue(String(value)).onChange((raw) => {
+            const next = Number(raw);
+            if (Number.isInteger(next) && next >= min && next <= max) {
+              this.save((s) => set(s, next));
+            }
+          });
         }),
+    });
+
+    const rows: Row[] = [
+      toggle(t('settingsHistory'), t('settingsHistoryDesc'), settings.historyEnabled, (s, v) => {
+        s.historyEnabled = v;
+      }),
+      integer(
+        t('settingsMaxSessions'),
+        t('settingsMaxSessionsDesc'),
+        settings.maxSessions,
+        [1, 10000],
+        (s, v) => {
+          s.maxSessions = v;
+        },
       ),
-    );
-    new Setting(details)
-      .setName(t('settingsCommand'))
-      .setDesc(t('settingsCommandDesc'))
-      .addText((text) =>
-        text.setValue(agent.command).onChange((value) =>
-          edit((a) => {
-            a.command = value.trim();
-          }),
-        ),
-      );
-    new Setting(details)
-      .setName(t('settingsArgs'))
-      .setDesc(t('settingsArgsDesc'))
-      .addTextArea((area) =>
-        area.setValue(agent.args.join('\n')).onChange((value) =>
-          edit((a) => {
-            a.args = toLines(value);
-          }),
-        ),
-      );
-    new Setting(details)
-      .setName(t('settingsEnv'))
-      .setDesc(t('settingsEnvDesc'))
-      .addTextArea((area) =>
-        area.setValue(formatPairs(agent.env)).onChange((value) =>
-          edit((a) => {
-            a.env = parsePairs(value);
-          }),
-        ),
-      );
-    new Setting(details)
-      .setName(t('settingsConfig'))
-      .setDesc(t('settingsConfigDesc'))
-      .addTextArea((area) =>
-        area.setValue(formatPairs(agent.config)).onChange((value) =>
-          edit((a) => {
-            a.config = parsePairs(value);
-          }),
-        ),
-      );
-  }
-
-  private renderSessions(el: HTMLElement): void {
-    const { settings } = this.host;
-    new Setting(el).setName(t('settingsSessions')).setHeading();
-    new Setting(el)
-      .setName(t('settingsHistory'))
-      .setDesc(t('settingsHistoryDesc'))
-      .addToggle((toggle) => {
-        toggle.setValue(settings.historyEnabled).onChange((value) =>
-          this.save((s) => {
-            s.historyEnabled = value;
-          }),
-        );
-      });
-    new Setting(el)
-      .setName(t('settingsMaxSessions'))
-      .setDesc(t('settingsMaxSessionsDesc'))
-      .addText((text) => {
-        text.inputEl.type = 'number';
-        text.inputEl.min = '1';
-        text.inputEl.max = '10000';
-        text.setValue(String(settings.maxSessions)).onChange((value) => {
-          const count = Number(value);
-          if (Number.isInteger(count) && count >= 1 && count <= 10000) {
-            this.save((s) => {
-              s.maxSessions = count;
-            });
-          }
-        });
-      });
-
-    new Setting(el)
-      .setName(t('settingsIdleTimeout'))
-      .setDesc(t('settingsIdleTimeoutDesc'))
-      .addText((text) => {
-        text.inputEl.type = 'number';
-        text.inputEl.min = '0';
-        text.inputEl.max = '1440';
-        text.setValue(String(settings.idleTimeoutMin)).onChange((value) => {
-          const minutes = Number(value);
-          if (Number.isInteger(minutes) && minutes >= 0 && minutes <= 1440) {
-            this.save((s) => {
-              s.idleTimeoutMin = minutes;
-            });
-          }
-        });
-      });
-
-    new Setting(el)
-      .setName(t('settingsExportFolder'))
-      .setDesc(t('settingsExportFolderDesc'))
-      .addText((text) =>
-        text.setValue(settings.exportFolder).onChange((value) =>
-          this.save((s) => {
-            s.exportFolder = value.trim();
-          }),
-        ),
-      );
-
-    new Setting(el)
-      .setName(t('settingsCwd'))
-      .setDesc(t('settingsCwdDesc'))
-      .addDropdown((dropdown) =>
-        dropdown
-          .addOption('vault', t('settingsCwdVault'))
-          .addOption('active-note-folder', t('settingsCwdActiveFolder'))
-          .addOption('custom', t('settingsCwdCustom'))
-          .setValue(settings.cwdMode)
-          .onChange((value) =>
-            this.save((s) => {
-              s.cwdMode = value === 'custom' || value === 'active-note-folder' ? value : 'vault';
-            }, true),
+      integer(
+        t('settingsIdleTimeout'),
+        t('settingsIdleTimeoutDesc'),
+        settings.idleTimeoutMin,
+        [0, 1440],
+        (s, v) => {
+          s.idleTimeoutMin = v;
+        },
+      ),
+      {
+        name: t('settingsExportFolder'),
+        desc: t('settingsExportFolderDesc'),
+        render: (setting) =>
+          setting.addText((text) =>
+            text.setValue(settings.exportFolder).onChange((value) =>
+              this.save((s) => {
+                s.exportFolder = value.trim();
+              }),
+            ),
           ),
-      );
+      },
+      {
+        name: t('settingsCwd'),
+        desc: t('settingsCwdDesc'),
+        render: (setting) =>
+          setting.addDropdown((dropdown) =>
+            dropdown
+              .addOption('vault', t('settingsCwdVault'))
+              .addOption('active-note-folder', t('settingsCwdActiveFolder'))
+              .addOption('custom', t('settingsCwdCustom'))
+              .setValue(settings.cwdMode)
+              .onChange((value) =>
+                this.save((s) => {
+                  s.cwdMode =
+                    value === 'custom' || value === 'active-note-folder' ? value : 'vault';
+                }, true),
+              ),
+          ),
+      },
+    ];
     if (settings.cwdMode === 'custom') {
-      new Setting(el)
-        .setName(t('settingsCustomCwd'))
-        .setDesc(t('settingsCustomCwdDesc'))
-        .addText((text) =>
-          text.setValue(settings.customCwd).onChange((value) =>
-            this.save((s) => {
-              s.customCwd = value.trim();
-            }),
+      rows.push({
+        name: t('settingsCustomCwd'),
+        desc: t('settingsCustomCwdDesc'),
+        render: (setting) =>
+          setting.addText((text) =>
+            text.setValue(settings.customCwd).onChange((value) =>
+              this.save((s) => {
+                s.customCwd = value.trim();
+              }),
+            ),
           ),
-        );
-    }
-
-    new Setting(el)
-      .setName(t('settingsInstructions'))
-      .setDesc(t('settingsInstructionsDesc'))
-      .addTextArea((area) => {
-        area.inputEl.rows = 5;
-        area.setValue(settings.vaultInstructions).onChange((value) =>
-          this.save((s) => {
-            s.vaultInstructions = value;
-          }),
-        );
       });
-
-    new Setting(el)
-      .setName(t('settingsIncludeActive'))
-      .setDesc(t('settingsIncludeActiveDesc'))
-      .addToggle((toggle) =>
-        toggle.setValue(settings.includeActiveNote).onChange((value) =>
-          this.save((s) => {
-            s.includeActiveNote = value;
+    }
+    rows.push(
+      {
+        name: t('settingsInstructions'),
+        desc: t('settingsInstructionsDesc'),
+        render: (setting) =>
+          setting.addTextArea((area) => {
+            area.inputEl.rows = 5;
+            area.setValue(settings.vaultInstructions).onChange((value) =>
+              this.save((s) => {
+                s.vaultInstructions = value;
+              }),
+            );
           }),
-        ),
-      );
-
-    new Setting(el).setName(t('settingsSendWith')).addDropdown((dropdown) =>
-      dropdown
-        .addOption('enter', t('settingsSendEnter'))
-        .addOption('mod-enter', t('settingsSendModEnter'))
-        .setValue(settings.sendWith)
-        .onChange((value) =>
-          this.save((s) => {
-            s.sendWith = value === 'mod-enter' ? 'mod-enter' : 'enter';
-          }),
-        ),
+      },
+      toggle(
+        t('settingsIncludeActive'),
+        t('settingsIncludeActiveDesc'),
+        settings.includeActiveNote,
+        (s, v) => {
+          s.includeActiveNote = v;
+        },
+      ),
+      {
+        name: t('settingsSendWith'),
+        render: (setting) =>
+          setting.addDropdown((dropdown) =>
+            dropdown
+              .addOption('enter', t('settingsSendEnter'))
+              .addOption('mod-enter', t('settingsSendModEnter'))
+              .setValue(settings.sendWith)
+              .onChange((value) =>
+                this.save((s) => {
+                  s.sendWith = value === 'mod-enter' ? 'mod-enter' : 'enter';
+                }),
+              ),
+          ),
+      },
+      toggle(
+        t('settingsShowThoughts'),
+        t('settingsShowThoughtsDesc'),
+        settings.showThoughts,
+        (s, v) => {
+          s.showThoughts = v;
+        },
+      ),
+      toggle(t('settingsDebug'), t('settingsDebugDesc'), settings.debugPanel, (s, v) => {
+        s.debugPanel = v;
+      }),
     );
-
-    new Setting(el)
-      .setName(t('settingsShowThoughts'))
-      .setDesc(t('settingsShowThoughtsDesc'))
-      .addToggle((toggle) =>
-        toggle.setValue(settings.showThoughts).onChange((value) =>
-          this.save((s) => {
-            s.showThoughts = value;
-          }),
-        ),
-      );
-
-    new Setting(el)
-      .setName(t('settingsDebug'))
-      .setDesc(t('settingsDebugDesc'))
-      .addToggle((toggle) =>
-        toggle.setValue(settings.debugPanel).onChange((value) =>
-          this.save((s) => {
-            s.debugPanel = value;
-          }),
-        ),
-      );
+    return rows;
   }
 
-  private renderEnvironment(el: HTMLElement): void {
+  // ── Environment ────────────────────────────────────────────────────────────
+
+  private environmentRows(): Row[] {
     const { settings } = this.host;
-    new Setting(el).setName(t('settingsEnvironment')).setHeading();
-
-    new Setting(el)
-      .setName(t('settingsLoginShell'))
-      .setDesc(t('settingsLoginShellDesc'))
-      .addToggle((toggle) =>
-        toggle.setValue(settings.resolveLoginShell).onChange((value) =>
-          this.save((s) => {
-            s.resolveLoginShell = value;
-          }),
-        ),
-      );
-
-    new Setting(el)
-      .setName(t('settingsExtraPath'))
-      .setDesc(t('settingsExtraPathDesc'))
-      .addTextArea((area) =>
-        area.setValue(settings.extraPath.join('\n')).onChange((value) =>
-          this.save((s) => {
-            s.extraPath = toLines(value);
-          }),
-        ),
-      );
+    return [
+      {
+        name: t('settingsLoginShell'),
+        desc: t('settingsLoginShellDesc'),
+        render: (setting) =>
+          setting.addToggle((toggle) =>
+            toggle.setValue(settings.resolveLoginShell).onChange((value) =>
+              this.save((s) => {
+                s.resolveLoginShell = value;
+              }),
+            ),
+          ),
+      },
+      {
+        name: t('settingsExtraPath'),
+        desc: t('settingsExtraPathDesc'),
+        render: (setting) =>
+          setting.addTextArea((area) =>
+            area.setValue(settings.extraPath.join('\n')).onChange((value) =>
+              this.save((s) => {
+                s.extraPath = toLines(value);
+              }),
+            ),
+          ),
+      },
+    ];
   }
 }

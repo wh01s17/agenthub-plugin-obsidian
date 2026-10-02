@@ -37,3 +37,40 @@ describe('AgentHubSettingTab', () => {
     expect(tab.containerEl.textContent).toContain('Disabled'); // Gemini
   });
 });
+
+describe('declarative settings (T6.7)', () => {
+  it('exposes searchable groups for Obsidian 1.13+ and hides per-agent detail rows from search', () => {
+    const { tab } = makeTab();
+    const groups = tab.getSettingDefinitions();
+    const headings = groups.map((g) => ('heading' in g ? g.heading : ''));
+    expect(headings).toEqual(['Agents', 'Sessions', 'Environment']);
+
+    const names = groups.flatMap((g) =>
+      'items' in g && g.items ? g.items.flatMap((i) => ('name' in i ? [i.name] : [])) : [],
+    );
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'Default agent',
+        'Claude Code',
+        'Working directory',
+        'Extra PATH folders',
+      ]),
+    );
+  });
+
+  it('draws the same rows imperatively on older Obsidian (display fallback)', () => {
+    const { tab } = makeTab();
+    tab.display();
+    const text = tab.containerEl.textContent ?? '';
+    for (const name of [
+      'Agents',
+      'Default agent',
+      'Claude Code',
+      'Sessions',
+      'Working directory',
+      'Environment',
+    ]) {
+      expect(text).toContain(name);
+    }
+  });
+});

@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.2 en borrador |
-| Próxima tarea | Probar la release 0.0.3 con BRAT (usuario) → T6.7 (decidir `minAppVersion`) → envío a la comunidad (opcional) |
+| Próxima tarea | Probar la release con BRAT (usuario) → envío a la comunidad (opcional) → Fase 7 (opcional) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1253,7 +1253,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
   orden de foco, tamaño de objetivos).
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
-- [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
+- [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
 - [~] **T6.6** *(release **0.0.3** publicada en GitHub con sus 3 archivos; falta probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
@@ -1284,7 +1284,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
 | ADR-017 | `PATH`: `process.env` primero; shell de login solo como respaldo asíncrono y cacheado, añadiendo rutas al final. | S1: en este equipo `process.env` ya encuentra todo; el shell cuesta ≈1,4 s y cambia el binario elegido. | Fusionar siempre el entorno del shell (lento y cambia binarios). | Aceptada (matiza ADR-006) |
 | ADR-018 | La skill `frontend-design` se aplica solo en su principio (dirección visual intencional y coherente), no en su estética "audaz" (fuentes propias, fondos con texturas, paletas propias). | Las guías de Obsidian exigen respetar el tema del usuario: solo variables CSS de Obsidian, sin fuentes impuestas. | Seguir la skill al pie de la letra (rompería temas y la revisión de la comunidad). | Aceptada |
-| ADR-019 | La pestaña de ajustes usa `PluginSettingTab.display()` (deprecado en Obsidian 1.13) en lugar de la API declarativa `getSettingDefinitions()`. | La API nueva exige `minAppVersion` ≥ 1.13; mantener 1.8.7 de momento. El lint lo marca como aviso. | Subir ya `minAppVersion` a 1.13 (excluye usuarios en versiones anteriores). | Aceptada — revisar en T6.7 |
+| ADR-019 | La pestaña de ajustes usa `PluginSettingTab.display()` (deprecado en Obsidian 1.13) en lugar de la API declarativa `getSettingDefinitions()`. | La API nueva exige `minAppVersion` ≥ 1.13; mantener 1.8.7 de momento. El lint lo marca como aviso. | Subir ya `minAppVersion` a 1.13 (excluye usuarios en versiones anteriores). | Reemplazada por ADR-027 |
 | ADR-020 | `AgentRegistry` vive en `src/agents/` (capa de composición), no en `src/core/`. | Construye adaptadores concretos; en `core/` invertiría la dependencia núcleo → adaptadores. | `core/AgentRegistry.ts` (plan original). | Aceptada |
 | ADR-021 | `SessionStore` recibe un subconjunto estructural de `DataAdapter` y guarda snapshots JSONL completos, serializados, con `.tmp` y respaldo `.bak` recuperable. El núcleo lo conecta mediante `SessionManager.onCreate`. | Herramientas y planes cambian después de insertarse; snapshots evitan duplicados. Verificado en Obsidian 1.13.7: `rename()` rechaza destinos existentes. El respaldo conserva la versión anterior durante el reemplazo. | Append de cada snapshot (duplicación); usar `fs.rename` directamente (acoplamiento a disco); asumir que `DataAdapter.rename` sobrescribe. | Aceptada |
 | ADR-022 | Reabrir una sesión guardada usa `session/resume` si el agente lo anuncia; si no, `session/load` ignorando la repetición del historial (ya está en el transcript local); si no, sesión nueva con aviso `contextNotRestored`. | El transcript local es la fuente de lo que se muestra; el agente solo necesita recuperar su contexto. S2: Claude, Codex y OpenCode anuncian `resume`. | Usar siempre `session/load` (duplicaría el historial). | Aceptada |
@@ -1292,6 +1292,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-024 | El agente arranca en segundo plano al mostrar una sesión (no con el primer mensaje), para que modo/modelo/esfuerzo se elijan **antes** de conversar. Mientras arranca se muestran las opciones que anunció al iniciar la última vez (`knownConfigOptions` en `data.json`, solo valores iniciales: un modo peligroso nunca queda fijado); un cambio hecho antes o durante el arranque se aplica al iniciar. Arrancar no bloquea el envío. | Pedido del usuario: configurar antes de iniciar la conversación. | Arranque perezoso (las opciones no aparecían hasta el primer mensaje). | Aceptada — revisar consumo con el reaper (T4.5) |
 | ADR-025 | La Fase 5 (adaptadores directos `stream-json` / `exec --json`) pasa a **opcional y condicional**, con tres disparadores (adaptador ACP roto o abandonado, entorno sin Node/npm, función del CLI ausente en ACP). | ACP ya da todo lo necesario con mejores permisos y streaming; dos formatos extra que mantener no compensan hoy. Se conserva la investigación (S3/S4). | Implementarla ya (coste de una fase para una segunda vía a lo mismo); borrarla (perder el trabajo previo y la salida de emergencia). | Aceptada (decidido con el usuario) |
 | ADR-026 | El Markdown de los agentes se renderiza **por bloques** (párrafos fuera de bloques de código) y con una **cola de ≤ 8 ms por tarea**. | S5 en Obsidian real: renderizar el mensaje entero bloqueaba la UI hasta 603 ms; con bloques + cola, 0 tareas largas y 33 ms de hueco máximo. | Renderizar entero con throttle (bloqueos visibles); texto plano durante el streaming (pierde formato mientras escribe). | Aceptada |
+| ADR-027 | Ajustes definidos una vez como secciones y filas: `getSettingDefinitions()` los entrega a Obsidian 1.13+ (aparecen en su buscador; las filas de detalle por agente con `searchable: false`) y `display()` dibuja las mismas filas en versiones anteriores; cambios de estructura con `update()` (1.13+) o `display()`. **`minAppVersion` sigue en 1.8.7.** | La documentación de 1.13 indica que `display()` no se llama si hay definiciones y recomienda conservarlo para versiones antiguas: no hace falta excluir usuarios. Verificado en Obsidian 1.13.7 real. | Subir `minAppVersion` a 1.13 (excluye usuarios sin necesidad). | Aceptada (reemplaza ADR-019) |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1600,3 +1601,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   marcada como *Latest*): versión subida en `package.json`/`manifest.json`/`versions.json`, tag `0.0.3`, workflow
   `release.yml` en verde y borrador publicado con `gh release edit --draft=false --latest`. Incluye S5, T3.7 y los
   enlaces en la exportación. El borrador antiguo de 0.0.2 se borró a pedido del usuario (el tag `0.0.2` se conserva).
+- **2026-10-01 · Claude (Opus 5.5)** — **T6.7 hecho** (ADR-027): `SettingsTab` define secciones y filas una sola vez;
+  `getSettingDefinitions()` para Obsidian 1.13+ y `display()` como respaldo, sin subir `minAppVersion`. Las funciones
+  `render` devuelven `unknown` y se llaman dentro de un envoltorio con cuerpo de bloque, para que un `Setting`
+  (thenable) nunca llegue a Obsidian. Verificado en una instancia aislada de Obsidian 1.13.7: la pestaña se dibuja,
+  el buscador de ajustes encuentra "AgentHub → Working directory" y el lápiz despliega los detalles del agente vía
+  `update()`. El mock de `obsidian` simula `requireApiVersion`. 176 tests.

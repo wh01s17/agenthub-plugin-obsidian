@@ -197,3 +197,12 @@ export const MarkdownRenderer = {
 export class MarkdownView {}
 export class FileSystemAdapter {}
 export const normalizePath = (path: string): string => path;
+
+/** Tests run the pre-1.13 path unless they override this. */
+export let apiVersionAtLeast113 = false;
+export function __setApi113(value: boolean): void {
+  apiVersionAtLeast113 = value;
+}
+export function requireApiVersion(version: string): boolean {
+  return version === '1.13.0' ? apiVersionAtLeast113 : true;
+}
