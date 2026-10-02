@@ -35,9 +35,19 @@ export default defineConfig([
     },
   },
   {
-    // Los tests corren en jsdom puro, sin los helpers DOM de Obsidian.
+    // Los tests corren en jsdom puro, sin los helpers DOM de Obsidian. Las rutas `.obsidian` literales son
+    // datos de prueba (guardia de rutas, copia del vault), no la carpeta de configuración real.
     files: ['tests/**'],
-    rules: { 'obsidianmd/prefer-create-el': 'off', 'obsidianmd/prefer-window-timers': 'off' },
+    rules: {
+      'obsidianmd/prefer-create-el': 'off',
+      'obsidianmd/prefer-window-timers': 'off',
+      'obsidianmd/hardcoded-config-path': 'off',
+    },
+  },
+  {
+    // Estos tests ejercitan a propósito `display()`, el respaldo para Obsidian < 1.13 (ADR-027).
+    files: ['tests/unit/SettingsTab.test.ts'],
+    rules: { '@typescript-eslint/no-deprecated': 'off' },
   },
   {
     // Núcleo, procesos y adaptadores no dependen del DOM y se prueban en Node: los timers de `window`

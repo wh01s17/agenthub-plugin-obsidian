@@ -11,6 +11,8 @@ export default defineConfig({
   oxc: { jsx: { runtime: 'automatic', importSource: 'preact' } },
   test: {
     environment: 'jsdom',
+    // Un jsdom por worker en lugar de uno por archivo; cada archivo sigue aislado en su propio contexto VM.
+    pool: 'vmThreads',
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
     setupFiles: ['tests/setup.ts'],
     // Cada test parte de mocks, variables de entorno y globals limpios.
