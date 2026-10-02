@@ -1599,4 +1599,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — **Release 0.0.3 publicada** (`github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.3`,
   marcada como *Latest*): versión subida en `package.json`/`manifest.json`/`versions.json`, tag `0.0.3`, workflow
   `release.yml` en verde y borrador publicado con `gh release edit --draft=false --latest`. Incluye S5, T3.7 y los
-  enlaces en la exportación. El borrador antiguo de 0.0.2 sigue sin publicar (pendiente de decidir si se borra).
+  enlaces en la exportación. El borrador antiguo de 0.0.2 se borró a pedido del usuario (el tag `0.0.2` se conserva).
