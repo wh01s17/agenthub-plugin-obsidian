@@ -1082,11 +1082,51 @@ habilitar AgentHub. Instalar el plugin **Hot Reload** (pjeby) en el vault de pru
 - Agente simulado: añadir en ajustes un agente ACP personalizado con
   `command: node`, `args: [<ruta>/scripts/fake-acp-agent.mjs, --scenario, permissions]`.
 
-### 8.4 Release
+### 8.4 Versionado y releases
 
-1. `pnpm version <patch|minor|major>` (actualiza manifest/versions).
-2. Push del tag → workflow `release.yml` crea el release con `main.js`, `manifest.json`, `styles.css`.
-3. Beta: distribuir con BRAT. Publicación: PR a `obsidianmd/obsidian-releases` (`community-plugins.json`).
+**Esquema: SemVer `MAJOR.MINOR.PATCH`**, igual en `package.json`, `manifest.json` y `versions.json`. El **tag de git es
+exactamente la versión, sin prefijo `v`** (Obsidian y BRAT lo exigen; `release.yml` falla si no coincide con el manifest).
+
+**Mientras la versión sea 0.x (desarrollo inicial):**
+
+| Sube | Cuándo | Ejemplos |
+|---|---|---|
+| **MINOR** (`0.X.0`) | Funcionalidad nueva visible para el usuario, cambio de comportamiento, cambio en el formato de ajustes o sesiones guardadas (con migración), o subida de `minAppVersion`. | Historial, exportar a nota, ajustes buscables, nuevo agente soportado. |
+| **PATCH** (`0.x.Y`) | Solo arreglos, ajustes visuales, rendimiento o documentación, sin funciones nuevas. | Arreglar "Starting the agent…", animación de los puntos, color de un logo. |
+
+**Hitos:**
+
+- **0.1.0 — primera versión funcionalmente completa.** Fases 0–4 y 6 cerradas y verificadas en Obsidian (hecho), más:
+  `CHANGELOG.md` creado, capturas en el README y la instalación desde la release probada con BRAT. Es la versión que
+  sigue a 0.0.4.
+- **1.0.0 — versión estable.** Aceptada en la tienda de plugins de la comunidad de Obsidian, con el formato de ajustes y
+  de sesiones guardadas estable (todo cambio posterior lleva migración).
+
+**Desde 1.0.0:** **MAJOR** si rompe compatibilidad (datos o ajustes sin migración, subida de `minAppVersion` que deja
+fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatibles, **PATCH** para arreglos.
+
+**Pre-releases** para probar con BRAT antes de publicar: `0.2.0-beta.1`, `0.2.0-beta.2`… publicadas en GitHub como
+*pre-release* (no *Latest*).
+
+**`versions.json`:** cada versión publicada se añade con su `minAppVersion`; nunca se borran entradas.
+
+**Procedimiento** (lo ejecuta un agente; **publicar requiere la confirmación del usuario**, porque es visible para otros):
+
+1. `main` limpio y sincronizado con `origin`; `pnpm lint && pnpm test && pnpm build` en verde.
+2. Decidir MINOR o PATCH con la tabla anterior y añadir la entrada en `CHANGELOG.md` (formato *Keep a Changelog*:
+   Añadido / Cambiado / Corregido).
+3. Cambiar la versión en `package.json` y ejecutar `npm_package_version=X.Y.Z node scripts/version-bump.mjs`
+   (actualiza `manifest.json` y `versions.json`). **No usar `pnpm version`**: crea el tag con prefijo `v`.
+4. Commit `chore(release): X.Y.Z`, tag anotado `git tag -a X.Y.Z -m "AgentHub X.Y.Z"`, push de `main` y del tag.
+5. El workflow `release.yml` valida, compila y crea el **borrador** con `main.js`, `manifest.json` y `styles.css`.
+6. Con la confirmación del usuario: `gh release edit X.Y.Z --draft=false --latest`, con las notas del `CHANGELOG.md`.
+7. Anotar la release en la bitácora (§17).
+
+**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3 y 0.0.4 publicadas. Las
+versiones 0.0.x se numeraron sin esta regla; desde aquí se aplica. La próxima release es **0.1.0**.
+
+**Tienda de la comunidad (camino a 1.0.0):** PR a `obsidianmd/obsidian-releases` añadiendo el plugin a
+`community-plugins.json`.
 
 ---
 
@@ -1640,3 +1680,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Codex** — **T6.10 completa** a pedido del usuario: la etiqueta accesible «Tú»/«You» pasa a ser visible; los mensajes se distinguen con tarjeta, fondo, borde de acento, leve desplazamiento a la derecha y separación inferior. Estilos con variables de Obsidian, texto y adjuntos legibles y ajuste de líneas largas. Revisado en Obsidian 1.13.7, tema claro/oscuro y panel estrecho: la tarjeta no desborda horizontalmente. Sin cambios en los datos del historial. Lint/build sin errores (7 advertencias preexistentes); 198 pruebas pasan y 2 e2e omitidas.
 
 - **2026-10-01 · Codex** — Corrección de metadatos de T6.6 a pedido del usuario: `manifest.json` identifica al autor como `wh01s17`. Se incorpora a la release 0.0.5 junto al diseño de mensajes de T6.10.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Política de versiones explícita en **§8.4** a pedido del usuario: SemVer
+  sin prefijo `v`; en 0.x, MINOR para funciones y cambios de datos o de `minAppVersion`, PATCH para arreglos y estilo;
+  hitos 0.1.0 (funcionalmente completa: falta `CHANGELOG.md`, capturas y prueba con BRAT) y 1.0.0 (tienda de la
+  comunidad); pre-releases `-beta.N`; procedimiento paso a paso con la publicación sujeta a confirmación del usuario.

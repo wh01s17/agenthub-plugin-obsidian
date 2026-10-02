@@ -26,4 +26,6 @@ Todo debe estar en verde antes de empezar y antes de cada commit.
 - Sin `innerHTML`; estilos solo en `styles.css` con prefijo `agenthub-` y variables CSS de Obsidian.
 - Textos de UI vía `t()` (`src/i18n/`), con las mismas claves en `en.ts` y `es.ts`.
 - Commits: Conventional Commits con el ID de tarea, p. ej. `feat(ui): permission card [T2.8]`.
+- Versiones y releases: seguir la política de `plan.md` §8.4 (SemVer, tag sin `v`, no usar `pnpm version`,
+  publicar solo con confirmación del usuario).
 - Los datos marcados con ⚠️ en `plan.md` se verifican contra la herramienta real antes de usarlos.
