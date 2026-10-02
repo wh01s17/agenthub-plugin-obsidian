@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.2.0 preparada** (rediseño T6.12, apariencia T6.13, historial de prompts T6.14); 0.1.1 publicada y entrada *live* en el directorio de la comunidad. |
-| Próxima tarea | Publicar 0.2.0 con confirmación del usuario y pulsar **Check for new releases** en community.obsidian.md. Pendiente aparte: e2e de escritura con Gemini real (no crea `resumen.md`). Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **0.2.0 publicada como Latest** (rediseño T6.12, apariencia T6.13, historial de prompts T6.14); entrada *live* en el directorio de la comunidad. |
+| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md y se atiende la revisión de 0.2.0. Pendiente aparte: e2e de escritura con Gemini real (no crea `resumen.md`). Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Release 0.2.0 preparada: CHANGELOG cerrado, versiones sincronizadas. Claude (Opus 5.5). |
+| Última actualización | 2026-10-02 — Release 0.2.0 publicada como Latest; assets y attestation verificados. Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 214 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1115,8 +1115,8 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
 7. Anotar la release en la bitácora (§17) y pulsar **Check for new releases** en community.obsidian.md para que la revisión
    automática analice la versión nueva.
 
-**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0 y 0.1.1
-publicadas · 0.2.0 en borrador.
+**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1 y
+0.2.0 publicadas.
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1737,3 +1737,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Release 0.2.0 (preparación):** el usuario pide la release. CHANGELOG cerrado en 0.2.0 (Added/Changed/Fixed), `package.json` 0.2.0 y `version-bump.mjs` para `manifest.json`/`versions.json`; T6.12 y T6.13 cerradas tras la revisión visual del usuario. Lint (1 aviso intencionado), build y 214 pruebas correctos. Siguiente: tag `0.2.0`, push, borrador del workflow, verificación de assets y publicación con confirmación.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Auditoría de documentación para 0.2.0** a pedido del usuario. Revisados todos los `.md` (README, CHANGELOG, AGENTS, CLAUDE, plan, docs/): sin enlaces ni rutas rotas. README: funciones (pastillas de opciones persistentes, historial de prompts, apariencia), uso, sección de ajustes con *Appearance*, seguridad (modo sin restricciones guardado se reconfirma; historial solo en memoria) y pasos de release (push de `main` y tag juntos, *attestations*, *Check for new releases*). plan.md: §0.1, RF-22/23/24, §4.11 (disposición real), §4.12 (esquema real de ajustes), §6 (árbol real de `src/`, `tests/`, `scripts/`, `docs/`), §8.4 (procedimiento e historial). AGENTS.md: `styles.css` fuera del límite de 1000 líneas, tokens de apariencia (ADR-032) y push conjunto. `checklist-0.1.0.md`: nota sobre la captura reemplazada. Los documentos históricos (spikes, notas de 0.0.5/0.1.0, bitácora) se conservan como registro.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **Release 0.2.0 publicada como Latest** con confirmación del usuario: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.0. Tag anotado `0.2.0` subido junto con `main`; workflow Release correcto; `main.js`, `manifest.json` y `styles.css` coinciden por SHA-256 con el build local; `gh attestation verify` de `main.js` correcto; notas tomadas del CHANGELOG. Pendiente: *Check for new releases* en el directorio de la comunidad.
