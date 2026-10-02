@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido** (Fase 5 aplazada, ver bitácora). T6.1 hecha |
-| Próxima tarea | Verificar T4.3 (reinicio) → primer release (T6.6, con confirmación) → T6.7 (decidir `minAppVersion`) |
+| Próxima tarea | Publicar el borrador de la release 0.0.2 (usuario) y probar con BRAT → verificar T4.3 (reinicio) → T6.7 (decidir `minAppVersion`) |
 | Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
 | Bloqueos | Ninguno |
 | Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
@@ -1254,7 +1254,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [ ] **T6.7** Migrar la pestaña de ajustes a la API declarativa `getSettingDefinitions()` (aparece en la búsqueda de ajustes de Obsidian 1.13+) y decidir si subir `minAppVersion` (ADR-019).
-- [~] **T6.6** *(workflow `release.yml` y pasos en el README listos; falta el primer tag/release, probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(workflow y README listos; release **0.0.2** creada como borrador con sus 3 archivos; falta publicarla, probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
 ### Fase 7 — Opcional: modo terminal
 
@@ -1577,3 +1577,10 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · Claude (Opus 5.5)** — Exportación verificada sobre la nota que generó el usuario: 6 bloques de código
   en callouts, todos cerrados, 4 con delimitador largo. Ajuste: las rutas de archivos del vault se exportan como
   `[[enlaces]]` relativos (`ExportLabels.vaultPath`) y las de fuera del vault como código. 167 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — Limpieza del vault de pruebas a pedido del usuario: borradas las notas creadas
+  al probar (`AgentHub/`, `Kurt Rosenwinkel.md`, `test.md`) y restauradas `Bienvenida.md` e `Ideas.md`, cuyas ediciones
+  de prueba se habían colado en commits anteriores por usar `git add -A` (lección: excluir `test-vault/` al
+  commitear); `test-vault/AgentHub/` pasa al `.gitignore`. **Primera release:** versión **0.0.2** (`package.json`,
+  `manifest.json`, `versions.json`), tag `0.0.2` sin prefijo, push de `main` y del tag; el workflow `release.yml` pasó
+  (lint, test, build, tag = manifest) y creó el **borrador** de release con `main.js` (632 KB), `manifest.json` y
+  `styles.css`. Publicarlo queda en manos del usuario.
