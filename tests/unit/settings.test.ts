@@ -8,6 +8,7 @@ import {
 } from '../../src/settings/settings';
 import {
   describeDetection,
+  tildePath,
   formatPairs,
   parsePairs,
   toLines,
@@ -94,6 +95,14 @@ describe('settings tab helpers', () => {
     expect(toLines(' a \n\n b ')).toEqual(['a', 'b']);
     expect(parsePairs('A=1\nB = x=y\nnope\n=bad')).toEqual({ A: '1', B: 'x=y' });
     expect(formatPairs({ A: '1', B: '2' })).toBe('A=1\nB=2');
+  });
+
+  it('shortens paths in the home folder with a tilde', () => {
+    expect(tildePath('/home/me/.local/bin/npx', '/home/me')).toBe('~/.local/bin/npx');
+    expect(tildePath('/home/me', '/home/me/')).toBe('~');
+    expect(tildePath('/home/meow/bin', '/home/me')).toBe('/home/meow/bin');
+    expect(tildePath('C:\\Users\\me\\npx.cmd', 'C:\\Users\\me')).toBe('~\\npx.cmd');
+    expect(tildePath('/usr/bin/x', undefined)).toBe('/usr/bin/x');
   });
 
   it('describes detection results', () => {

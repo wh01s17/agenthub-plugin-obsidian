@@ -40,10 +40,23 @@ export const formatPairs = (pairs: Record<string, string>): string =>
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
 
+/** Shortens a path in the user's home folder to `~/…`, as shells do. */
+export function tildePath(
+  path: string,
+  home = process.env.HOME ?? process.env.USERPROFILE,
+): string {
+  if (!home) return path;
+  const base = home.replace(/[\\/]+$/, '');
+  if (path === base) return '~';
+  return path.startsWith(`${base}/`) || path.startsWith(`${base}\\`)
+    ? `~${path.slice(base.length)}`
+    : path;
+}
+
 export function describeDetection(result: DetectionResult): string {
   switch (result.status) {
     case 'available':
-      return t('settingsAvailable', { path: result.resolvedCommand ?? '' });
+      return t('settingsAvailable', { path: tildePath(result.resolvedCommand ?? '') });
     case 'missing':
       return t('settingsMissing', { hint: result.message ?? '' });
     case 'error':
