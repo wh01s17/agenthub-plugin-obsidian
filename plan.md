@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.1.0 publicada como Latest**. Fases 0–4 y 6 cerradas; revisión manual aceptada por el usuario y BRAT final comprobado. |
-| Próxima tarea | Ninguna obligatoria para 0.1.0. Futuras mejoras según el usuario; envío a comunidad opcional. Fase 5 condicional y Fase 7 descartada. |
-| Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
-| Bloqueos | Ninguno para 0.1.0. |
-| Última actualización | 2026-10-02 — Release 0.1.0 publicada como Latest; instalación limpia y actualización por BRAT verificadas, Codex |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Fase actual | **0.1.0 publicada como Latest**. Fases 0–4 y 6 cerradas; revisión manual aceptada por el usuario y BRAT final comprobado. Preparando el envío al directorio de la comunidad (T6.11). |
+| Próxima tarea | **T6.11:** el usuario envía el plugin en [community.obsidian.md](https://community.obsidian.md) (requiere su cuenta de Obsidian y vincular GitHub) y se atiende la revisión automática. Fase 5 condicional y Fase 7 descartada. |
+| Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
+| Bloqueos | El envío exige iniciar sesión con la cuenta de Obsidian del usuario: no lo puede hacer un agente. |
+| Última actualización | 2026-10-02 — Repo listo para el envío a la comunidad: divulgaciones del README según las políticas de desarrollador, id libre, lint sin avisos en tests, test-vault depurado; e2e de Claude pasan. Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -1303,6 +1303,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.10** Mensajes del usuario con etiqueta «Tú»/«You», tarjeta de fondo propio, borde de acento y espacio entre turnos; estilos del tema de Obsidian y texto seleccionable con el mouse.
 
+- [~] **T6.11** Envío al directorio de la comunidad (Q3). Hecho: id `agenthub` libre, LICENSE, manifest y release 0.1.0 válidos, divulgaciones del README (procesos externos, red, descargas de `npx`, cuentas, archivos fuera del vault) según las *Developer policies*. Falta: el usuario inicia sesión en community.obsidian.md, vincula GitHub y añade el plugin; corregir lo que indique la revisión automática con una release de versión incrementada. *CA:* plugin instalable desde Obsidian.
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1327,6 +1329,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-009 | Las escrituras `fs/write_text_file` de ACP pasan por la Vault API con guardia de rutas. | Obsidian refresca editores abiertos; control de `.obsidian/`. | Escritura directa con `fs` (desincroniza editores). | Aceptada |
 | ADR-010 | Fijar versiones de adaptadores ACP en los presets. | Los adaptadores evolucionan rápido (p. ej. renombres de paquetes). | `@latest` (roturas silenciosas). | Aceptada |
 | ADR-011 | `minAppVersion` 1.8.7 (antes 1.7.2). | `getLanguage()` (i18n) existe desde 1.8.7; el entorno usa 1.13.7. | Leer el idioma de `localStorage` (no documentado). | Aceptada |
+| ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
+| ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-014 | Los agentes escriben directamente en disco (S2); el refresco de editores depende del watcher de Obsidian. Se siguen anunciando y sirviendo `fs/*` (con guardia), pero la protección real del vault es el **modo de permisos** del agente. | Ningún agente probado usa `fs/*` del cliente. | Forzar escrituras por `fs/*` (no está en nuestra mano). | Aceptada (matiza ADR-009) |
 | ADR-015 | Modo y modelo se exponen en la UI a partir de `configOptions` (`session/set_config_option`); `modes`/`models` solo como respaldo. | Es lo único común a Claude, Codex y OpenCode. | Selectores separados por `modes`/`models` (OpenCode quedaría sin selector). | Aceptada |
 | ADR-016 | Usar el builder `acp.client()` del SDK 1.6, no `ClientSideConnection`. | `ClientSideConnection` está deprecado. | API deprecada. | Aceptada |
@@ -1345,8 +1349,6 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-029 | La Fase 7 (modo terminal), T7.1, T7.2 y RF-21 quedan fuera del alcance y cancelados. | El usuario decidió que no realizará la Fase 7. | Mantener el modo terminal como tarea opcional pendiente. | Aceptada (decidido por el usuario; matiza ADR-008) |
 | ADR-030 | Codex ACP usa `read-only` por defecto; las opciones explícitas prevalecen. Confirmación por activación/inicio/reanudación de los cuatro modos sin restricciones y distintivo rojo; rechazo o cierre bloquean el cambio. | Resolver Q8 y cumplir §10 y §4.9 también al restaurar sesiones. | Mantener Auto review como valor implícito; confiar solo en el selector. | Aceptada; resuelve Q8 |
 | ADR-031 | Normalizar `modes`/`models` ACP antiguos a `ConfigOption` cuando falta su equivalente moderno. Cambios mediante `session/set_mode` y `session/set_model`; `configOptions` tiene prioridad. | Gemini 0.62 real anuncia estas opciones y no ofrece esfuerzo por ACP. | Inventar una lista de modelos/esfuerzos; usar `set_config_option` con agentes que no lo implementan. | Aceptada; completa ADR-015 |
-| ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
-| ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
 ---
 
@@ -1364,6 +1366,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | Procesos huérfanos | Media | Medio | `ProcessRegistry`, kill de grupo, EOF de stdin, prueba en checklist. |
 | Coste/consumo de tokens inesperado | Media | Medio | Mostrar uso/coste; e2e reales fuera de CI. |
 | Revisión de la comunidad rechaza algo (procesos externos) | Baja | Medio | Cumplir guías, `isDesktopOnly`, divulgación en README; hay precedentes de plugins que lanzan procesos. |
+| La revisión objeta que los presets usen `npx` (descarga de adaptadores en tiempo de ejecución; las políticas prohíben que un plugin instale sus dependencias) | Media | Medio | Divulgado en el README: versión fijada, la descarga la hace `npx` y no el plugin, alternativa de instalación global. Si se exige, cambiar los presets a los binarios globales (`claude-agent-acp`, `codex-acp`) con `npx` como opción manual (MINOR). |
 | Latencia de `npx` en el primer arranque | Alta | Bajo | Detectar binario global; mensaje "instalando adaptador…"; recomendar `npm i -g`. |
 | Vulnerabilidad moderada en `moment` (GHSA-4p3w-j4w9-5jqw), vía el paquete de tipos `obsidian` | Baja | Bajo | No se incluye en el bundle (`obsidian` es externo). Revisar al actualizar `obsidian`. |
 | Rendimiento con transcripts largos | Media | Medio | Throttle, items consolidados, virtualización (T6.4). |
@@ -1374,9 +1377,9 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 | # | Pregunta | Supuesto actual (hasta que se decida) |
 |---|---|---|
-| Q1 | Nombre e `id` definitivos (¿"AgentHub" / `agenthub` libre en `community-plugins.json`?). | AgentHub / `agenthub`. |
+| Q1 | Nombre e `id` definitivos (¿"AgentHub" / `agenthub` libre en `community-plugins.json`?). | Resuelta: AgentHub / `agenthub`; el id no figura entre los 8301 plugins de `community-plugins.json` (comprobado el 2026-10-02) y no contiene `obsidian`. |
 | Q2 | Licencia. | MIT. |
-| Q3 | ¿Publicar en la tienda de la comunidad o uso personal/BRAT? | Diseñar para publicar; decidir en Fase 6. |
+| Q3 | ¿Publicar en la tienda de la comunidad o uso personal/BRAT? | Resuelta: publicar en el directorio de la comunidad (T6.11); BRAT sigue disponible. |
 | Q4 | ¿Prioridad de agentes para el MVP? | Claude Code y Codex (vía ACP); Gemini/OpenCode "gratis" por ACP. |
 | Q5 | ¿Idioma principal de la UI? | Inglés por defecto + español completo (sigue el idioma de Obsidian). |
 | Q6 | ¿Se requiere el modo directo si ACP funciona bien en S2? | Resuelta: Fase 5 condicional, solo ante una limitación real (ADR-025). |
@@ -1423,6 +1426,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   `accessibility`, `frontend-design`, `nodejs-best-practices`, `bash-defensive-patterns` (scripts de `scripts/spikes/`).
 - Lint: las reglas de `eslint-plugin-obsidianmd` no permiten `eslint-disable` en línea; las excepciones
   para `scripts/` y `tests/` se configuran en `eslint.config.mjs`.
+- Vitest usa `pool: 'vmThreads'`: un jsdom por worker en lugar de uno por archivo (suite ≈ 2× más rápida; cada archivo sigue aislado en su contexto VM).
 - El mock `tests/__mocks__/obsidian.ts` replica solo lo necesario (incluye `HTMLElement#addClass`); ampliarlo según haga falta.
 
 ## 16. Glosario
@@ -1700,3 +1704,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Codex** — Tag anotado **0.1.0** en `88967dc`, push y workflow Release `36959592684` correcto: borrador con main.js/manifest.json/styles.css. Assets descargados y comparados por SHA-256 con el build local; versión 0.1.0 y autor wh01s17 verificados. Retirado del README el estado interno de fases/preparación a pedido del usuario. El usuario elige **documentación pública en inglés, documentos internos conservados y UI bilingüe**: README, CHANGELOG y notas del borrador traducidos, con links locales comprobados. Se conserva la documentación interna en español; sin cambios de comportamiento ni assets. Publicación con confirmación y BRAT final aún pendientes.
 
 - **2026-10-02 · usuario + Codex** — El usuario autoriza publicar 0.1.0. Release publicada como **Latest**, sin draft ni prerelease: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0. BRAT 2.2.0 en Obsidian aislado verificó instalación limpia de 0.1.0, actualización 0.0.5 → 0.1.0, plugin/vista cargados y autor wh01s17. Ajustes y contenido de transcripts conservados. T6.6 y Fase 6 cerradas; no queda trabajo obligatorio para este hito. Documentación pública en inglés; sin modificaciones de las notas de prueba del usuario.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — Análisis del proyecto y preparación del envío a la comunidad **[T6.11]**. Revisadas las *Developer policies* y *Submission requirements* actuales: el envío ya no es un PR a `obsidian-releases`, sino desde community.obsidian.md con cuenta de Obsidian y GitHub vinculado, y revisión automática; el directorio lee el `manifest.json` de la rama por defecto y los assets de la release con el mismo tag. Id `agenthub` libre (8301 plugins comprobados). README: nueva sección *Disclosures* (procesos externos, red de los agentes, descarga de adaptadores por `npx` con versión fijada, cuentas necesarias, archivos fuera del vault; el canal ACP `fs/*` solo permite el vault). Q1 y Q3 resueltas; ADR-012/013 reordenados; §0.1 corregida (texto cortado). Lint: reglas `hardcoded-config-path` y `no-deprecated` desactivadas solo en tests (datos de prueba y respaldo `display()` intencionado); queda 1 aviso intencionado en `SettingsTab.ts` (ADR-027). Vitest con `pool: 'vmThreads'`: 21 s → 11 s. E2e reales de Claude (`claude-acp`): 2/2 pasan (antes fallaban por cuota). test-vault depurado: restauradas `Bienvenida.md` y `Notas/Proyecto Alfa.md`; restos de pruebas manuales (`Prueba-AgentHub.md`, `Notas/Fibonacci.md`, export `AgentHub/`, sesiones del plugin) movidos a una copia fuera del repo. Sin cambios de código ejecutable: no hace falta nueva release. Lint/build correctos; 198 pruebas pasan, 2 omitidas. Pendiente: envío por el usuario.
