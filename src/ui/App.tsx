@@ -175,6 +175,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         busy={busy}
         disabled={state.status === 'closed'}
         sendWith={settings.sendWith}
+        history={host.prompts}
         notes={() => host.notes.listNotes()}
         commands={state.commands}
         onSend={onSend}

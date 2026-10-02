@@ -1,5 +1,6 @@
 import type { App } from 'obsidian';
 import type { AgentRegistry } from '../agents/AgentRegistry';
+import type { PromptHistory } from '../core/PromptHistory';
 import type { SessionManager } from '../core/SessionManager';
 import type { SessionViewState } from '../core/types';
 import type { NoteContext } from '../host/NoteContext';
@@ -14,6 +15,8 @@ export interface ViewHost {
   readonly agents: AgentRegistry;
   readonly sessions: SessionManager;
   readonly notes: NoteContext;
+  /** Prompts sent since Obsidian started, recalled with the arrow keys. */
+  readonly prompts: PromptHistory;
   /** Saved sessions; `undefined` when history is disabled. */
   readonly history:
     (SessionHistory & { load(localId: string): Promise<StoredSession | undefined> }) | undefined;

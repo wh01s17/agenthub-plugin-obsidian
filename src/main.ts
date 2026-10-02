@@ -32,6 +32,7 @@ import { exportFileName, sessionToMarkdown } from './storage/exportToNote';
 import { SessionStore } from './storage/SessionStore';
 import { noticeText } from './ui/components/NoticeItem';
 import { initialSessionConfig } from './core/permissionModes';
+import { PromptHistory } from './core/PromptHistory';
 import { confirmDangerousMode } from './ui/DangerousModeDialog';
 
 export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
@@ -92,6 +93,7 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
     },
   });
   readonly notes = createNoteContext(this.app);
+  readonly prompts = new PromptHistory();
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });
 
   override async onload(): Promise<void> {

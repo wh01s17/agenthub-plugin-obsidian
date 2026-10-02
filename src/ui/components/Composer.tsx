@@ -1,5 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useRef, useState } from 'preact/hooks';
+import type { PromptHistory } from '../../core/PromptHistory';
 import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
 import type { SlashCommand } from '../../core/types';
 import { t } from '../../i18n';
@@ -12,6 +13,8 @@ interface ComposerProps {
   sendWith: 'enter' | 'mod-enter';
   /** Vault note paths for `@` completion (read lazily). */
   notes: () => string[];
+  /** Prompts sent earlier, recalled with Up/Down like a shell. */
+  history?: PromptHistory;
   /** Agent slash commands for `/` completion. */
   commands: readonly SlashCommand[];
   onSend: (text: string) => void;
@@ -45,6 +48,8 @@ export function Composer(props: ComposerProps) {
   const [text, setText] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
   const ref = useRef<HTMLTextAreaElement>(null);
+  // Position while browsing the history (`null`: editing a new prompt) and the text it replaced.
+  const recall = useRef<{ index: number; draft: string } | null>(null);
 
   const updateSuggestions = (value: string, cursor: number) => {
     const trigger = findTrigger(value, cursor);
@@ -76,9 +81,45 @@ export function Composer(props: ComposerProps) {
     });
   };
 
+  /** Shows a history entry (or the draft) with the caret at its end. */
+  const showRecalled = (value: string) => {
+    setText(value);
+    const el = ref.current;
+    window.requestAnimationFrame(() => el?.setSelectionRange(value.length, value.length));
+  };
+
+  /** Up on the first line goes back in history; Down on the last line goes forward. */
+  const browseHistory = (event: KeyboardEvent): boolean => {
+    const el = ref.current;
+    const entries = props.history?.entries() ?? [];
+    if (!el || entries.length === 0 || el.selectionStart !== el.selectionEnd) return false;
+    if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return false;
+    const state = recall.current;
+    if (event.key === 'ArrowUp' && !el.value.slice(0, el.selectionStart).includes('\n')) {
+      const index = state ? Math.max(0, state.index - 1) : entries.length - 1;
+      recall.current = { index, draft: state?.draft ?? text };
+      showRecalled(entries[index] ?? '');
+      return true;
+    }
+    if (event.key === 'ArrowDown' && state && !el.value.slice(el.selectionEnd).includes('\n')) {
+      const index = state.index + 1;
+      if (index >= entries.length) {
+        recall.current = null;
+        showRecalled(state.draft);
+      } else {
+        recall.current = { ...state, index };
+        showRecalled(entries[index] ?? '');
+      }
+      return true;
+    }
+    return false;
+  };
+
   const send = () => {
     const message = text.trim();
     if (!message || busy || disabled) return;
+    props.history?.add(message);
+    recall.current = null;
     onSend(message);
     setText('');
     setSuggestions(null);
@@ -106,7 +147,9 @@ export function Composer(props: ComposerProps) {
     if (isSendKey(event, sendWith)) {
       event.preventDefault();
       send();
+      return;
     }
+    if (browseHistory(event)) event.preventDefault();
   };
 
   const activeId = suggestions ? `${LISTBOX_ID}-${suggestions.active}` : undefined;
@@ -153,6 +196,8 @@ export function Composer(props: ComposerProps) {
         placeholder={t('composerPlaceholder', { agent: agentLabel })}
         onInput={(event) => {
           const el = event.currentTarget;
+          // Editing a recalled prompt makes it the new draft.
+          recall.current = null;
           setText(el.value);
           updateSuggestions(el.value, el.selectionStart);
         }}

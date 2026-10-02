@@ -2,6 +2,7 @@
 import { vi } from 'vitest';
 import type { App } from 'obsidian';
 import { AgentRegistry } from '../../src/agents/AgentRegistry';
+import { PromptHistory } from '../../src/core/PromptHistory';
 import { SessionManager } from '../../src/core/SessionManager';
 import { ProcessRegistry } from '../../src/process/ProcessRunner';
 import { defaultSettings, type AgentHubSettings } from '../../src/settings/settings';
@@ -44,6 +45,7 @@ export function makeViewHost(
       openPath: () => false,
       displayPath: (path: string) => path,
     },
+    prompts: new PromptHistory(),
     history: store,
     openSettings: vi.fn(),
     exportSession: vi.fn(() => Promise.resolve()),

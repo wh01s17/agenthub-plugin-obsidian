@@ -10,6 +10,7 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 - Agent options (mode, model, effort…) as pills in the message box, with a panel that lists each choice and its description; effort levels show as a level meter, and unrestricted modes are highlighted in red.
 - The mode, model, and other agent options you choose are kept for new sessions and after restarting Obsidian. Unrestricted modes still ask for confirmation each time the agent starts.
 - Two-state agent options, such as fast mode, appear as switches with their name.
+- Up and Down in the message box recall the prompts sent since Obsidian started, like a shell history. The history is not saved.
 
 ### Changed
 

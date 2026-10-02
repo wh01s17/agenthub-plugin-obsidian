@@ -101,6 +101,7 @@ Back up your vault or keep it under version control before allowing an agent to 
 
 - Open the sidebar using the **robot ribbon icon** or the **Open AgentHub** command.
 - Choose an agent and its options, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
+- Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
 - Use the **clock icon** for session history and the **pencil icon** for a new session.
 
