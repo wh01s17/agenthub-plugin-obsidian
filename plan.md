@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.2.1 publicada como Latest**; **Fase 8 (pestañas, 0.3.0)** implementada en `main` sin publicar (T8.1–T8.4). |
-| Próxima tarea | **T8.5:** revisión del usuario de las pestañas en Obsidian; después, release 0.3.0 (MINOR) con su confirmación. Pendiente: *Check for new releases* en community.obsidian.md, repetir la e2e de Gemini cuando se renueve su cuota diaria, T8.6. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **0.3.0 preparada** (pestañas, Fase 8 T8.1–T8.5): commit y tag locales, a la espera de la confirmación del usuario para el push y la publicación. 0.2.1 sigue como Latest. |
+| Próxima tarea | Con la confirmación del usuario: push de `main` y del tag `0.3.0` juntos, verificar el borrador del workflow (SHA-256, attestation) y publicarlo como Latest (§8.4). Pendiente: *Check for new releases* en community.obsidian.md, repetir la e2e de Gemini cuando se renueve su cuota diaria, T8.6. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Pestañas con varios agentes en una vista (Fase 8, ADR-033). Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 230 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Última actualización | 2026-10-02 — Release 0.3.0 preparada (pestañas). Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 231 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -1127,7 +1127,7 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
    automática analice la versión nueva.
 
 **Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1,
-0.2.0 y 0.2.1 publicadas.
+0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) preparada.
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1331,7 +1331,8 @@ Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
   pestaña (`DangerousModeRequest.sessionTitle`); renombrar con doble clic/F2 (`ChatSession.rename`, también desde el
   historial). *CA:* auditoría axe del `TabBar` sin violaciones.
 - [x] **T8.4** Comandos `new-tab`, `close-tab`, `next-tab`, `previous-tab` sin atajos; i18n es/en; README y CHANGELOG.
-- [ ] **T8.5** Revisión del usuario en Obsidian (aspecto del `TabBar` en el sidebar estrecho, temas claro/oscuro).
+- [x] **T8.5** Revisión del usuario en Obsidian: la barra va arriba de todo, sobre la cabecera, y la pestaña activa queda a la
+  vista al cambiar de pestaña (antes el scroll horizontal volvía al inicio). Aprobada por el usuario («ya funciona»).
 - [ ] **T8.6** *(pendiente, ver `next.md`)* Aviso cuando dos pestañas editan el mismo archivo; límite configurable de
   pestañas trabajando a la vez; reordenar arrastrando.
 
@@ -1780,3 +1781,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fix y release 0.2.1** a pedido del usuario: el botón de un permiso nuevo quedaba oculto bajo el cuadro de mensaje. `MessageList` fuerza el seguimiento al llegar una petición de permiso no vista (aunque el usuario haya subido) y observa con `ResizeObserver` una columna interna (`.agenthub-messages-content`) para seguir abajo mientras el contenido crece tras dibujarse (Markdown por bloques). Prueba nueva `MessageScroll.test.tsx`. 215 pruebas, lint (1 aviso intencionado) y build correctos. Publicada con autorización explícita del usuario («cuando termines lanza la release»).
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fase 8: pestañas** (T8.1–T8.4, ADR-033, RF-25) a pedido del usuario, desde `next.md` §1. `AgentHubView` pasa de una sesión a una lista de pestañas con la activa; `TabBar.tsx` (logo, título, indicador, cerrar, `+`, doble clic/F2 para renombrar, clic central cierra) y `ui/tabs.ts` (`TabActivity`: indicadores permiso/trabajando/error/sin leer y `Notice` cuando una pestaña oculta pide permiso). Núcleo: `ChatSession.rename()` y `sessionTitle` en `DangerousModeRequest` (el diálogo nombra la pestaña). Estado de vista `{tabs, activeTab, sessionId}` compatible con 0.2.x; solo la pestaña visible arranca su agente al restaurar. El historial abre en pestaña nueva (o en la activa si está vacía) y renombrar en el historial renombra la pestaña abierta. Comandos `new-tab`, `close-tab`, `next-tab`, `previous-tab`. Pruebas nuevas en `Tabs.test.tsx`, axe del `TabBar`, `rename` y título en la confirmación; el helper de vista tiene un segundo agente (`codex-acp`) y el mock de `Notice` registra los mensajes. 230 pruebas, lint (1 aviso intencionado) y build correctos. Pendiente: T8.5 (revisión visual del usuario), release 0.3.0 con confirmación y T8.6 (conflictos de edición entre pestañas, límite de concurrencia, reordenar).
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **T8.5 y preparación de 0.3.0.** Revisión del usuario en Obsidian: la barra de pestañas pasa arriba de todo, sobre la cabecera, y `TabBar` desplaza la pestaña activa a la vista al montarse (la barra se recrea dentro de la pestaña activa y su scroll volvía al inicio); prueba nueva. El usuario confirma que funciona y pide preparar la release. MINOR por §8.4 (función nueva y cambio del estado guardado de la vista, compatible con 0.2.x). CHANGELOG 0.3.0 (y enlaces de versiones al pie), `package.json`, `manifest.json` y `versions.json` en 0.3.0; commit `chore(release): 0.3.0` y tag anotado `0.3.0` **solo locales**: el push conjunto y la publicación esperan la confirmación del usuario. 231 pruebas, lint (1 aviso intencionado) y build correctos.

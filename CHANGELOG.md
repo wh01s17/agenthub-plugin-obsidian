@@ -4,11 +4,14 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-02
+
 ### Added
 
 - Tabs: several conversations side by side in one view, each with its own agent and process. Switching tabs does not interrupt any of them, and each tab keeps its draft.
 - Tab indicators for working, waiting for permission, error, and finished-but-unread; a permission request from a hidden tab also shows a notice. Nothing is ever approved automatically.
 - Commands to open, close, and switch tabs (no default hotkeys). Double-click a tab to rename it.
+- The tab bar sits at the top of the view and keeps the active tab in view when you switch tabs.
 - The unrestricted mode confirmation names the tab that asks for it.
 
 ### Changed
@@ -122,7 +125,11 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.3.0
+[0.2.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.1
+[0.2.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.0
+[0.1.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.1
 [0.1.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0
 [0.0.5]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5
 [0.0.4]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.4
