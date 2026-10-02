@@ -163,7 +163,14 @@ export type TranscriptItem =
   | { kind: 'notice'; id: string; level: 'info' | 'warning' | 'error'; notice: Notice };
 
 export type SessionStatus =
-  'idle' | 'starting' | 'running' | 'awaiting-permission' | 'error' | 'closed';
+  | 'idle'
+  | 'starting'
+  /** Waiting for another session to finish its turn (limit of agents working at once, ADR-034). */
+  | 'queued'
+  | 'running'
+  | 'awaiting-permission'
+  | 'error'
+  | 'closed';
 
 /** Immutable snapshot rendered by the UI; the reducer returns a new object on every change. */
 export interface SessionViewState {

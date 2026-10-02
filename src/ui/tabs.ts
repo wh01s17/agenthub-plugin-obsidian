@@ -4,7 +4,7 @@
 import type { ChatSession } from '../core/ChatSession';
 import type { SessionStatus, SessionViewState } from '../core/types';
 
-export type TabIndicator = 'permission' | 'working' | 'error' | 'unread' | null;
+export type TabIndicator = 'permission' | 'working' | 'queued' | 'error' | 'unread' | null;
 
 export interface TabActivityEvents {
   /** A tab's status, title or unread mark changed: redraw the tab bar. */
@@ -19,7 +19,7 @@ interface Watched {
   title: string;
 }
 
-const BUSY: ReadonlySet<SessionStatus> = new Set(['running', 'awaiting-permission']);
+const BUSY: ReadonlySet<SessionStatus> = new Set(['queued', 'running', 'awaiting-permission']);
 
 export class TabActivity {
   private readonly watched = new Map<string, Watched>();
@@ -48,6 +48,7 @@ export class TabActivity {
     const { status } = session.getState();
     if (status === 'awaiting-permission') return 'permission';
     if (status === 'running') return 'working';
+    if (status === 'queued') return 'queued';
     if (status === 'error') return 'error';
     return this.unread.has(session.localId) ? 'unread' : null;
   }

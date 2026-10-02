@@ -21,11 +21,16 @@ interface TabBarProps {
   onClose: (id: string) => void;
   onNew: () => void;
   onRename: (id: string, title: string) => void;
+  /** Moves tab `id` to the place of tab `target` (drag and drop, or Ctrl/Cmd+Shift+arrows). */
+  onMove: (id: string, target: string) => void;
 }
+
+const DRAG_TYPE = 'application/x-agenthub-tab';
 
 const INDICATOR_LABEL = {
   permission: 'tabPermission',
   working: 'tabWorking',
+  queued: 'tabQueued',
   error: 'tabError',
   unread: 'tabUnread',
 } as const;
@@ -36,17 +41,39 @@ function Tab(props: {
   onSelect: () => void;
   onClose: () => void;
   onRename: (title: string) => void;
+  /** Moves this tab one place left (-1) or right (1). */
+  onStep: (step: -1 | 1) => void;
+  onDropTab: (id: string) => void;
 }) {
   const { tab, active } = props;
   const [editing, setEditing] = useState(false);
+  const [dropTarget, setDropTarget] = useState(false);
   const title = tab.title || tab.agentLabel;
   const status = tab.indicator ? t(INDICATOR_LABEL[tab.indicator]) : '';
 
   return (
     <div
-      class={`agenthub-tab ${active ? 'is-active' : ''}`}
+      class={`agenthub-tab ${active ? 'is-active' : ''} ${dropTarget ? 'is-drop-target' : ''}`}
       data-agent-color={agentIdentity(tab.agentId, tab.agentLabel).color}
       data-indicator={tab.indicator ?? undefined}
+      draggable={!editing}
+      onDragStart={(event) => {
+        event.dataTransfer?.setData(DRAG_TYPE, tab.id);
+        if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+      }}
+      onDragOver={(event) => {
+        if (!event.dataTransfer?.types.includes(DRAG_TYPE)) return;
+        event.preventDefault();
+        setDropTarget(true);
+      }}
+      onDragLeave={() => setDropTarget(false)}
+      onDrop={(event) => {
+        setDropTarget(false);
+        const id = event.dataTransfer?.getData(DRAG_TYPE);
+        if (!id) return;
+        event.preventDefault();
+        props.onDropTab(id);
+      }}
     >
       {editing ? (
         <input
@@ -78,6 +105,12 @@ function Tab(props: {
           }}
           onKeyDown={(event) => {
             if (event.key === 'F2') setEditing(true);
+            const arrow = { ArrowLeft: -1, ArrowRight: 1 } as const;
+            const step = arrow[event.key as keyof typeof arrow];
+            if (step && event.shiftKey && (event.ctrlKey || event.metaKey)) {
+              event.preventDefault();
+              props.onStep(step);
+            }
           }}
         >
           <AgentBadge agentId={tab.agentId} label={tab.agentLabel} />
@@ -112,7 +145,7 @@ export function TabBar(props: TabBarProps) {
   return (
     <div class="agenthub-tabs" role="group" aria-label={t('tabsLabel')}>
       <div class="agenthub-tab-list" ref={list}>
-        {props.tabs.map((tab) => (
+        {props.tabs.map((tab, index) => (
           <Tab
             key={tab.id}
             tab={tab}
@@ -120,6 +153,13 @@ export function TabBar(props: TabBarProps) {
             onSelect={() => props.onSelect(tab.id)}
             onClose={() => props.onClose(tab.id)}
             onRename={(title) => props.onRename(tab.id, title)}
+            onStep={(step) => {
+              const neighbour = props.tabs[index + step];
+              if (neighbour) props.onMove(tab.id, neighbour.id);
+            }}
+            onDropTab={(id) => {
+              if (id !== tab.id) props.onMove(id, tab.id);
+            }}
           />
         ))}
       </div>

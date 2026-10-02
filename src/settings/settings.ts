@@ -55,6 +55,10 @@ const SettingsSchema = z.object({
   exportFolder: z.string(),
   /** Minutes without activity before an agent process is stopped (0 = never). */
   idleTimeoutMin: z.number().int().min(0).max(1440),
+  /** Sessions that may run a turn at the same time; others wait (0 = no limit, ADR-034). */
+  maxWorkingAgents: z.number().int().min(0).max(20),
+  /** Notice when two sessions edit the same file (ADR-034). */
+  warnEditConflicts: z.boolean(),
   /** Options each agent announced at start-up, shown before it starts again (not user-facing). */
   knownConfigOptions: z.record(z.string(), z.array(ConfigOptionSchema)),
   /** Ask the login shell for PATH when a command is not found (ADR-017). */
@@ -163,6 +167,8 @@ export function defaultSettings(): AgentHubSettings {
     maxSessions: 200,
     exportFolder: 'AgentHub',
     idleTimeoutMin: 15,
+    maxWorkingAgents: 0,
+    warnEditConflicts: true,
     knownConfigOptions: {},
     resolveLoginShell: true,
     extraPath: [],
@@ -224,6 +230,8 @@ export function migrate(raw: unknown): AgentHubSettings {
     maxSessions: field('maxSessions'),
     exportFolder: field('exportFolder'),
     idleTimeoutMin: field('idleTimeoutMin'),
+    maxWorkingAgents: field('maxWorkingAgents'),
+    warnEditConflicts: field('warnEditConflicts'),
     knownConfigOptions: field('knownConfigOptions'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),

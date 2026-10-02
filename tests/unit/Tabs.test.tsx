@@ -264,6 +264,7 @@ describe('TabBar', () => {
       onClose: vi.fn(),
       onNew: vi.fn(),
       onRename: vi.fn(),
+      onMove: vi.fn(),
     };
     render(<TabBar tabs={infos} activeId="a" {...props} />);
     const waiting = screen.getByRole('button', { name: 'Codex, waiting for permission' });
@@ -279,5 +280,58 @@ describe('TabBar', () => {
     expect(props.onClose).toHaveBeenCalledWith('a');
     fireEvent.click(screen.getByRole('button', { name: 'New tab' }));
     expect(props.onNew).toHaveBeenCalled();
+  });
+
+  it('moves tabs by dragging and with Ctrl/Cmd+Shift+arrows', () => {
+    const onMove = vi.fn();
+    render(
+      <TabBar
+        tabs={infos}
+        activeId="a"
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+        onNew={vi.fn()}
+        onRename={vi.fn()}
+        onMove={onMove}
+      />,
+    );
+    const [first, second] = [...document.querySelectorAll('.agenthub-tab')];
+    const data = new Map<string, string>();
+    const dataTransfer = {
+      setData: (type: string, value: string) => data.set(type, value),
+      getData: (type: string) => data.get(type) ?? '',
+      get types() {
+        return [...data.keys()];
+      },
+      effectAllowed: 'none',
+    };
+    fireEvent.dragStart(second!, { dataTransfer });
+    fireEvent.dragOver(first!, { dataTransfer });
+    expect(first?.classList.contains('is-drop-target')).toBe(true);
+    fireEvent.drop(first!, { dataTransfer });
+    expect(onMove).toHaveBeenLastCalledWith('b', 'a');
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Resumen' }), {
+      key: 'ArrowRight',
+      ctrlKey: true,
+      shiftKey: true,
+    });
+    expect(onMove).toHaveBeenLastCalledWith('a', 'b');
+  });
+});
+
+describe('moving tabs in the view', () => {
+  it('reorders tabs and saves the new order', async () => {
+    const { view } = await openView();
+    const a = view.active!.localId;
+    view.newTab();
+    const b = view.active!.localId;
+    view.newTab();
+    const c = view.active!.localId;
+    view.moveTab(c, a);
+    expect(view.getState().tabs).toEqual([c, a, b]);
+    view.moveTab(c, b);
+    expect(view.getState().tabs).toEqual([a, b, c]);
+    expect(view.active!.localId).toBe(c);
   });
 });

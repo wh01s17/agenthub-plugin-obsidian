@@ -142,6 +142,16 @@ export class AgentHubView extends ItemView {
     this.changed();
   }
 
+  /** Moves tab `localId` to the place of tab `target`, shifting the tabs in between. */
+  moveTab(localId: string, target: string): void {
+    const session = this.tabs.find((s) => s.localId === localId);
+    const to = this.tabs.findIndex((s) => s.localId === target);
+    if (!session || to < 0 || session.localId === target) return;
+    const rest = this.tabs.filter((s) => s !== session);
+    this.tabs = [...rest.slice(0, to), session, ...rest.slice(to)];
+    this.changed();
+  }
+
   /** Moves to the next (`1`) or previous (`-1`) tab, wrapping around. */
   cycleTab(step: 1 | -1): void {
     const index = this.tabs.findIndex((s) => s === this.active);
@@ -344,6 +354,7 @@ export class AgentHubView extends ItemView {
       onClose: (id: string) => this.closeTab(id),
       onNew: () => this.newTab(),
       onRename: (id: string, title: string) => this.host.sessions.get(id)?.rename(title),
+      onMove: (id: string, target: string) => this.moveTab(id, target),
     });
     render(
       h(

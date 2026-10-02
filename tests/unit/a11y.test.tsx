@@ -99,7 +99,7 @@ describe('accessibility audit (axe-core)', () => {
     expect(await audit(container)).toEqual([]);
   });
   it('tab bar with every indicator has named controls', async () => {
-    const indicators = ['permission', 'working', 'error', 'unread', null] as const;
+    const indicators = ['permission', 'working', 'queued', 'error', 'unread', null] as const;
     const { container } = render(
       <TabBar
         tabs={indicators.map((indicator, n) => ({
@@ -114,6 +114,7 @@ describe('accessibility audit (axe-core)', () => {
         onClose={vi.fn()}
         onNew={vi.fn()}
         onRename={vi.fn()}
+        onMove={vi.fn()}
       />,
     );
     expect(await audit(container)).toEqual([]);

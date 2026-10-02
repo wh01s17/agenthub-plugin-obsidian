@@ -4,6 +4,7 @@ import { t, type MessageKey } from '../../i18n';
 const STATUS_TEXT: Record<SessionStatus, MessageKey> = {
   idle: 'statusIdle',
   starting: 'statusStarting',
+  queued: 'statusQueued',
   running: 'statusRunning',
   'awaiting-permission': 'statusAwaiting',
   error: 'statusError',

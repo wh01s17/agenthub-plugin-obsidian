@@ -396,6 +396,23 @@ export class AgentHubSettingTab extends PluginSettingTab {
           s.idleTimeoutMin = v;
         },
       ),
+      integer(
+        t('settingsMaxWorking'),
+        t('settingsMaxWorkingDesc'),
+        settings.maxWorkingAgents,
+        [0, 20],
+        (s, v) => {
+          s.maxWorkingAgents = v;
+        },
+      ),
+      toggle(
+        t('settingsEditConflicts'),
+        t('settingsEditConflictsDesc'),
+        settings.warnEditConflicts,
+        (s, v) => {
+          s.warnEditConflicts = v;
+        },
+      ),
       {
         name: t('settingsExportFolder'),
         desc: t('settingsExportFolderDesc'),

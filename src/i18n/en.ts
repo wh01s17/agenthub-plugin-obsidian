@@ -130,6 +130,7 @@ export const en = {
   stop: 'Stop',
   statusIdle: 'Ready',
   statusStarting: 'Starting the agent…',
+  statusQueued: 'Waiting for another tab to finish…',
   statusRunning: 'Working…',
   statusAwaiting: 'Waiting for your permission',
   statusError: 'The agent stopped',
@@ -205,6 +206,13 @@ export const en = {
   settingsIdleTimeout: 'Stop idle agents after (minutes)',
   settingsIdleTimeoutDesc:
     'Frees the agent process when a session is unused. The conversation continues when you write again. 0 = never.',
+  settingsMaxWorking: 'Agents working at once',
+  settingsMaxWorkingDesc:
+    'Limits how many tabs and panes can run a turn at the same time; extra messages wait their turn. 0 = no limit.',
+  settingsEditConflicts: 'Warn about shared edits',
+  settingsEditConflictsDesc:
+    'Show a notice when an agent edits a file that an agent in another tab or pane has also edited.',
+  editConflictNotice: 'AgentHub: "{tab}" is editing {path}, which "{other}" has also edited.',
   cmdOpenNewView: 'Open AgentHub in a new pane',
   // Tabs (ADR-033)
   tabsLabel: 'Conversations',
@@ -213,6 +221,7 @@ export const en = {
   tabRename: 'Rename tab',
   tabPermission: 'waiting for permission',
   tabWorking: 'working',
+  tabQueued: 'waiting for another tab',
   tabError: 'error',
   tabUnread: 'finished, not read yet',
   tabPermissionNotice: 'AgentHub: "{tab}" is waiting for your permission.',

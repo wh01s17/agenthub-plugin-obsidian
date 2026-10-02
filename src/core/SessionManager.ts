@@ -4,6 +4,7 @@ import type { AgentAdapter, SessionOptions } from './AgentAdapter';
 import { ChatSession, type HostServices } from './ChatSession';
 import type { AgentId, ConfigOption, TranscriptItem } from './types';
 import type { ConfirmDangerousMode } from './permissionModes';
+import { TurnLimiter } from './TurnLimiter';
 
 export interface SessionManagerDeps {
   getAdapter(agentId: AgentId): AgentAdapter | undefined;
@@ -18,13 +19,19 @@ export interface SessionManagerDeps {
   /** Keeps an option the user chose (mode, model…) as the agent's initial value for new sessions. */
   rememberConfigChoice?: (agentId: AgentId, id: string, value: string) => void;
   confirmDangerousMode?: ConfirmDangerousMode;
+  /** Sessions that may run a turn at once; 0 or absent = no limit (ADR-034). */
+  maxWorking?: () => number;
 }
 
 export class SessionManager {
   private readonly sessions = new Map<string, ChatSession>();
   private counter = 0;
+  /** Shared by every session, whatever view or tab shows it. */
+  readonly turns: TurnLimiter;
 
-  constructor(private readonly deps: SessionManagerDeps) {}
+  constructor(private readonly deps: SessionManagerDeps) {
+    this.turns = new TurnLimiter(() => deps.maxWorking?.() ?? 0);
+  }
 
   /** Returns `undefined` when the agent is unknown (e.g. removed from settings). */
   create(agentId: AgentId, localId?: string): ChatSession | undefined {
@@ -72,6 +79,7 @@ export class SessionManager {
   private configHooks(agentId: AgentId) {
     return {
       confirmDangerousMode: this.deps.confirmDangerousMode,
+      turns: this.turns,
       initialConfigOptions: this.deps.knownConfigOptions?.(agentId),
       onAgentReady: (options: ConfigOption[]) =>
         this.deps.rememberConfigOptions?.(agentId, options),

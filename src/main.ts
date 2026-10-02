@@ -12,6 +12,7 @@ import type { DetectionResult, SessionOptions } from './core/AgentAdapter';
 import type { SelectionRef } from './core/PromptBuilder';
 import type { SessionViewState } from './core/types';
 import { SessionManager } from './core/SessionManager';
+import { EditConflictWatcher } from './core/EditConflicts';
 import { createNoteContext } from './host/NoteContext';
 import { createObsidianHost, vaultBasePath } from './host/ObsidianHost';
 import { openPluginSettings } from './host/openSettings';
@@ -69,7 +70,11 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
         this.agents.config(request.agentId)?.label ?? request.agentId,
         signal,
       ),
-    onCreate: (session) => this.sessionStore?.track(session),
+    onCreate: (session) => {
+      this.sessionStore?.track(session);
+      this.editConflicts.track(session);
+    },
+    maxWorking: () => this.settings.maxWorkingAgents,
     knownConfigOptions: (agentId) => this.settings.knownConfigOptions[agentId],
     // The options chosen in the view become the agent's initial values (unrestricted modes are
     // still confirmed at every start, ADR-030).
@@ -93,6 +98,22 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
     },
   });
   readonly notes = createNoteContext(this.app);
+  /** Two tabs or panes editing the same file (ADR-034). */
+  private readonly editConflicts = new EditConflictWatcher(
+    ({ path, session, others }) => {
+      const title = (state: SessionViewState) =>
+        state.title || (this.agents.config(state.agentId)?.label ?? state.agentId);
+      new Notice(
+        t('editConflictNotice', {
+          tab: title(session),
+          path: this.notes.displayPath(path),
+          other: others.map(title).join(', '),
+        }),
+        10_000,
+      );
+    },
+    () => this.settings.warnEditConflicts,
+  );
   readonly prompts = new PromptHistory();
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });
 

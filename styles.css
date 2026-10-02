@@ -1166,6 +1166,10 @@
   background: var(--background-modifier-hover);
 }
 
+.agenthub-tab.is-drop-target {
+  box-shadow: inset 2px 0 0 var(--interactive-accent);
+}
+
 .agenthub-tab.is-active {
   border-color: var(--agenthub-border);
   background: var(--agenthub-surface);
@@ -1220,6 +1224,11 @@
   height: 8px;
   background: var(--color-orange);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-orange) 30%, transparent);
+}
+
+.agenthub-tab[data-indicator='queued'] .agenthub-tab-indicator {
+  border: var(--border-width) solid var(--agenthub-agent);
+  background: transparent;
 }
 
 .agenthub-tab[data-indicator='error'] .agenthub-tab-indicator {

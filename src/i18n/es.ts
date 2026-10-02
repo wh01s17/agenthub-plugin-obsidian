@@ -130,6 +130,7 @@ export const es: Messages = {
   stop: 'Detener',
   statusIdle: 'Listo',
   statusStarting: 'Iniciando el agente…',
+  statusQueued: 'Esperando a que termine otra pestaña…',
   statusRunning: 'Trabajando…',
   statusAwaiting: 'Esperando tu permiso',
   statusError: 'El agente se detuvo',
@@ -205,6 +206,13 @@ export const es: Messages = {
   settingsIdleTimeout: 'Detener agentes inactivos tras (minutos)',
   settingsIdleTimeoutDesc:
     'Libera el proceso del agente cuando una sesión no se usa. La conversación continúa al volver a escribir. 0 = nunca.',
+  settingsMaxWorking: 'Agentes trabajando a la vez',
+  settingsMaxWorkingDesc:
+    'Limita cuántas pestañas y paneles pueden ejecutar un turno al mismo tiempo; los mensajes de más esperan su turno. 0 = sin límite.',
+  settingsEditConflicts: 'Avisar de ediciones compartidas',
+  settingsEditConflictsDesc:
+    'Muestra un aviso cuando un agente edita un archivo que también editó un agente de otra pestaña o panel.',
+  editConflictNotice: 'AgentHub: «{tab}» está editando {path}, que también editó «{other}».',
   cmdOpenNewView: 'Abrir AgentHub en un panel nuevo',
   // Pestañas (ADR-033)
   tabsLabel: 'Conversaciones',
@@ -213,6 +221,7 @@ export const es: Messages = {
   tabRename: 'Renombrar pestaña',
   tabPermission: 'esperando permiso',
   tabWorking: 'trabajando',
+  tabQueued: 'esperando a otra pestaña',
   tabError: 'error',
   tabUnread: 'terminada, sin leer',
   tabPermissionNotice: 'AgentHub: «{tab}» espera tu permiso.',

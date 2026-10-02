@@ -15,6 +15,7 @@ import {
   type ConfirmDangerousMode,
 } from './permissionModes';
 import { createInitialState, reduce, type SessionAction } from './reducer';
+import type { ReleaseTurn, TurnLimiter } from './TurnLimiter';
 import type {
   AgentEvent,
   ConfigOption,
@@ -42,6 +43,8 @@ export interface ChatSessionInit {
   confirmDangerousMode?: ConfirmDangerousMode;
   /** Called when the user's change of an option takes effect, so it can be kept for new sessions. */
   onConfigChosen?: (id: string, value: string) => void;
+  /** Turn slots shared with other sessions (limit of agents working at once, ADR-034). */
+  turns?: Pick<TurnLimiter, 'full' | 'acquire'>;
   now?: () => number;
 }
 
@@ -63,6 +66,7 @@ export class ChatSession {
   private lastActivityAt: number;
   private disposed = false;
   private modeConfirmation: AbortController | null = null;
+  private turnWait: AbortController | null = null;
   private configuring = false;
 
   constructor(private readonly init: ChatSessionInit) {
@@ -101,7 +105,12 @@ export class ChatSession {
   /** A turn is in progress. Starting the agent is not "busy": messages sent meanwhile wait for it. */
   get busy(): boolean {
     const { status } = this.state;
-    return this.configuring || status === 'running' || status === 'awaiting-permission';
+    return (
+      this.configuring ||
+      status === 'queued' ||
+      status === 'running' ||
+      status === 'awaiting-permission'
+    );
   }
 
   /** Sends one user message. Starts the agent on first use. Ignored while a turn is running. */
@@ -114,13 +123,32 @@ export class ChatSession {
 
     const agent = await this.ensureAgent();
     if (!agent) return;
+    const release = this.init.turns ? await this.waitForTurn(this.init.turns) : undefined;
+    if (release === null) return;
     this.dispatch({ type: 'local.status', status: 'running' });
     try {
       await agent.prompt(blocks);
     } catch (error) {
       this.reportError(error);
       this.dispatch({ type: 'turn.end', stopReason: 'error' });
+    } finally {
+      release?.();
     }
+  }
+
+  /** Waits (shown as queued) while too many agents are working; `null` if stopped meanwhile. */
+  private async waitForTurn(
+    turns: Pick<TurnLimiter, 'full' | 'acquire'>,
+  ): Promise<ReleaseTurn | null> {
+    const controller = new AbortController();
+    this.turnWait = controller;
+    if (turns.full) this.dispatch({ type: 'local.status', status: 'queued' });
+    const release = await turns.acquire(controller.signal);
+    this.turnWait = null;
+    if (release && !this.disposed && !controller.signal.aborted) return release;
+    release?.();
+    if (!this.disposed) this.dispatch({ type: 'turn.end', stopReason: 'cancelled' });
+    return null;
   }
 
   /** Renames the session (tab and history); an empty title is ignored. */
@@ -166,6 +194,11 @@ export class ChatSession {
   }
 
   async cancel(): Promise<void> {
+    if (this.turnWait) {
+      // Still queued: the agent has not received the message, so there is nothing to cancel there.
+      this.turnWait.abort();
+      return;
+    }
     this.modeConfirmation?.abort();
     this.resolveAllPending({ outcome: 'cancelled' });
     await this.agent?.cancel();
@@ -215,6 +248,7 @@ export class ChatSession {
     if (this.disposed) return;
     this.disposed = true;
     this.modeConfirmation?.abort();
+    this.turnWait?.abort();
     this.resolveAllPending({ outcome: 'cancelled' });
     this.dispatch({ type: 'local.status', status: 'closed' });
     this.listeners.clear();
