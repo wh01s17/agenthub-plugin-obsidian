@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **0.3.0 publicada como Latest** (pestañas: varias conversaciones en una vista, Fase 8 T8.1–T8.5). |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.3.0. Pendiente: T8.6 (conflictos de edición entre pestañas, límite de concurrencia, reordenar) y repetir la e2e de Gemini cuando se renueve su cuota diaria. Fase 5 condicional y Fase 7 descartada. |
+| Próxima tarea | Release **0.4.0** (T8.6) con la confirmación del usuario; después *Check for new releases* en community.obsidian.md. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
 | Última actualización | 2026-10-02 — Release 0.3.0 publicada (pestañas). Claude (Opus 5.5). |
@@ -157,7 +157,7 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | RF-22 | Apariencia configurable (estilo de mensajes, densidad, tamaño de texto, acento, ubicación de opciones, herramientas desplegadas, consumo) respetando el tema de Obsidian. | Should | 6 (T6.13, ADR-032) |
 | RF-23 | Las opciones elegidas de cada agente (modo, modelo, esfuerzo…) se conservan entre sesiones y reinicios; los modos sin restricciones se confirman en cada inicio. | Should | 6 (T6.13) |
 | RF-24 | Historial de prompts con ↑/↓ en el compositor, solo en memoria. | Could | 6 (T6.14) |
-| RF-25 | Pestañas: varias conversaciones (con agentes distintos) trabajando a la vez en una misma vista, con indicadores de estado y aviso de permisos en pestañas ocultas; se conservan al reiniciar. | Should | 8 (T8.1–T8.4, ADR-033) |
+| RF-25 | Pestañas: varias conversaciones (con agentes distintos) trabajando a la vez en una misma vista, con indicadores de estado y aviso de permisos en pestañas ocultas; se conservan al reiniciar y se reordenan. Límite opcional de agentes trabajando a la vez y aviso de ediciones compartidas. | Should | 8 (T8.1–T8.6, ADR-033, ADR-034) |
 
 ### 2.2 No funcionales
 
@@ -790,6 +790,8 @@ AgentHubSettings = {
   cwdMode: 'vault' | 'active-note-folder' | 'custom', customCwd, vaultInstructions,
   includeActiveNote, sendWith: 'enter' | 'mod-enter', showThoughts, debugPanel,
   historyEnabled, maxSessions, exportFolder, idleTimeoutMin,
+  maxWorkingAgents,                // turnos a la vez entre todas las pestañas/paneles; 0 = sin límite (ADR-034)
+  warnEditConflicts,               // aviso si dos sesiones abiertas editan el mismo archivo (ADR-034)
   knownConfigOptions,              // opciones anunciadas por cada agente (se muestran antes de arrancar)
   resolveLoginShell, extraPath: string[],
   // Apariencia (ADR-032)
@@ -1333,8 +1335,13 @@ Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
 - [x] **T8.4** Comandos `new-tab`, `close-tab`, `next-tab`, `previous-tab` sin atajos; i18n es/en; README y CHANGELOG.
 - [x] **T8.5** Revisión del usuario en Obsidian: la barra va arriba de todo, sobre la cabecera, y la pestaña activa queda a la
   vista al cambiar de pestaña (antes el scroll horizontal volvía al inicio). Aprobada por el usuario («ya funciona»).
-- [ ] **T8.6** *(pendiente, ver `next.md`)* Aviso cuando dos pestañas editan el mismo archivo; límite configurable de
-  pestañas trabajando a la vez; reordenar arrastrando.
+- [x] **T8.6** Cierre de lo abierto en `next.md` (ADR-034): `TurnLimiter` (núcleo) compartido por todas las sesiones con el
+  ajuste `maxWorkingAgents` (0 = sin límite): los turnos de más esperan en orden con estado `queued` («Esperando a que
+  termine otra pestaña…», punto hueco en la pestaña); Detener o cerrar sacan el mensaje de la cola sin enviarlo.
+  `EditConflictWatcher` (núcleo) avisa con un `Notice` cuando una sesión abierta edita (`edit`/`delete`/`move`, por
+  `locations` o diffs) un archivo que otra sesión abierta ya editó; una vez por archivo y par, ajuste `warnEditConflicts`;
+  las ediciones de transcripts reabiertos cuentan pero no avisan solas. Reordenar pestañas arrastrando o con
+  Ctrl/Cmd+Shift+←/→ (`AgentHubView.moveTab`). *CA:* `TurnLimiter.test.ts`, `EditConflicts.test.ts`, `Tabs.test.tsx`.
 
 ### Fase 7 — Descartada: modo terminal
 
@@ -1380,6 +1387,7 @@ Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
 | ADR-029 | La Fase 7 (modo terminal), T7.1, T7.2 y RF-21 quedan fuera del alcance y cancelados. | El usuario decidió que no realizará la Fase 7. | Mantener el modo terminal como tarea opcional pendiente. | Aceptada (decidido por el usuario; matiza ADR-008) |
 | ADR-030 | Codex ACP usa `read-only` por defecto; las opciones explícitas prevalecen. Confirmación por activación/inicio/reanudación de los cuatro modos sin restricciones y distintivo rojo; rechazo o cierre bloquean el cambio. | Resolver Q8 y cumplir §10 y §4.9 también al restaurar sesiones. | Mantener Auto review como valor implícito; confiar solo en el selector. | Aceptada; resuelve Q8 |
 | ADR-031 | Normalizar `modes`/`models` ACP antiguos a `ConfigOption` cuando falta su equivalente moderno. Cambios mediante `session/set_mode` y `session/set_model`; `configOptions` tiene prioridad. | Gemini 0.62 real anuncia estas opciones y no ofrece esfuerzo por ACP. | Inventar una lista de modelos/esfuerzos; usar `set_config_option` con agentes que no lo implementan. | Aceptada; completa ADR-015 |
+| ADR-034 | Límite de turnos simultáneos y aviso de ediciones compartidas en el núcleo, comunes a todas las vistas y pestañas: `SessionManager` posee un `TurnLimiter` (FIFO, límite leído en cada petición, 0 = sin límite) que `ChatSession.send` usa tras arrancar el agente (arrancar no cuenta); el estado `queued` solo aparece si hay que esperar y cuenta como ocupado. `EditConflictWatcher` sigue a cada sesión creada y avisa sin bloquear. | Cerrar los riesgos de `next.md` §1 (consumo de varios agentes, conflictos de edición) sin cambiar el modelo de permisos. | Rechazar el mensaje al superar el límite (pierde el texto); bloquear la segunda edición (los agentes que escriben solos, ADR-014, no pasan por AgentHub); detectar conflictos solo dentro de una vista. | Aceptada |
 | ADR-033 | Pestañas en la vista: `AgentHubView` guarda una lista de `ChatSession` (una por pestaña, cada una con su proceso, ADR-005) y la activa; el núcleo no cambia salvo `ChatSession.rename()` y `sessionTitle` en la petición de modo sin restricciones. Todas las pestañas quedan montadas y las ocultas llevan `hidden` (conservan borrador y scroll); `TabActivity` vigila estado y título de cada una para los indicadores y el `Notice` de permisos en segundo plano. Estado de vista `{tabs, activeTab, sessionId}`, compatible con 0.2.x; al restaurar, solo la pestaña visible arranca su agente y el reaper (T4.5) libera las olvidadas. Sin límite de pestañas trabajando a la vez por ahora. *Open AgentHub in a new pane* se mantiene. | Varias conversaciones a la vez sin ocupar más paneles (RF-25, `next.md` §1). | Solo varias vistas (RF-11: ocupa espacio, hay que cambiar de panel para ver quién terminó); montar solo la pestaña activa (pierde borrador y scroll); un `SessionManager` por vista. | Aceptada |
 | ADR-032 | Apariencia configurable: ajustes planos validados campo a campo (`messageStyle`, `density`, `chatFontSize`, `accentColor`, `optionsPlacement`, `expandToolCalls`, `showUsage`) que la vista expone como atributos `data-*` en `.agenthub-app`; `styles.css` solo cambia tokens propios derivados de variables de Obsidian. Formas de componentes según shadcn/ui y las apps oficiales, sin copiar a Claudian: las opciones del agente son pastillas con panel propio (lista con descripciones o medidor de niveles) y se ubican por defecto en el cuadro de mensaje. Amplía ADR-018. | Personalización sin romper temas ni la revisión de la comunidad; menos selectores nativos en el sidebar. | Temas CSS propios (rompen temas de Obsidian); variables CSS editables por el usuario (difícil de mantener); copiar el selector combinado de Claudian. | Aceptada |
 

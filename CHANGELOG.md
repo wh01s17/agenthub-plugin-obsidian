@@ -4,6 +4,12 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Setting to limit how many agents work at once across tabs and panes (off by default). Extra messages wait their turn, shown as "Waiting for another tab to finish…" and a hollow dot on the tab; **Stop** takes a waiting message out of the queue without sending it.
+- Notice when an agent edits a file that an agent in another open tab or pane has also edited (can be turned off in settings). Nothing is blocked.
+- Reorder tabs by dragging them, or with **Ctrl/Cmd+Shift+Left/Right** on a focused tab.
+
 ## [0.3.0] - 2026-10-02
 
 ### Added

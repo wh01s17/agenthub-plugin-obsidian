@@ -20,7 +20,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 
 - **Agent chat:** streaming responses rendered with Obsidian's Markdown engine.
 - **Visible tools:** file reads, edits, and commands appear in the conversation. Edits show a diff, and file links open the corresponding note.
-- **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission.
+- **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission. Drag tabs (or press **Ctrl/Cmd+Shift+Left/Right**) to reorder them.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
 - **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
 - **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
@@ -127,7 +127,7 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 ## Settings
 
 - **Agents:** enable or disable agents, check detection results, edit commands, arguments, environment variables, and initial options, add custom ACP agents, and run detection again. The options you choose in the message box are saved as the agent's initial options.
-- **Sessions:** working directory (vault root, current note folder, or a custom folder), vault instructions, current note context, send key, reasoning display, debug panel, history and retention, export folder, and idle timeout. The default idle timeout is 15 minutes; the conversation resumes when you send another message.
+- **Sessions:** working directory (vault root, current note folder, or a custom folder), vault instructions, current note context, send key, reasoning display, debug panel, history and retention, export folder, idle timeout, how many agents may work at once, and the shared-edit warning. The default idle timeout is 15 minutes; the conversation resumes when you send another message. With a limit on agents working at once (off by default), extra messages wait their turn; **Stop** takes a waiting message out of the queue. The shared-edit warning (on by default) shows a notice when an agent edits a file that an agent in another tab or pane has also edited.
 - **Appearance:** message style, density, text size, accent color, where the agent options appear (message box or above the conversation), expanded tool calls, and usage display. Changes apply at once.
 - **Environment:** use the login shell PATH as a fallback when a command cannot be found, and configure additional PATH folders.
 
