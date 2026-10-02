@@ -4,6 +4,6 @@
   "version": "0.0.5",
   "minAppVersion": "1.8.7",
   "description": "Use coding agents like Claude Code and Codex from a sidebar.",
-  "author": "AgentHub contributors",
+  "author": "wh01s17",
   "isDesktopOnly": true
 }
