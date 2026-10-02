@@ -379,11 +379,15 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding: var(--agenthub-pad);
+  font-size: var(--agenthub-text);
+}
+
+/* Inner column: its size is observed to keep the view at the bottom while content grows. */
+.agenthub-messages-content {
   display: flex;
   flex-direction: column;
   gap: var(--agenthub-gap);
-  padding: var(--agenthub-pad);
-  font-size: var(--agenthub-text);
 }
 
 /* Bubbles (default): your messages on the right, the agent's replies as plain text. */
