@@ -229,6 +229,9 @@ export class ChatSession {
       }
       agent.onEvent((event) => this.onAgentEvent(event));
       this.agent = agent;
+      // Started ahead of a message (prepare): back to "Ready". A message sent meanwhile already
+      // switched the status to running, so leave that alone.
+      if (this.state.status === 'starting') this.dispatch({ type: 'local.status', status: 'idle' });
       if (resumeId !== undefined && !agent.restored) {
         this.dispatch({
           type: 'local.notice',

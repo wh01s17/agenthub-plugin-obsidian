@@ -1607,3 +1607,7 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   (thenable) nunca llegue a Obsidian. Verificado en una instancia aislada de Obsidian 1.13.7: la pestaña se dibuja,
   el buscador de ajustes encuentra "AgentHub → Working directory" y el lápiz despliega los detalles del agente vía
   `update()`. El mock de `obsidian` simula `requireApiVersion`. 176 tests.
+- **2026-10-01 · usuario + Claude (Opus 5.5)** — Bug reportado: "Starting the agent…" no desaparecía. Con el arranque
+  anticipado (ADR-024) nadie devolvía el estado a `idle` cuando el agente terminaba de iniciar sin un mensaje en curso.
+  `ChatSession.startAgent` ahora pasa de `starting` a `idle` (si un mensaje enviado mientras arrancaba ya puso
+  `running`, no lo toca). Test de regresión añadido. 177 tests.

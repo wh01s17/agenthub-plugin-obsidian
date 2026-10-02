@@ -280,3 +280,13 @@ describe('idle agents (T4.5)', () => {
     await turn;
   });
 });
+
+describe('status after starting the agent early', () => {
+  it('returns to idle when prepare() finishes without a message', async () => {
+    const { session } = makeSession(say('ok'));
+    const preparing = session.prepare();
+    expect(session.getState().status).toBe('starting');
+    await preparing;
+    expect(session.getState().status).toBe('idle');
+  });
+});
