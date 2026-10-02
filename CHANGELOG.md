@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-02
+
 ### Added
 
 - Appearance settings: message style (bubbles, cards, or plain), density, text size, accent color (agent or theme), placement of the agent options, expanded tool calls, and usage display. Changes apply to open views at once.
@@ -12,19 +14,19 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 - Two-state agent options, such as fast mode, appear as switches with their name.
 - Up and Down in the message box recall the prompts sent since Obsidian started, like a shell history. The history is not saved.
 
-### Fixed
-
-- Agent detection in settings shortens paths in your home folder to `~`.
-- Tool and permission titles show paths relative to the vault instead of full system paths.
-- Reopening a conversation no longer stops the agent when it cannot continue the saved session (Gemini after restarting Obsidian): a new session starts and the view says that the earlier context was not restored.
-- The suggestion list follows the highlighted item while moving with the arrow keys, and long descriptions are limited to two lines.
-
 ### Changed
 
 - Refreshed design: message bubbles, rounded message box with a round send button and context at the top, softer cards for tools and plans, and a permission card with one primary action.
 - Agent options appear in the message box by default; the previous selectors above the conversation remain available in settings.
 - README screenshots retaken for the new design, including the agent options panel, context, and appearance settings.
 - README adds a table of contents and installation from the community plugin directory; screenshots are shown expanded, two per row.
+
+### Fixed
+
+- Agent detection in settings shortens paths in your home folder to `~`.
+- Tool and permission titles show paths relative to the vault instead of full system paths.
+- Reopening a conversation no longer stops the agent when it cannot continue the saved session (Gemini after restarting Obsidian): a new session starts and the view says that the earlier context was not restored.
+- The suggestion list follows the highlighted item while moving with the arrow keys, and long descriptions are limited to two lines.
 
 ## [0.1.1] - 2026-10-02
 
