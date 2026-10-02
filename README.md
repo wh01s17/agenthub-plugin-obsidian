@@ -37,25 +37,17 @@ Codex working with a vault note, highlighted user messages, agent options, and t
 
 ### Permission requests
 
-The agent asks before changing a note:
-
-![Codex requesting permission to create a note, with approve and deny buttons](docs/images/codex-permission.png)
-
-Long permission labels wrap to fit the panel:
-
-![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png)
+| The agent asks before changing a note | Long permission labels wrap to fit the panel |
+|---|---|
+| ![Codex requesting permission to create a note, with approve and deny buttons](docs/images/codex-permission.png) | ![A real Codex permission request with a long command wrapped across multiple lines](docs/images/codex-permission-long.png) |
 
 ### Settings screens
 
-Agents, sessions, context, and environment:
-
-![Available agents and the default agent selector](docs/images/settings-agents.png)
-
-![Session history, retention, idle timeout, and export folder settings](docs/images/settings-sessions.png)
-
-![Vault instructions, current note context, send key, and reasoning settings](docs/images/settings-context.png)
-
-![Debug panel and environment PATH settings](docs/images/settings-environment.png)
+| Agents | Sessions |
+|---|---|
+| ![Available agents and the default agent selector](docs/images/settings-agents.png) | ![Session history, retention, idle timeout, and export folder settings](docs/images/settings-sessions.png) |
+| **Context** | **Environment** |
+| ![Vault instructions, current note context, send key, and reasoning settings](docs/images/settings-context.png) | ![Debug panel and environment PATH settings](docs/images/settings-environment.png) |
 
 ## Requirements
 

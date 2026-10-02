@@ -6,7 +6,7 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ### Changed
 
-- README adds a table of contents and installation from the community plugin directory; all screenshots are shown expanded.
+- README adds a table of contents and installation from the community plugin directory; screenshots are shown expanded, two per row.
 
 ## [0.1.1] - 2026-10-02
 
