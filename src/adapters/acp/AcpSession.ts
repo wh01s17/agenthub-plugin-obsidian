@@ -67,7 +67,7 @@ export class AcpSession implements AgentSession {
   private turnActive = false;
   private crashReported = false;
   /** Kills an agent that ignores `session/cancel`; cleared when the turn ends. */
-  private cancelTimer: ReturnType<typeof setTimeout> | undefined;
+  private cancelTimer: number | undefined;
   private configOptions: ConfigOption[] = [];
   private readonly legacyConfigIds = new Set<string>();
 
@@ -122,7 +122,7 @@ export class AcpSession implements AgentSession {
       this.init.process.exited.then(() => ({ kind: 'exited' as const })),
     ]).catch((error: unknown) => ({ kind: 'failed' as const, error }));
     this.turnActive = false;
-    clearTimeout(this.cancelTimer);
+    window.clearTimeout(this.cancelTimer);
 
     this.emitAll(this.mapper.endTurn());
     // A dead agent usually closes the connection (request fails) just before `exit` arrives.
@@ -156,8 +156,8 @@ export class AcpSession implements AgentSession {
     });
     // An agent that ignores the cancel is stopped; the session can be resumed later.
     if (this.turnActive) {
-      clearTimeout(this.cancelTimer);
-      this.cancelTimer = setTimeout(() => void this.init.process.kill(), CANCEL_GRACE_MS);
+      window.clearTimeout(this.cancelTimer);
+      this.cancelTimer = window.setTimeout(() => void this.init.process.kill(), CANCEL_GRACE_MS);
     }
   }
 
@@ -195,7 +195,7 @@ export class AcpSession implements AgentSession {
   async dispose(): Promise<void> {
     if (this.disposed) return;
     this.disposed = true;
-    clearTimeout(this.cancelTimer);
+    window.clearTimeout(this.cancelTimer);
     this.listeners.clear();
     this.connection?.close();
     await this.init.process.kill();
@@ -299,7 +299,7 @@ export class AcpSession implements AgentSession {
     // A crash while idle is reported here; a crash during a turn is reported by `prompt()`.
     void proc.exited.then(() => {
       // Let a racing `prompt()` claim the crash first.
-      setTimeout(() => {
+      window.setTimeout(() => {
         if (this.disposed || this.turnActive || this.crashReported) return;
         this.crashReported = true;
         const error = this.crashError();
@@ -367,9 +367,9 @@ export class AcpSession implements AgentSession {
   }
 
   private withStartupGuard<T>(request: Promise<T>): Promise<T> {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: number | undefined;
     const timeout = new Promise<never>((_, reject) => {
-      timer = setTimeout(
+      timer = window.setTimeout(
         () => reject(new AgentError('startup', 'The agent did not respond in time.')),
         STARTUP_TIMEOUT_MS,
       );
@@ -377,7 +377,7 @@ export class AcpSession implements AgentSession {
     const exited = this.init.process.exited.then((info): never => {
       throw info.error ?? this.crashError();
     });
-    return Promise.race([request, timeout, exited]).finally(() => clearTimeout(timer));
+    return Promise.race([request, timeout, exited]).finally(() => window.clearTimeout(timer));
   }
 
   // ── permissions ────────────────────────────────────────────────────────────
@@ -409,13 +409,13 @@ export class AcpSession implements AgentSession {
   /** Whether the agent process exits within a short grace period. */
   private async exitsSoon(graceMs = 500): Promise<boolean> {
     if (!this.init.process.running) return true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: number | undefined;
     const timeout = new Promise<false>((resolve) => {
-      timer = setTimeout(() => resolve(false), graceMs);
+      timer = window.setTimeout(() => resolve(false), graceMs);
     });
     const exited = this.init.process.exited.then(() => true as const);
     const result = await Promise.race([exited, timeout]);
-    clearTimeout(timer);
+    window.clearTimeout(timer);
     return result;
   }
 

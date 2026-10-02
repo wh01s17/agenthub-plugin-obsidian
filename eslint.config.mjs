@@ -31,6 +31,8 @@ export default defineConfig([
       'no-console': 'off',
       'obsidianmd/rule-custom-message': 'off',
       'obsidianmd/hardcoded-config-path': 'off',
+      // `tests/setup.ts` crea `window` en los tests que corren en Node.
+      'obsidianmd/no-global-this': 'off',
       'obsidianmd/prefer-window-timers': 'off',
     },
   },
@@ -42,17 +44,13 @@ export default defineConfig([
       'obsidianmd/prefer-create-el': 'off',
       'obsidianmd/prefer-window-timers': 'off',
       'obsidianmd/hardcoded-config-path': 'off',
+      // `tests/setup.ts` crea `window` en los tests que corren en Node.
+      'obsidianmd/no-global-this': 'off',
     },
   },
   {
     // Estos tests ejercitan a propósito `display()`, el respaldo para Obsidian < 1.13 (ADR-027).
     files: ['tests/unit/SettingsTab.test.ts'],
     rules: { '@typescript-eslint/no-deprecated': 'off' },
-  },
-  {
-    // Núcleo, procesos y adaptadores no dependen del DOM y se prueban en Node: los timers de `window`
-    // (pensados para ventanas emergentes de la UI) no aplican.
-    files: ['src/core/**', 'src/process/**', 'src/adapters/**', 'src/storage/**'],
-    rules: { 'obsidianmd/prefer-window-timers': 'off' },
   },
 ]);

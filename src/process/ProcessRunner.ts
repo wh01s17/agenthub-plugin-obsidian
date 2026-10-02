@@ -85,11 +85,11 @@ export class ManagedProcess {
   async kill(graceMs = 3000): Promise<ExitInfo> {
     if (!this.running) return this.exited;
     this.signalTree('SIGTERM');
-    const timer = setTimeout(() => this.signalTree('SIGKILL'), graceMs);
+    const timer = window.setTimeout(() => this.signalTree('SIGKILL'), graceMs);
     try {
       return await this.exited;
     } finally {
-      clearTimeout(timer);
+      window.clearTimeout(timer);
     }
   }
 

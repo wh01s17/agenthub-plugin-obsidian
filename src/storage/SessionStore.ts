@@ -38,7 +38,7 @@ export class SessionStore {
   private entries: SessionEntry[] | null = null;
   private readonly pending = new Map<string, Pending>();
   private readonly subscriptions = new Set<Disposable>();
-  private timer: ReturnType<typeof setTimeout> | undefined;
+  private timer: number | undefined;
   private queue: Promise<unknown> = Promise.resolve();
   private disposed = false;
   private revision = 0;
@@ -68,15 +68,15 @@ export class SessionStore {
     if (this.disposed || !this.options.settings().enabled || state.items.length === 0) return;
     localIdSchema.parse(state.localId);
     this.pending.set(state.localId, { state, at: this.now(), revision: ++this.revision });
-    if (this.timer !== undefined) clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
+    if (this.timer !== undefined) window.clearTimeout(this.timer);
+    this.timer = window.setTimeout(() => {
       this.timer = undefined;
       void this.flush().catch(this.options.onError);
     }, this.options.debounceMs ?? 1000);
   }
 
   flush(): Promise<void> {
-    if (this.timer !== undefined) clearTimeout(this.timer);
+    if (this.timer !== undefined) window.clearTimeout(this.timer);
     this.timer = undefined;
     const snapshots = [...this.pending.values()];
     this.pending.clear();
