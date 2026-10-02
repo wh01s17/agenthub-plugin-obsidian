@@ -49,7 +49,7 @@
 .agenthub-config-label {
   overflow: hidden;
   padding-left: 2px;
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-size: var(--font-ui-smaller);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -258,6 +258,11 @@
   animation: agenthub-spin 1s linear infinite;
 }
 
+/* Pending tool calls spin too, slower, so "waiting" and "running" stay distinguishable. */
+.agenthub-status-pending svg {
+  animation: agenthub-spin 3s linear infinite;
+}
+
 @keyframes agenthub-spin {
   to {
     transform: rotate(360deg);
@@ -265,7 +270,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .agenthub-status-in_progress svg {
+  .agenthub-status-in_progress svg,
+  .agenthub-status-pending svg {
     animation: none;
   }
 }
@@ -384,7 +390,7 @@
   display: flex;
   gap: var(--size-4-3);
   padding: var(--size-4-1) var(--size-4-4) 0;
-  color: var(--text-faint);
+  color: var(--text-muted);
   font-size: var(--font-ui-smaller);
 }
 
@@ -859,4 +865,60 @@
   width: 20px;
   height: 20px;
   color: var(--text-normal); /* monochrome logos (OpenCode) follow the theme */
+}
+.agenthub-dangerous-mode {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  color: var(--text-normal);
+  border-left: 3px solid var(--text-error);
+  padding-left: var(--size-4-2);
+  font-size: var(--font-ui-small);
+  overflow-wrap: anywhere;
+}
+
+.agenthub-dangerous-mode .agenthub-icon {
+  color: var(--text-error);
+}
+
+.agenthub-mode-dialog {
+  max-width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  box-sizing: border-box;
+  overflow: auto;
+  padding: var(--size-4-4);
+  color: var(--text-normal);
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+}
+
+.agenthub-mode-dialog::backdrop {
+  background: var(--background-modifier-cover);
+}
+
+.agenthub-mode-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
+  justify-content: flex-end;
+}
+
+.agenthub-mode-dialog button {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.agenthub-mode-dialog button:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .agenthub-dangerous-mode {
+    border: 1px solid CanvasText;
+  }
+  .agenthub-mode-dialog button:focus-visible {
+    outline-color: Highlight;
+  }
 }
