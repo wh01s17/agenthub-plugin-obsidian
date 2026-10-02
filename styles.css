@@ -145,6 +145,17 @@
   color: var(--agenthub-accent);
 }
 
+/* Switch pills: muted when off, filled with the accent when on. */
+.agenthub-pill.is-toggle:not(.is-on) .agenthub-icon:first-child {
+  color: var(--text-faint);
+}
+
+.agenthub-app button.agenthub-pill.is-toggle.is-on {
+  border-color: color-mix(in srgb, var(--agenthub-accent) 60%, transparent);
+  background: color-mix(in srgb, var(--agenthub-accent) 16%, transparent);
+  color: var(--text-normal);
+}
+
 .agenthub-app button.agenthub-pill.is-danger {
   border-color: color-mix(in srgb, var(--color-red) 55%, transparent);
   color: var(--text-error);

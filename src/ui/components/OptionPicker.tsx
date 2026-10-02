@@ -10,14 +10,47 @@ export function isLevelOption(option: ConfigOption): boolean {
   return /effort|reasoning|thought|thinking/i.test(text) && option.options.length <= 6;
 }
 
-/** Lucide icon per kind of option, so each pill reads at a glance. */
+/** Lucide icon per kind of option, so each pill reads at a glance. Specific kinds go first. */
 export function optionIcon(option: ConfigOption): string {
   const text = `${option.id} ${option.name} ${option.category ?? ''}`.toLowerCase();
-  if (option.category === 'mode' || /\bmode\b|permission|access/.test(text)) return 'shield';
-  if (option.category === 'model' || /model/.test(text)) return 'sparkles';
-  if (isLevelOption(option)) return 'gauge';
   if (/fast|speed/.test(text)) return 'zap';
+  if (isLevelOption(option)) return 'gauge';
+  if (option.category === 'model' || /model/.test(text)) return 'sparkles';
+  if (option.category === 'mode' || /\bmode\b|permission|access/.test(text)) return 'shield';
   return 'sliders-horizontal';
+}
+
+const ON = /^(on|enabled?|true|yes|s[ií])$/i;
+const OFF = /^(off|disabled?|false|no)$/i;
+
+/** The "on" and "off" values of a two-state option (e.g. Fast mode: On/Off), or `null`. */
+export function toggleValues(option: ConfigOption): { on: string; off: string } | null {
+  if (option.options.length !== 2) return null;
+  const matches = (re: RegExp) =>
+    option.options.find((choice) => re.test(choice.value) || re.test(choice.name));
+  const on = matches(ON);
+  const off = matches(OFF);
+  return on && off && on !== off ? { on: on.value, off: off.value } : null;
+}
+
+/** A two-state option as a switch pill: its name, filled when on; no panel needed. */
+export function TogglePill({ option, label, busy, onChange }: OptionPickerProps) {
+  const values = toggleValues(option);
+  if (!values) return null;
+  const on = option.currentValue === values.on;
+  return (
+    <button
+      type="button"
+      class={`agenthub-pill is-toggle ${on ? 'is-on' : ''}`}
+      aria-pressed={on}
+      title={option.description ?? label}
+      disabled={busy}
+      onClick={() => onChange(on ? values.off : values.on)}
+    >
+      <Icon name={optionIcon(option)} />
+      <span class="agenthub-pill-value">{label}</span>
+    </button>
+  );
 }
 
 interface OptionPickerProps {

@@ -1,6 +1,6 @@
 import type { ConfigOption } from '../../core/types';
 import { t } from '../../i18n';
-import { OptionPicker } from './OptionPicker';
+import { OptionPicker, TogglePill, toggleValues } from './OptionPicker';
 
 interface ConfigOptionsProps {
   options: readonly ConfigOption[];
@@ -25,15 +25,18 @@ export function ConfigOptions({ options, busy, onChange, variant }: ConfigOption
   if (variant === 'inline') {
     return (
       <div class="agenthub-config is-inline">
-        {options.map((option) => (
-          <OptionPicker
-            key={option.id}
-            option={option}
-            label={optionName(option)}
-            busy={busy}
-            onChange={(value) => onChange(option.id, value)}
-          />
-        ))}
+        {options.map((option) => {
+          const Pill = toggleValues(option) ? TogglePill : OptionPicker;
+          return (
+            <Pill
+              key={option.id}
+              option={option}
+              label={optionName(option)}
+              busy={busy}
+              onChange={(value) => onChange(option.id, value)}
+            />
+          );
+        })}
       </div>
     );
   }

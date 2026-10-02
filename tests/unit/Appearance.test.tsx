@@ -8,7 +8,7 @@ import { Composer } from '../../src/ui/components/Composer';
 import { ConfigOptions } from '../../src/ui/components/ConfigOptions';
 import { Header } from '../../src/ui/components/Header';
 import { MessageList } from '../../src/ui/components/MessageList';
-import { isLevelOption } from '../../src/ui/components/OptionPicker';
+import { isLevelOption, optionIcon } from '../../src/ui/components/OptionPicker';
 import { PermissionCard } from '../../src/ui/components/PermissionCard';
 import { StatusBar } from '../../src/ui/components/StatusBar';
 import { AGENT_PRESETS } from '../../src/settings/settings';
@@ -123,6 +123,25 @@ describe('appearance settings (ADR-032)', () => {
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Plan' }));
     expect(onChange).toHaveBeenCalledWith('mode', 'plan');
     expect(screen.queryByRole('menu')).toBeNull();
+  });
+
+  it('turns two-state options into switch pills with their name', () => {
+    const fast: ConfigOption = {
+      id: 'fast_mode',
+      name: 'Fast mode',
+      currentValue: 'off',
+      options: [
+        { value: 'off', name: 'Off' },
+        { value: 'on', name: 'On' },
+      ],
+    };
+    const onChange = vi.fn();
+    render(<ConfigOptions options={[fast]} busy={false} onChange={onChange} variant="inline" />);
+    const pill = screen.getByRole('button', { name: 'Fast mode' });
+    expect(pill.getAttribute('aria-pressed')).toBe('false');
+    fireEvent.click(pill);
+    expect(onChange).toHaveBeenCalledWith('fast_mode', 'on');
+    expect(optionIcon(fast)).toBe('zap');
   });
 
   it('shows effort-like options as a level meter and flags unrestricted modes', () => {
