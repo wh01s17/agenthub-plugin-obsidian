@@ -1171,6 +1171,7 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
 ## 11. Roadmap y tareas
 
 > Cada tarea: ID, descripción, dependencias, criterio de aceptación (CA). Marcar `[x]` al completar.
+> Las funciones futuras aún sin planificar (p. ej. pestañas con varios agentes) están en [`next.md`](next.md).
 
 ### Fase 0 — Fundaciones
 
@@ -1741,3 +1742,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Release 0.2.0 publicada como Latest** con confirmación del usuario: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.2.0. Tag anotado `0.2.0` subido junto con `main`; workflow Release correcto; `main.js`, `manifest.json` y `styles.css` coinciden por SHA-256 con el build local; `gh attestation verify` de `main.js` correcto; notas tomadas del CHANGELOG. Pendiente: *Check for new releases* en el directorio de la comunidad.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **E2e de Gemini revisada:** no era un fallo del plugin. Con una traza temporal se vio que Gemini lee la nota, pide permiso (aprobado con `proceed_once`) y escribe `resumen.md` **por el canal `fs/write_text_file` de ACP**, con su diff; pero las e2e usaban `hostServices` de los tests, cuyo `writeTextFile` no hace nada (Claude y Codex escriben en disco por su cuenta, ADR-014, por eso no se notaba). La e2e usa ahora `diskHost(vault)`, que lee y escribe de verdad en la copia temporal del vault, como `ObsidianHost`. OpenCode e2e: 2/2. La repetición con Gemini quedó bloqueada por la cuota diaria agotada del proveedor («You have exhausted your daily quota on this model»): pendiente de repetir. 214 pruebas y lint correctos.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — Creado `next.md` para funciones futuras, a pedido del usuario. Primera entrada: **pestañas** para varios agentes en paralelo en la misma vista (indicadores de estado, permisos en segundo plano con aviso, persistencia en el estado de la vista, encaje con `SessionManager`/ADR-005/ADR-022, riesgos y CA en borrador). Sin código. Puntero añadido en §11.
