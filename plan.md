@@ -41,9 +41,9 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas; **0.1.0 preparada localmente**, 0.0.5 sigue publicada. Changelog y capturas del usuario incorporados; BRAT 0.0.5 comprobado. |
-| Próxima tarea | Cerrar revisión humana T6.3/T6.6 según `docs/checklist-0.1.0.md`; repetir Claude cuando haya cuota y preparar tag/borrador tras cerrar criterios. Capturas del usuario incorporadas. Publicar con confirmación. Envío a comunidad opcional; Fase 7 descartada. |
+| Próxima tarea | Revisión manual aceptada por el usuario. Preparar tag/borrador 0.1.0, publicar con confirmación y comprobar BRAT final. Envío a comunidad opcional; Fase 7 descartada. |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
-| Bloqueos | Pruebas reales de Claude bloqueadas por límite de sesión del proveedor. Lector de pantalla y alto contraste nativo requieren revisión humana en un entorno disponible. |
+| Bloqueos | Ninguno para preparar el borrador; aceptación manual general recibida. Se conserva como límite la cuota de Claude en la última ejecución automática. |
 | Última actualización | 2026-10-02 — Usuario verifica Codex: permisos, cancelar/reenviar, reinicio completo y reanudación, exportación y permiso largo; evidencia y límites registrados en la checklist, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
@@ -1097,7 +1097,7 @@ exactamente la versión, sin prefijo `v`** (Obsidian y BRAT lo exigen; `release.
 **Hitos:**
 
 - **0.1.0 — primera versión funcionalmente completa.** Fases 0–4 y 6 cerradas y verificadas en Obsidian
-  (Fases 0–4 hechas; cierre manual de Fase 6 pendiente), más:
+  (Fases 0–4 hechas; revisión manual de Fase 6 aceptada por el usuario), más:
   `CHANGELOG.md` creado, capturas en el README y la instalación desde la release probada con BRAT. Es la versión que
   sigue a 0.0.5.
 - **1.0.0 — versión estable.** Aceptada en la tienda de plugins de la comunidad de Obsidian, con el formato de ajustes y
@@ -1292,9 +1292,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [x] **T6.2** i18n es/en completo; textos en *sentence case*.
-- [~] **T6.3** *(axe-core y pruebas de teclado/foco, temas claro/oscuro, zoom 200 % y emulación de alto contraste/movimiento reducido realizadas; recorrido del diálogo al 200 % repetido; faltan lector de pantalla, alto contraste nativo y contraste inconcluso; ver `docs/checklist-0.1.0.md`)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
-  manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
-  orden de foco, tamaño de objetivos).
+- [x] **T6.3** Accesibilidad y revisión de temas: pruebas automáticas/nativas registradas; el usuario aprueba el cierre manual general el 2026-10-02. Evidencias y límites en `docs/checklist-0.1.0.md`; esa aprobación no se presenta como prueba automática de lector de pantalla o alto contraste.
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
@@ -1696,3 +1694,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-01 · usuario + Codex** — **T6.10:** corregido el texto del mensaje propio no seleccionable. Reproducción nativa en Obsidian 1.13.7: estilo calculado `user-select: none`, arrastre con mouse sin selección. La tarjeta declara `user-select: text`, también para autor/adjuntos; tras corregir, el mismo arrastre selecciona «Seleccionar este mensaje». Changelog y evidencias actualizados; paquete local 0.1.0 regenerado. Lint/build correctos, 198 pruebas pasan y 2 optativas omitidas; 7 avisos existentes. Sin publicación.
 
 - **2026-10-02 · usuario + Codex** — **T6.3/T6.6 (avance manual):** capturas de Codex real verifican rechazo de permiso (herramienta fallida/Stopped), aprobación posterior y escritura, cancelación de streaming y nuevo mensaje respondido con CANCELACIÓN OK, exportación a nota y permiso largo envuelto sin desborde. El usuario confirma explícitamente cierre completo de Obsidian y reapertura antes de recuperar CLAVE-PUMA-83: reanudación manual marcada como comprobada. Nota de prueba leída localmente con ambas líneas autorizadas. Sugerencia @ y chip de selección visibles; sus respuestas de contexto no aparecen, por lo que el flujo completo sigue pendiente. Capturas guardadas y enlazadas desde la checklist; permiso largo añadido al README. Pendientes: resto de pasada visual por agentes, limpieza de proceso, accesibilidad humana y cuota de Claude; luego tag/borrador, confirmación y BRAT 0.1.0. Sin cambios de código ni publicación. Lint/build correctos; 198 pruebas pasan, 2 omitidas, 7 avisos existentes.
+
+- **2026-10-02 · usuario + Codex** — El usuario confirma «ta todo ok» y aprueba el cierre de la revisión manual de 0.1.0. T6.3 cerrada por aceptación; se conserva la evidencia individual sin inventar pruebas no observadas ni nueva ejecución de Claude. Nueva captura verifica @nota con adjunto y respuesta correcta. Changelog cerrado en 0.1.0 para preparar commit/tag y borrador; publicación requiere confirmación según §8.4. BRAT final de 0.1.0 pendiente hasta publicar.

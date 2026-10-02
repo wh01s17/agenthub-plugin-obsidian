@@ -1,6 +1,6 @@
 # Cierre de AgentHub 0.1.0
 
-Estado: **preparada localmente; pendiente de aceptación manual y publicación**.
+Estado: **aceptación manual cerrada por el usuario; release preparada, pendiente de publicación**.
 Versión pública actual: 0.0.5. Última comprobación: 2026-10-02 (Chile).
 
 ## Resultados comprobados
@@ -25,11 +25,13 @@ Versión pública actual: 0.0.5. Última comprobación: 2026-10-02 (Chile).
 | Codex: cancelar y volver a enviar | Pasa | Capturas muestran respuesta cortada, Stopped, nuevo mensaje y respuesta CANCELACIÓN OK. |
 | Codex: reiniciar Obsidian y reanudar | Pasa | El usuario confirma cierre completo y reapertura antes de preguntar; recupera CLAVE-PUMA-83. |
 | Codex: exportar a nota | Pasa en el caso mostrado | Nota exportada con propiedades, mensajes ordenados, adjuntos enlazados y razonamiento plegable; captura y transcript coinciden. |
-| Changelog | Hecho | CHANGELOG.md; 0.1.0 sigue en Unreleased hasta publicar. |
+| Changelog | Hecho | CHANGELOG.md; Notas de 0.1.0 cerradas para preparar la release. |
 | Capturas README | Incorporadas | Chat con mensaje propio, nota, herramientas y solicitud de permiso; cuatro vistas de ajustes. El permiso de la captura tiene etiquetas cortas. |
 | Metadatos 0.1.0 | Preparados | package.json, manifest.json y versions.json; minAppVersion 1.8.7 y autor wh01s17. |
 
-## Lo que requiere revisión humana
+## Aceptación humana — cerrada el 2026-10-02
+
+El usuario confirma «ta todo ok» y aprueba el cierre general de las comprobaciones. Se registra su aceptación; no se presentan pruebas no observadas como verificaciones automáticas. Las capturas individuales y límites de evidencia se conservan debajo. Claude no fue repetido tras el error de cuota.
 
 Usar un vault de prueba. Anotar versión de Obsidian, agente, sistema, resultado y cualquier fallo.
 
@@ -72,7 +74,7 @@ Repetir con los agentes disponibles; marcar «no aplica» solo con explicación 
 | Denegar permiso y comprobar que no edita | Pendiente | Rechazo de herramienta verificado | Pendiente | Pendiente |
 | Cancelar durante streaming y volver a enviar | Pendiente | Verificado | Pendiente | Pendiente |
 | Reiniciar Obsidian y recuperar sesión | Pendiente | Verificado y confirmado | Pendiente | Pendiente |
-| Adjuntar @nota y selección | Pendiente | Sugerencia @ y chip de selección verificados; falta respuesta usando ambos | Pendiente | Pendiente |
+| Adjuntar @nota y selección | Pendiente | Mención con respuesta verificada; selección aceptada por el usuario, chip documentado | Pendiente | Pendiente |
 | Exportar conversación y comprobar nota | Pendiente | Verificado en el caso mostrado | Pendiente | Pendiente |
 | Cerrar vista y comprobar limpieza del proceso propio | Pendiente | Pendiente | Pendiente | Pendiente |
 | Tema claro/oscuro, teclado y zoom en el uso real | Pendiente | Pendiente | Pendiente | Pendiente |
@@ -84,7 +86,7 @@ Evidencia aportada por el usuario el 2026-10-02: [permisos](images/verification-
 [selección adjunta](images/verification-0.1.0/codex-selection.png), [reanudación](images/verification-0.1.0/codex-resume.png),
 [exportación](images/verification-0.1.0/codex-export.png) y [permiso largo](images/codex-permission-long.png).
 La selección mostrada corresponde a «Edición autorizada: ALFA-27.», no al fragmento de ejemplo de la guía.
-La captura de @ muestra la sugerencia, no un mensaje enviado ni su respuesta; no se marca ese flujo completo.
+La nueva [captura de respuesta a @](images/verification-0.1.0/codex-mention-response.png) muestra la nota mencionada adjunta y una respuesta acorde a su contenido.
 
 Para permisos, pedir una edición de una nota desechable, denegar y comprobar que no cambió; repetir y aprobar.
 Para cancelar, solicitar una respuesta larga, detener durante el streaming y enviar otro mensaje.
@@ -101,11 +103,11 @@ AGENTHUB_E2E_AGENTS=claude-acp pnpm test:e2e
 ## Cierre que puede ejecutar el agente
 
 - [x] Incorporar las capturas enviadas por el usuario.
-- [ ] Registrar resultados humanos y corregir los fallos encontrados.
+- [x] Registrar resultados humanos y aprobación general del usuario.
 - [ ] Cerrar T6.3/T6.6 cuando los criterios estén realmente comprobados.
 - [ ] Pasar lint/tests/build, cerrar notas de 0.1.0 y crear commit/tag anotado sin v.
 - [ ] Subir el tag y comprobar el borrador y sus tres assets.
 - [ ] Publicar con confirmación explícita del usuario, según AGENTS.md y plan §8.4.
 - [ ] Instalar/actualizar a la release pública 0.1.0 con BRAT y registrar resultados.
 
-El tag de 0.1.0 se deja pendiente hasta cerrar las comprobaciones. No es necesario que el usuario ejecute el empaquetado, git o BRAT: el agente puede hacerlo. La fase 7 está descartada; el envío a la comunidad es opcional para 0.1.0.
+La revisión manual queda aceptada; el tag/borrador se prepara a continuación. No es necesario que el usuario ejecute el empaquetado, git o BRAT: el agente puede hacerlo. La fase 7 está descartada; el envío a la comunidad es opcional para 0.1.0.

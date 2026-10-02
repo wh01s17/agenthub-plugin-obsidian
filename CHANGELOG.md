@@ -1,11 +1,11 @@
 # Changelog
 
 Cambios relevantes de AgentHub. Las versiones siguen la política de `plan.md` §8.4.
-Las secciones de versiones corresponden a releases publicadas; `Unreleased` contiene trabajo aún no publicado.
+`Unreleased` contiene trabajo futuro. La sección 0.1.0 corresponde a la release preparada, pendiente de publicación.
 
 ## [Unreleased]
 
-Preparación del hito **0.1.0**. La fecha y sección definitiva se añadirán al publicar, después de cerrar las comprobaciones pendientes.
+## [0.1.0] - 2026-10-02
 
 ### Añadido
 
@@ -67,7 +67,8 @@ Preparación del hito **0.1.0**. La fecha y sección definitiva se añadirán al
 
 La versión 0.0.1 fue scaffolding y 0.0.2 tuvo un tag y un borrador posteriormente eliminado; no fueron releases públicas.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.0.5...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.1.0...HEAD
+[0.1.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0
 [0.0.5]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.5
 [0.0.4]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.4
 [0.0.3]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.0.3

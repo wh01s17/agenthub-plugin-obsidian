@@ -67,6 +67,8 @@ contiene la línea autorizada y la comprobación posterior del comando largo.
 Las capturas de @ y selección comprueban la sugerencia y el chip adjunto; queda por ver la respuesta
 del agente utilizando esos dos contextos. Evidencias enlazadas en la checklist.
 
-Lector de pantalla, alto contraste nativo, contraste inconcluso con el tema del usuario, pasada visual final
-de los agentes y Claude con cuota disponible. Capturas del README incorporadas. Después: cierre del changelog,
-commit/tag de release, borrador, confirmación de publicación y comprobación final con BRAT.
+El usuario aprueba el cierre general de la revisión manual el 2026-10-02 («ta todo ok»).
+La mención @ queda además comprobada con captura de la nota adjunta y respuesta sobre su contenido.
+Se mantiene la distinción entre esa aceptación y las pruebas individuales observadas: no se añade
+una certificación automática de lector de pantalla/alto contraste ni una repetición de Claude con cuota.
+Pendiente: tag/borrador, confirmación de publicación y BRAT final hacia 0.1.0.
