@@ -727,8 +727,8 @@ Disposición a 0.2.0 (T6.12, ADR-032; ajustes por defecto):
 
 ```
 ┌──────────────────────────────────────┐
-│ ✳ [Claude Code ▾]        [✎] [🕘] [⚙] │ cabecera: logo, agente, nueva sesión, historial, ajustes
-│ [✳ Resumen ●][Cx Carpetas ●×]     [+] │ pestañas (0.3.0, ADR-033): logo, título, indicador
+│ [✳ Resumen ●][Cx Carpetas ●×]     [+] │ pestañas arriba de todo (0.3.0, ADR-033): logo, título, indicador
+│ ✳ [Claude Code ▾]        [✎] [🕘] [⚙] │ cabecera de la pestaña activa: logo, agente, nueva sesión, historial, ajustes
 ├──────────────────────────────────────┤
 │        ╭ Summarize this note… ╮       │ mensaje propio: burbuja (o tarjeta / línea plana)
 │        ╰ Note: Projects/X.md  ╯       │
@@ -748,7 +748,7 @@ Disposición a 0.2.0 (T6.12, ADR-032; ajustes por defecto):
 └──────────────────────────────────────┘
 ```
 
-**Pestañas (ADR-033):** cada pestaña es una `ChatSession` con su proceso. Indicador: naranja = espera permiso,
+**Pestañas (ADR-033):** la barra va arriba de todo, sobre la cabecera (pedido del usuario al revisarla). Cada pestaña es una `ChatSession` con su proceso. Indicador: naranja = espera permiso,
 punto animado del color del agente = trabajando, rojo = error, acento = terminó sin leer. `+` abre pestaña con el agente
 por defecto; `×` o clic central la cierra (termina su proceso, queda en el historial); doble clic o F2 renombra. La cabecera
 (agente, ✎) actúa sobre la pestaña activa. Las pestañas ocultas siguen montadas (borrador, scroll) con `hidden`.

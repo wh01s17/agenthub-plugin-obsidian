@@ -18,7 +18,7 @@ obliga a ir cambiando de panel para ver cuál terminó o cuál pide permiso.
 
 ### Propuesta
 
-Una barra de pestañas bajo la cabecera de la vista. Cada pestaña es una conversación independiente, con su agente,
+Una barra de pestañas arriba de todo, sobre la cabecera de la vista (así quedó al implementarla). Cada pestaña es una conversación independiente, con su agente,
 sus opciones y su proceso, y todas pueden trabajar a la vez.
 
 ```

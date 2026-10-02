@@ -34,7 +34,7 @@ export interface AppProps {
   onOpenSession?: (localId: string) => void;
   /** Deletes a saved session from the history panel. */
   onDeleteSession?: (localId: string) => Promise<void>;
-  /** Tab bar shown under the header (ADR-033). */
+  /** Tab bar shown at the very top, above the header (ADR-033). */
   tabBar?: ComponentChildren;
   /** Tabs the user is not looking at stay mounted (draft, scroll) but hidden. */
   hidden?: boolean;
@@ -127,6 +127,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
       data-agent-color={agentIdentity(state.agentId, agentLabel).color}
       {...appearanceAttributes(settings)}
     >
+      {props.tabBar}
       <Header
         agents={host.agents.enabled()}
         agentId={state.agentId}
@@ -139,7 +140,6 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         onOpenSettings={() => host.openSettings()}
         onOpenHistory={history ? () => setShowHistory((open) => !open) : undefined}
       />
-      {props.tabBar}
       {showHistory && history ? (
         <HistoryPanel
           history={history}

@@ -107,7 +107,7 @@ Back up your vault or keep it under version control before allowing an agent to 
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
 - Use the **clock icon** for session history and the **pencil icon** for a new session in the current tab.
-- Use **`+`** under the header to open another tab with the default agent. Double-click a tab to rename it, and close it with **×** or the middle mouse button; closing a tab stops its agent (the conversation stays in history). Sessions opened from history get their own tab, and your tabs reopen after restarting Obsidian.
+- Use **`+`** in the tab bar at the top of the view to open another tab with the default agent. Double-click a tab to rename it, and close it with **×** or the middle mouse button; closing a tab stops its agent (the conversation stays in history). Sessions opened from history get their own tab, and your tabs reopen after restarting Obsidian.
 
 Commands have no default keyboard shortcuts. Assign them under **Settings → Hotkeys**.
 
