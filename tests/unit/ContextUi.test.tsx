@@ -106,4 +106,32 @@ describe('composer suggestions (T3.3/T3.4)', () => {
     await waitFor(() => expect(input.value).toBe('mira @[[Notas/Ideas.md]] '));
     expect(screen.queryByRole('listbox')).toBeNull();
   });
+
+  it('scrolls the highlighted suggestion into view while moving with the arrows', async () => {
+    const scroll = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scroll;
+    const { host, sessions } = makeViewHost(() => 'end_turn');
+    host.notes.listNotes = () => ['Uno.md', 'Dos.md', 'Tres.md'];
+    render(
+      <App
+        host={host}
+        session={sessions.create('claude-acp') ?? null}
+        onAgentChange={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    const input = screen.getByRole<HTMLTextAreaElement>('textbox', {
+      name: 'Message to the agent',
+    });
+    input.value = '@';
+    input.setSelectionRange(1, 1);
+    fireEvent.input(input);
+    await screen.findByRole('listbox');
+    fireEvent.keyDown(input, { key: 'ArrowDown' });
+    const active = screen
+      .getAllByRole('option')
+      .find((o) => o.getAttribute('aria-selected') === 'true');
+    await waitFor(() => expect(scroll.mock.contexts.at(-1)).toBe(active));
+    expect(scroll).toHaveBeenLastCalledWith({ block: 'nearest' });
+  });
 });

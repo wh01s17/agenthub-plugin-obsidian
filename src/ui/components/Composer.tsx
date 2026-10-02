@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import { useRef, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import type { PromptHistory } from '../../core/PromptHistory';
 import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
 import type { SlashCommand } from '../../core/types';
@@ -154,10 +154,20 @@ export function Composer(props: ComposerProps) {
 
   const activeId = suggestions ? `${LISTBOX_ID}-${suggestions.active}` : undefined;
 
+  // Keep the highlighted suggestion in view while moving with the arrow keys.
+  const listRef = useRef<HTMLUListElement>(null);
+  useEffect(() => {
+    if (!activeId) return;
+    listRef.current
+      ?.querySelector<HTMLElement>(`#${activeId}`)
+      ?.scrollIntoView?.({ block: 'nearest' });
+  }, [activeId]);
+
   return (
     <div class="agenthub-composer">
       {suggestions && (
         <ul
+          ref={listRef}
           id={LISTBOX_ID}
           class="agenthub-suggestions"
           role="listbox"

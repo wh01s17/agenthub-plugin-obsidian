@@ -12,6 +12,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 - Two-state agent options, such as fast mode, appear as switches with their name.
 - Up and Down in the message box recall the prompts sent since Obsidian started, like a shell history. The history is not saved.
 
+### Fixed
+
+- The suggestion list follows the highlighted item while moving with the arrow keys, and long descriptions are limited to two lines.
+
 ### Changed
 
 - Refreshed design: message bubbles, rounded message box with a round send button and context at the top, softer cards for tools and plans, and a permission card with one primary action.
