@@ -59,7 +59,7 @@ function Item({
     case 'user':
       return (
         <div class="agenthub-message is-user">
-          <span class="agenthub-visually-hidden">{t('you')}</span>
+          <div class="agenthub-message-author">{t('you')}</div>
           <div class="agenthub-message-text">{userText(item.blocks)}</div>
           <Attachments blocks={item.blocks} />
         </div>

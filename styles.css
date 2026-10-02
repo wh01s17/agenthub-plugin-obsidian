@@ -106,9 +106,27 @@
 }
 
 .agenthub-message.is-user {
-  padding: var(--size-4-2) var(--size-4-3);
+  align-self: flex-end;
+  flex-shrink: 0;
+  width: calc(100% - var(--size-4-3));
+  box-sizing: border-box;
+  margin-block: var(--size-4-1) var(--size-4-3);
+  padding: var(--size-4-3);
+  border: var(--border-width) solid var(--background-modifier-border);
+  border-inline-start: 3px solid var(--interactive-accent);
   border-radius: var(--radius-m);
-  background: var(--background-secondary);
+  background: var(--background-primary);
+}
+
+.agenthub-message-author {
+  margin-bottom: var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-semibold);
+}
+
+.agenthub-message.is-user .agenthub-attachments {
+  color: var(--text-muted);
 }
 
 .agenthub-message-text {

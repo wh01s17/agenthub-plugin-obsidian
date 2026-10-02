@@ -11,6 +11,7 @@ Fecha: 2026-10-01 (Chile). Obsidian 1.13.7, Linux, perfil y vault temporales en 
 - Respaldo de `models` y `modes` antiguos de ACP, con sus métodos de cambio correspondientes.
   Las opciones modernas tienen prioridad. No se inventan modelos ni opciones de esfuerzo.
 - Etiquetas y estado usan colores legibles del tema. Diálogo adaptable a anchos pequeños.
+- Mensajes del usuario destacados con etiqueta «Tú»/«You», tarjeta, borde de acento y separación entre turnos.
 - Incluye logos de agentes y animaciones posteriores a 0.0.4.
 
 ## Evidencia

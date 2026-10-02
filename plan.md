@@ -44,7 +44,7 @@
 | Próxima tarea | Revisión con lector de pantalla y alto contraste nativo; publicar 0.0.5. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — T6.8/T6.9 implementadas; BRAT y accesibilidad verificados en vault temporal, Codex |
+| Última actualización | 2026-10-01 — T6.10: mensajes del usuario destacados y separados de la salida del agente, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1261,6 +1261,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
 - [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
 
+- [x] **T6.10** Mensajes del usuario con etiqueta «Tú»/«You», tarjeta de fondo propio, borde de acento y espacio entre turnos; estilos del tema de Obsidian.
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1634,3 +1636,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   (T6.3/T6.6); la Fase 5 conserva su carácter condicional (ADR-025). Cambio exclusivamente documental.
 
 - **2026-10-01 · Codex** — **T6.8/T6.9 completas:** guardia de modos sin restricciones en el núcleo y diálogo modal nativo con Escape, foco inicial en cancelar, restauración de foco y cancelación al cerrar. Codex ACP inicia en solo lectura; ADR-030 resuelve Q8. Respaldo ACP `modes`/`models` con RPC antiguos y prioridad de `configOptions` (ADR-031). Gemini 0.62 real inició una sesión y cambió desde el selector a `gemini-2.5-pro`; no se envió ningún prompt ni se inventó esfuerzo. BRAT 2.2.0 instaló 0.0.3 y actualizó a 0.0.4 en vault temporal. Corregido contraste de etiquetas/estado y aviso, botones adaptables a zoom. 198 pruebas pasan y 2 e2e omitidas fuera del sandbox; las pruebas de tuberías fallan dentro del sandbox. Versión 0.0.5 preparada con logos/animaciones posteriores a 0.0.4. Evidencias y límites en `docs/release-0.0.5.md`; lector de pantalla y alto contraste nativo siguen pendientes. Fase 7 sigue descartada.
+
+- **2026-10-01 · Codex** — **T6.10 completa** a pedido del usuario: la etiqueta accesible «Tú»/«You» pasa a ser visible; los mensajes se distinguen con tarjeta, fondo, borde de acento, leve desplazamiento a la derecha y separación inferior. Estilos con variables de Obsidian, texto y adjuntos legibles y ajuste de líneas largas. Revisado en Obsidian 1.13.7, tema claro/oscuro y panel estrecho: la tarjeta no desborda horizontalmente. Sin cambios en los datos del historial. Lint/build sin errores (7 advertencias preexistentes); 198 pruebas pasan y 2 e2e omitidas.
