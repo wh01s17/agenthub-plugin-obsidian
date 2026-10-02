@@ -1,6 +1,6 @@
-# Preparación de 0.1.0
+# Verificación de 0.1.0
 
-Estado: **tag 0.1.0 creado y borrador verificado; publicación pendiente de confirmación**. 0.0.5 sigue siendo la versión publicada. Workflow Release 36959592684 correcto; sus tres assets coinciden por SHA-256 con el build local, con versión 0.1.0 y autor wh01s17.
+Estado: **0.1.0 publicada como Latest**, autorizada por el usuario. [Release](https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0). Workflow Release 36959592684 correcto; assets verificados por SHA-256, versión 0.1.0 y autor wh01s17.
 Fecha: 2026-10-01 (Chile). Checklist de cierre: [checklist-0.1.0.md](checklist-0.1.0.md).
 
 ## Cambios preparados
@@ -33,8 +33,8 @@ No certifican toda la interacción visual en Obsidian ni la denegación manual d
 - Ajustes data.json idénticos antes/después de actualizar.
 - Cuatro elementos de la conversación conservados; cambian las marcas de tiempo de guardado del JSONL.
 
-Estas comprobaciones corresponden a releases públicas existentes. BRAT hacia 0.1.0 queda pendiente
-hasta que esa versión esté publicada.
+Comprobación final tras publicar: BRAT 2.2.0 instaló 0.1.0 en limpio y actualizó 0.0.5 → 0.1.0.
+Ajustes y contenido de transcripts conservados; versión/autor correctos y vista agenthub-view cargada.
 
 ## Interfaz nativa con el build local 0.1.0
 
@@ -71,4 +71,4 @@ El usuario aprueba el cierre general de la revisión manual el 2026-10-02 («ta 
 La mención @ queda además comprobada con captura de la nota adjunta y respuesta sobre su contenido.
 Se mantiene la distinción entre esa aceptación y las pruebas individuales observadas: no se añade
 una certificación automática de lector de pantalla/alto contraste ni una repetición de Claude con cuota.
-Pendiente: confirmación de publicación y BRAT final hacia 0.1.0. README, changelog y notas del borrador en inglés; documentos internos y UI bilingüe conservados por elección del usuario.
+Publicación y BRAT final completados; no quedan tareas obligatorias para 0.1.0. README, changelog y notas del borrador en inglés; documentos internos y UI bilingüe conservados por elección del usuario.

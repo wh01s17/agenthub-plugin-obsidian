@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas; **0.1.0 preparada localmente**, 0.0.5 sigue publicada. Changelog y capturas del usuario incorporados; BRAT 0.0.5 comprobado. |
-| Próxima tarea | Borrador 0.1.0 creado y CI correcto; archivos descargados verificados. Publicar con confirmación y comprobar BRAT final. Documentación pública en inglés; documentos internos y UI bilingüe conservados. Envío a comunidad opcional; Fase 7 descartada. |
+| Fase actual | **0.1.0 publicada como Latest**. Fases 0–4 y 6 cerradas; revisión manual aceptada por el usuario y BRAT final comprobado. |
+| Próxima tarea | Ninguna obligatoria para 0.1.0. Futuras mejoras según el usuario; envío a comunidad opcional. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
-| Bloqueos | Ninguno para preparar el borrador; aceptación manual general recibida. Se conserva como límite la cuota de Claude en la última ejecución automática. |
-| Última actualización | 2026-10-02 — Usuario verifica Codex: permisos, cancelar/reenviar, reinicio completo y reanudación, exportación y permiso largo; evidencia y límites registrados en la checklist, Codex |
+| Bloqueos | Ninguno para 0.1.0. |
+| Última actualización | 2026-10-02 — Release 0.1.0 publicada como Latest; instalación limpia y actualización por BRAT verificadas, Codex |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1296,7 +1296,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
-- [~] **T6.6** *(0.0.5 publicada; BRAT 2.2.0 verificó instalación limpia 0.0.5 y actualización 0.0.4 → 0.0.5 con ajustes y conversación conservados. Changelog, capturas y metadatos locales 0.1.0 preparados. OpenCode/Codex pasan lectura/escritura/reanudación reales; Claude bloqueado por cuota. Falta aceptación manual, tag/borrador/publicación y BRAT final 0.1.0; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [x] **T6.6** Release **0.1.0 publicada como Latest** con autorización del usuario, workflow correcto y tres assets verificados. BRAT 2.2.0: instalación limpia y actualización 0.0.5 → 0.1.0 correctas, ajustes/transcripts conservados. Revisión manual aceptada; comunidad opcional.
 
 - [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
 - [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
@@ -1698,3 +1698,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Codex** — El usuario confirma «ta todo ok» y aprueba el cierre de la revisión manual de 0.1.0. T6.3 cerrada por aceptación; se conserva la evidencia individual sin inventar pruebas no observadas ni nueva ejecución de Claude. Nueva captura verifica @nota con adjunto y respuesta correcta. Changelog cerrado en 0.1.0 para preparar commit/tag y borrador; publicación requiere confirmación según §8.4. BRAT final de 0.1.0 pendiente hasta publicar.
 
 - **2026-10-02 · usuario + Codex** — Tag anotado **0.1.0** en `88967dc`, push y workflow Release `36959592684` correcto: borrador con main.js/manifest.json/styles.css. Assets descargados y comparados por SHA-256 con el build local; versión 0.1.0 y autor wh01s17 verificados. Retirado del README el estado interno de fases/preparación a pedido del usuario. El usuario elige **documentación pública en inglés, documentos internos conservados y UI bilingüe**: README, CHANGELOG y notas del borrador traducidos, con links locales comprobados. Se conserva la documentación interna en español; sin cambios de comportamiento ni assets. Publicación con confirmación y BRAT final aún pendientes.
+
+- **2026-10-02 · usuario + Codex** — El usuario autoriza publicar 0.1.0. Release publicada como **Latest**, sin draft ni prerelease: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.1.0. BRAT 2.2.0 en Obsidian aislado verificó instalación limpia de 0.1.0, actualización 0.0.5 → 0.1.0, plugin/vista cargados y autor wh01s17. Ajustes y contenido de transcripts conservados. T6.6 y Fase 6 cerradas; no queda trabajo obligatorio para este hito. Documentación pública en inglés; sin modificaciones de las notas de prueba del usuario.

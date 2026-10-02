@@ -1,7 +1,7 @@
 # Cierre de AgentHub 0.1.0
 
-Estado: **aceptación manual cerrada por el usuario; release preparada, pendiente de publicación**.
-Versión pública actual: 0.0.5. Última comprobación: 2026-10-02 (Chile).
+Estado: **0.1.0 publicada como Latest; aceptación manual y distribución cerradas**.
+Versión pública actual: 0.1.0. Última comprobación: 2026-10-02 (Chile).
 
 ## Resultados comprobados
 
@@ -104,10 +104,10 @@ AGENTHUB_E2E_AGENTS=claude-acp pnpm test:e2e
 
 - [x] Incorporar las capturas enviadas por el usuario.
 - [x] Registrar resultados humanos y aprobación general del usuario.
-- [x] Cerrar T6.3 por aceptación manual del usuario; T6.6 conserva publicación y BRAT final.
+- [x] Cerrar T6.3 por aceptación manual del usuario y T6.6 por publicación y BRAT final.
 - [x] Pasar lint/tests/build, cerrar notas de 0.1.0 y crear commit/tag anotado sin v.
 - [x] Subir el tag y comprobar el borrador y sus tres assets: workflow 36959592684 correcto; SHA-256, versión y autor coinciden con el build local.
-- [ ] Publicar con confirmación explícita del usuario, según AGENTS.md y plan §8.4.
-- [ ] Instalar/actualizar a la release pública 0.1.0 con BRAT y registrar resultados.
+- [x] Publicar con confirmación explícita del usuario: 0.1.0 Latest, 2026-10-02.
+- [x] BRAT 2.2.0: instalación limpia 0.1.0 y actualización 0.0.5 → 0.1.0; ajustes y contenido de transcripts conservados, plugin y vista cargados.
 
-La revisión manual queda aceptada; el tag/borrador se prepara a continuación. No es necesario que el usuario ejecute el empaquetado, git o BRAT: el agente puede hacerlo. La fase 7 está descartada; el envío a la comunidad es opcional para 0.1.0.
+La revisión manual queda aceptada y la release está publicada y comprobada. No es necesario que el usuario ejecute el empaquetado, git o BRAT: el agente puede hacerlo. La fase 7 está descartada; el envío a la comunidad es opcional para 0.1.0.
