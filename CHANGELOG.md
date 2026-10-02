@@ -4,6 +4,13 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-02
+
+### Fixed
+
+- A new permission request scrolls into view even if you scrolled up, so its buttons are never hidden below the message box.
+- The conversation stays at the bottom while replies finish rendering, instead of stopping a little above the latest content.
+
 ## [0.2.0] - 2026-10-02
 
 ### Added

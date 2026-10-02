@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.2.0 publicada como Latest** (rediseño T6.12, apariencia T6.13, historial de prompts T6.14); entrada *live* en el directorio de la comunidad. |
+| Fase actual | **0.2.1 publicada como Latest** (arreglo del scroll de permisos sobre 0.2.0: rediseño, apariencia, historial de prompts); entrada *live* en el directorio de la comunidad. |
 | Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md y se atiende la revisión de 0.2.0. Pendiente: repetir la e2e de Gemini cuando se renueve su cuota diaria. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Release 0.2.0 publicada como Latest; assets y attestation verificados. Claude (Opus 5.5). |
+| Última actualización | 2026-10-02 — Release 0.2.1: los permisos nuevos siempre quedan a la vista. Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 214 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -1115,8 +1115,8 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
 7. Anotar la release en la bitácora (§17) y pulsar **Check for new releases** en community.obsidian.md para que la revisión
    automática analice la versión nueva.
 
-**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1 y
-0.2.0 publicadas.
+**Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1,
+0.2.0 y 0.2.1 publicadas.
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1744,3 +1744,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **E2e de Gemini revisada:** no era un fallo del plugin. Con una traza temporal se vio que Gemini lee la nota, pide permiso (aprobado con `proceed_once`) y escribe `resumen.md` **por el canal `fs/write_text_file` de ACP**, con su diff; pero las e2e usaban `hostServices` de los tests, cuyo `writeTextFile` no hace nada (Claude y Codex escriben en disco por su cuenta, ADR-014, por eso no se notaba). La e2e usa ahora `diskHost(vault)`, que lee y escribe de verdad en la copia temporal del vault, como `ObsidianHost`. OpenCode e2e: 2/2. La repetición con Gemini quedó bloqueada por la cuota diaria agotada del proveedor («You have exhausted your daily quota on this model»): pendiente de repetir. 214 pruebas y lint correctos.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — Creado `next.md` para funciones futuras, a pedido del usuario. Primera entrada: **pestañas** para varios agentes en paralelo en la misma vista (indicadores de estado, permisos en segundo plano con aviso, persistencia en el estado de la vista, encaje con `SessionManager`/ADR-005/ADR-022, riesgos y CA en borrador). Sin código. Puntero añadido en §11.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fix y release 0.2.1** a pedido del usuario: el botón de un permiso nuevo quedaba oculto bajo el cuadro de mensaje. `MessageList` fuerza el seguimiento al llegar una petición de permiso no vista (aunque el usuario haya subido) y observa con `ResizeObserver` una columna interna (`.agenthub-messages-content`) para seguir abajo mientras el contenido crece tras dibujarse (Markdown por bloques). Prueba nueva `MessageScroll.test.tsx`. 215 pruebas, lint (1 aviso intencionado) y build correctos. Publicada con autorización explícita del usuario («cuando termines lanza la release»).
