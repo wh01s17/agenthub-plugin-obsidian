@@ -7,7 +7,9 @@ import {
   type SelectionRef,
 } from '../core/PromptBuilder';
 import { t } from '../i18n';
+import { AgentBadge } from './components/AgentBadge';
 import { Composer } from './components/Composer';
+import { ConfigOptions } from './components/ConfigOptions';
 import { ContextChips } from './components/ContextChips';
 import { DebugPanel } from './components/DebugPanel';
 import { HistoryPanel } from './components/HistoryPanel';
@@ -83,6 +85,16 @@ function useActiveNotePath(host: ViewHost): string | null {
   return path;
 }
 
+/** Appearance settings as data attributes; `styles.css` does the rest (ADR-032). */
+export function appearanceAttributes(settings: ViewHost['settings']): Record<string, string> {
+  return {
+    'data-message-style': settings.messageStyle,
+    'data-density': settings.density,
+    'data-font-size': settings.chatFontSize,
+    'data-accent': settings.accentColor,
+  };
+}
+
 function ChatView(props: AppProps & { session: ChatSession }) {
   const { host, session, onAgentChange, onNewSession, selection = null } = props;
   const state = useSessionState(session);
@@ -92,6 +104,9 @@ function ChatView(props: AppProps & { session: ChatSession }) {
   const [includeActive, setIncludeActive] = useState(host.settings.includeActiveNote);
   const [showHistory, setShowHistory] = useState(false);
   const history = host.history;
+  const { settings } = host;
+  const optionsInComposer = settings.optionsPlacement === 'composer';
+  const onConfigChange = (id: string, value: string) => void session.setConfigOption(id, value);
 
   const onSend = (text: string) => {
     const context = { activeNotePath: includeActive ? activeNotePath : null, selection };
@@ -104,6 +119,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
       class="agenthub-app"
       data-session-id={state.localId}
       data-agent-color={agentIdentity(state.agentId, agentLabel).color}
+      {...appearanceAttributes(settings)}
     >
       <Header
         agents={host.agents.enabled()}
@@ -111,7 +127,8 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         configOptions={state.configOptions}
         busy={busy}
         onAgentChange={onAgentChange}
-        onConfigChange={(id, value) => void session.setConfigOption(id, value)}
+        onConfigChange={onConfigChange}
+        showOptions={!optionsInComposer}
         onNewSession={onNewSession}
         onOpenSettings={() => host.openSettings()}
         onOpenHistory={history ? () => setShowHistory((open) => !open) : undefined}
@@ -133,6 +150,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         />
       ) : state.items.length === 0 ? (
         <div class="agenthub-empty">
+          <AgentBadge agentId={state.agentId} label={agentLabel} />
           <p class="agenthub-empty-title">{t('welcomeTitle')}</p>
           <p class="agenthub-empty-body">
             {t('welcomeBody', { agent: agentLabel, cwd: state.cwd })}
@@ -142,24 +160,35 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         <MessageList
           app={host.app}
           items={state.items}
-          showThoughts={host.settings.showThoughts}
+          showThoughts={settings.showThoughts}
+          expandToolCalls={settings.expandToolCalls}
           onPermission={(id, outcome) => session.resolvePermission(id, outcome)}
           onOpenPath={(path) => host.notes.openPath(path)}
           pathLabel={(path) => host.notes.displayPath(path)}
         />
       )}
-      {host.settings.debugPanel && <DebugPanel lines={session.debugLog()} />}
-      <StatusBar status={state.status} usage={state.usage} />
+      {settings.debugPanel && <DebugPanel lines={session.debugLog()} />}
+      <StatusBar status={state.status} usage={state.usage} showUsage={settings.showUsage} />
 
       <Composer
         agentLabel={agentLabel}
         busy={busy}
         disabled={state.status === 'closed'}
-        sendWith={host.settings.sendWith}
+        sendWith={settings.sendWith}
         notes={() => host.notes.listNotes()}
         commands={state.commands}
         onSend={onSend}
         onStop={() => void session.cancel()}
+        options={
+          optionsInComposer ? (
+            <ConfigOptions
+              options={state.configOptions}
+              busy={busy}
+              onChange={onConfigChange}
+              variant="inline"
+            />
+          ) : undefined
+        }
       >
         <ContextChips
           activeNotePath={activeNotePath}

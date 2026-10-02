@@ -14,6 +14,19 @@ function answerText(request: PermissionRequest, resolved: PermissionOutcome): st
   return t('permissionAnswered', { option: option?.label ?? resolved.optionId });
 }
 
+/**
+ * One primary action (the first "allow"), quiet outline buttons for the rest and a red outline for
+ * rejections, so the safe choices are easy to tell apart.
+ */
+function buttonClass(
+  request: PermissionRequest,
+  option: PermissionRequest['options'][number],
+): string {
+  if (!option.kind.startsWith('allow')) return 'agenthub-button is-danger';
+  const primary = request.options.find((o) => o.kind.startsWith('allow'));
+  return option.id === primary?.id ? 'mod-cta' : 'agenthub-button';
+}
+
 export function PermissionCard({ request, resolved, onAnswer }: PermissionCardProps) {
   return (
     <section
@@ -33,7 +46,7 @@ export function PermissionCard({ request, resolved, onAnswer }: PermissionCardPr
             <button
               key={option.id}
               type="button"
-              class={option.kind.startsWith('allow') ? 'mod-cta' : 'mod-warning'}
+              class={buttonClass(request, option)}
               onClick={() => onAnswer({ outcome: 'selected', optionId: option.id })}
             >
               {option.label}

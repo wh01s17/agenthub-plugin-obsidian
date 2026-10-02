@@ -2,6 +2,7 @@ import type { App } from 'obsidian';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type { PermissionOutcome, PromptBlock, TranscriptItem } from '../../core/types';
 import { t } from '../../i18n';
+import { Icon } from './Icon';
 import { Markdown } from './Markdown';
 import { NoticeItem } from './NoticeItem';
 import { PermissionCard } from './PermissionCard';
@@ -12,6 +13,8 @@ interface MessageListProps {
   app: App;
   items: readonly TranscriptItem[];
   showThoughts: boolean;
+  /** Open tool call details by default (appearance setting). */
+  expandToolCalls?: boolean;
   onPermission: (id: string, outcome: PermissionOutcome) => void;
   /** Opens a vault path; returns false when it cannot be opened. */
   onOpenPath: (path: string) => boolean;
@@ -51,6 +54,7 @@ function Item({
   app,
   item,
   showThoughts,
+  expandToolCalls = false,
   onPermission,
   onOpenPath,
   pathLabel,
@@ -73,12 +77,22 @@ function Item({
     case 'thought':
       return (
         <details class="agenthub-thought" open={showThoughts}>
-          <summary>{t('thinking')}</summary>
+          <summary>
+            <Icon name="chevron-right" class="agenthub-chevron" />
+            <span>{t('thinking')}</span>
+          </summary>
           <div class="agenthub-thought-text">{item.text}</div>
         </details>
       );
     case 'tool':
-      return <ToolCallCard call={item.call} onOpenPath={onOpenPath} pathLabel={pathLabel} />;
+      return (
+        <ToolCallCard
+          call={item.call}
+          expanded={expandToolCalls}
+          onOpenPath={onOpenPath}
+          pathLabel={pathLabel}
+        />
+      );
     case 'plan':
       return <PlanView entries={item.entries} />;
     case 'permission':
@@ -111,6 +125,7 @@ export function MessageList({
   app,
   items,
   showThoughts,
+  expandToolCalls,
   onPermission,
   onOpenPath,
   pathLabel,
@@ -163,6 +178,7 @@ export function MessageList({
           app={app}
           item={item}
           showThoughts={showThoughts}
+          expandToolCalls={expandToolCalls}
           onPermission={onPermission}
           onOpenPath={onOpenPath}
           pathLabel={pathLabel}

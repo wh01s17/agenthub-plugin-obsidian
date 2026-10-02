@@ -43,7 +43,7 @@ describe('declarative settings (T6.7)', () => {
     const { tab } = makeTab();
     const groups = tab.getSettingDefinitions();
     const headings = groups.map((g) => ('heading' in g ? g.heading : ''));
-    expect(headings).toEqual(['Agents', 'Sessions', 'Environment']);
+    expect(headings).toEqual(['Agents', 'Sessions', 'Appearance', 'Environment']);
 
     const names = groups.flatMap((g) =>
       'items' in g && g.items ? g.items.flatMap((i) => ('name' in i ? [i.name] : [])) : [],

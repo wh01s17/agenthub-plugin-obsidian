@@ -1,15 +1,45 @@
-/* AgentHub — compact, sober sidebar. Only Obsidian CSS variables, so every theme applies (ADR-018). */
+/*
+ * AgentHub — compact, sober sidebar. Only Obsidian CSS variables, so every theme applies (ADR-018).
+ * Component shapes follow shadcn/ui (outline controls, soft cards, focus rings) and the agents' own apps
+ * (message bubbles, round send button, options next to the message box). Appearance settings arrive as
+ * `data-*` attributes on `.agenthub-app` and only change the tokens below (ADR-032).
+ */
 
 .agenthub-view {
   padding: 0;
 }
 
 .agenthub-app {
+  --agenthub-accent: var(--agenthub-agent);
+  --agenthub-border: var(--background-modifier-border);
+  --agenthub-surface: var(--background-primary);
+  --agenthub-muted: var(--background-modifier-hover);
+  --agenthub-ring: 0 0 0 3px color-mix(in srgb, var(--agenthub-accent) 22%, transparent);
+  --agenthub-gap: var(--size-4-4);
+  --agenthub-pad: var(--size-4-3);
+  --agenthub-text: var(--font-ui-small);
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
   font-size: var(--font-ui-small);
+}
+
+.agenthub-app[data-accent='theme'] {
+  --agenthub-accent: var(--interactive-accent);
+}
+
+.agenthub-app[data-density='compact'] {
+  --agenthub-gap: var(--size-4-2);
+  --agenthub-pad: var(--size-4-2);
+}
+
+.agenthub-app[data-font-size='medium'] {
+  --agenthub-text: var(--font-ui-medium);
+}
+
+.agenthub-app[data-font-size='large'] {
+  --agenthub-text: calc(var(--font-ui-medium) * 1.15);
 }
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
@@ -31,6 +61,9 @@
 .agenthub-agent-select {
   flex: 1;
   min-width: 0;
+  height: 28px;
+  border-radius: var(--radius-m);
+  font-weight: var(--font-medium);
 }
 
 .agenthub-config {
@@ -69,13 +102,218 @@
   text-overflow: ellipsis;
 }
 
+.agenthub-config-select {
+  border-radius: var(--radius-m);
+}
+
 .agenthub-config-select:hover {
   border-color: var(--background-modifier-border-hover);
 }
 
-.agenthub-icon-button {
-  min-width: 24px;
-  min-height: 24px;
+/* Options inside the message box (ADR-032): pills that open a panel rising from the composer. */
+.agenthub-config.is-inline {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: var(--size-4-1);
+  min-width: 0;
+}
+
+.agenthub-app button.agenthub-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 11rem;
+  height: 26px;
+  padding: 0 var(--size-4-2);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-app button.agenthub-pill:hover,
+.agenthub-app button.agenthub-pill.is-open {
+  border-color: color-mix(in srgb, var(--agenthub-accent) 50%, var(--agenthub-border));
+  background: color-mix(in srgb, var(--agenthub-accent) 10%, transparent);
+  color: var(--text-normal);
+}
+
+.agenthub-pill .agenthub-icon:first-child {
+  color: var(--agenthub-accent);
+}
+
+.agenthub-app button.agenthub-pill.is-danger {
+  border-color: color-mix(in srgb, var(--color-red) 55%, transparent);
+  color: var(--text-error);
+}
+
+.agenthub-app button.agenthub-pill.is-danger .agenthub-icon:first-child {
+  color: var(--text-error);
+}
+
+.agenthub-pill-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenthub-pill-caret {
+  opacity: 0.6;
+}
+
+.agenthub-pill-caret svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* The panel spans the composer, like a sheet coming out of the message box. */
+.agenthub-panel {
+  position: absolute;
+  bottom: calc(100% + var(--size-4-2));
+  left: 0;
+  right: 0;
+  z-index: var(--layer-popover);
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: var(--size-4-2);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-top: 2px solid var(--agenthub-accent);
+  border-radius: var(--radius-l);
+  background: var(--agenthub-surface);
+  box-shadow: var(--shadow-l);
+  animation: agenthub-rise 140ms ease-out;
+}
+
+@keyframes agenthub-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.agenthub-panel-title {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  padding: var(--size-4-1) var(--size-4-2) var(--size-4-2);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  font-weight: var(--font-semibold);
+}
+
+.agenthub-panel-title .agenthub-icon {
+  color: var(--agenthub-accent);
+}
+
+.agenthub-panel-current {
+  margin-left: auto;
+  color: var(--text-normal);
+  font-weight: var(--font-normal);
+}
+
+.agenthub-panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.agenthub-app button.agenthub-panel-item {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  width: 100%;
+  height: auto;
+  min-height: 30px;
+  padding: var(--size-4-1) var(--size-4-2);
+  border: none;
+  border-radius: var(--radius-m);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-normal);
+  text-align: start;
+}
+
+.agenthub-app button.agenthub-panel-item:is(:hover, :focus-visible) {
+  background: var(--agenthub-muted);
+}
+
+.agenthub-app button.agenthub-panel-item[aria-checked='true'] {
+  background: color-mix(in srgb, var(--agenthub-accent) 12%, transparent);
+}
+
+.agenthub-panel-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.agenthub-panel-name {
+  font-size: var(--font-ui-small);
+}
+
+.agenthub-panel-desc {
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  white-space: normal;
+}
+
+.agenthub-panel-check {
+  color: var(--agenthub-accent);
+}
+
+/* Effort-like options: a level meter, bars that grow with each step. */
+.agenthub-meter {
+  display: flex;
+  gap: var(--size-4-1);
+  padding: 0 var(--size-4-1) var(--size-4-1);
+}
+
+.agenthub-app button.agenthub-meter-step {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: var(--size-4-1);
+  height: auto;
+  min-width: 0;
+  padding: var(--size-4-1);
+  border: none;
+  border-radius: var(--radius-m);
+  background: transparent;
+  box-shadow: none;
+}
+
+.agenthub-app button.agenthub-meter-step:is(:hover, :focus-visible) {
+  background: var(--agenthub-muted);
+}
+
+.agenthub-meter-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--agenthub-border);
+  transition: background-color 120ms ease;
+}
+
+.agenthub-meter-step.is-filled .agenthub-meter-bar {
+  background: var(--agenthub-accent);
+}
+
+.agenthub-meter-label {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenthub-meter-step[aria-checked='true'] .agenthub-meter-label {
+  color: var(--text-normal);
+  font-weight: var(--font-semibold);
 }
 
 /* ── Empty states ───────────────────────────────────────────────────────── */
@@ -93,6 +331,18 @@
   color: var(--text-normal);
 }
 
+.agenthub-empty .agenthub-agent-badge {
+  min-width: 40px;
+  height: 40px;
+  border-radius: var(--radius-l);
+  font-size: var(--font-ui-medium);
+}
+
+.agenthub-empty .agenthub-agent-logo {
+  width: 36px;
+  height: 36px;
+}
+
 /* ── Messages ───────────────────────────────────────────────────────────── */
 
 .agenthub-messages {
@@ -101,22 +351,62 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--size-4-3);
-  padding: var(--size-4-3);
+  gap: var(--agenthub-gap);
+  padding: var(--agenthub-pad);
+  font-size: var(--agenthub-text);
 }
 
+/* Bubbles (default): your messages on the right, the agent's replies as plain text. */
 .agenthub-message.is-user {
   user-select: text;
   align-self: flex-end;
   flex-shrink: 0;
-  width: calc(100% - var(--size-4-3));
+  max-width: 85%;
   box-sizing: border-box;
+  margin-top: var(--size-4-2);
+  padding: var(--size-4-2) var(--size-4-3);
+  border-radius: var(--radius-l);
+  background: var(--agenthub-muted);
+}
+
+/* Cards: full-width card with an accent edge and the author label (T6.10). */
+[data-message-style='cards'] .agenthub-message.is-user {
+  width: calc(100% - var(--size-4-3));
+  max-width: none;
   margin-block: var(--size-4-1) var(--size-4-3);
   padding: var(--size-4-3);
-  border: var(--border-width) solid var(--background-modifier-border);
-  border-inline-start: 3px solid var(--interactive-accent);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-inline-start: 3px solid var(--agenthub-accent);
   border-radius: var(--radius-m);
-  background: var(--background-primary);
+  background: var(--agenthub-surface);
+}
+
+/* Plain: terminal-like prompt lines, as in the agents' CLIs. */
+[data-message-style='plain'] .agenthub-message.is-user {
+  align-self: stretch;
+  max-width: none;
+  padding: var(--size-4-1) var(--size-4-2);
+  border-radius: var(--radius-s);
+  font-family: var(--font-monospace);
+}
+
+[data-message-style='plain'] .agenthub-message.is-user .agenthub-message-text::before {
+  content: '› ';
+  color: var(--agenthub-accent);
+  font-weight: var(--font-bold);
+}
+
+/* The author label stays for screen readers when it is not shown. */
+:is([data-message-style='bubbles'], [data-message-style='plain']) .agenthub-message-author {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .agenthub-message-author {
@@ -166,7 +456,28 @@
 }
 
 .agenthub-thought > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  width: fit-content;
+  list-style: none;
   cursor: pointer;
+}
+
+.agenthub-thought > summary::-webkit-details-marker {
+  display: none;
+}
+
+.agenthub-thought > summary:hover {
+  color: var(--text-normal);
+}
+
+.agenthub-chevron {
+  transition: transform 120ms ease;
+}
+
+.agenthub-thought[open] > summary .agenthub-chevron {
+  transform: rotate(90deg);
 }
 
 .agenthub-thought-text {
@@ -218,9 +529,11 @@
 }
 
 .agenthub-tool-body {
-  margin: var(--size-4-1) 0 var(--size-4-1) var(--size-4-3);
-  padding-left: var(--size-4-3);
-  border-left: 2px solid var(--background-modifier-border);
+  margin: var(--size-4-1) 0 var(--size-4-2) var(--size-4-5);
+  padding: var(--size-4-2) var(--size-4-3);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: var(--radius-m);
+  background: var(--agenthub-surface);
 }
 
 .agenthub-tool-label {
@@ -293,6 +606,16 @@
   .agenthub-status-pending svg {
     animation: none;
   }
+
+  .agenthub-chevron,
+  .agenthub-composer,
+  .agenthub-meter-bar {
+    transition: none;
+  }
+
+  .agenthub-panel {
+    animation: none;
+  }
 }
 
 /* ── Plan, permissions, notices: accent on the left, no boxes ───────────── */
@@ -300,8 +623,14 @@
 .agenthub-plan,
 .agenthub-permission {
   padding: var(--size-4-1) var(--size-4-3);
-  border-left: 2px solid var(--background-modifier-border);
+  border-left: 2px solid var(--agenthub-border);
   font-size: var(--font-ui-smaller);
+}
+
+.agenthub-plan {
+  padding: var(--size-4-2) var(--size-4-3);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: var(--radius-m);
 }
 
 .agenthub-plan-title,
@@ -336,8 +665,22 @@
 }
 
 .agenthub-permission.is-pending {
-  border-left-color: var(--interactive-accent);
-  border-radius: 0 var(--radius-s) var(--radius-s) 0;
+  padding: var(--size-4-3);
+  border: var(--border-width) solid
+    color-mix(in srgb, var(--agenthub-accent) 45%, var(--agenthub-border));
+  border-radius: var(--radius-l);
+  background: var(--agenthub-surface);
+  box-shadow: var(--shadow-s);
+}
+
+.agenthub-permission.is-pending .agenthub-permission-header .agenthub-icon {
+  color: var(--agenthub-accent);
+}
+
+.agenthub-permission.is-pending .agenthub-permission-title {
+  margin: var(--size-4-2) 0 var(--size-4-3);
+  padding: var(--size-4-1) var(--size-4-2);
+  border-radius: var(--radius-s);
   background: var(--background-secondary);
 }
 
@@ -374,6 +717,27 @@
   overflow-wrap: anywhere;
   text-align: start;
   font-size: var(--font-ui-smaller);
+}
+
+/* Outline buttons (shadcn "outline"/"destructive outline"); the first "allow" stays primary. */
+.agenthub-app button.agenthub-button {
+  border: var(--border-width) solid var(--agenthub-border);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-normal);
+}
+
+.agenthub-app button.agenthub-button:hover {
+  background: var(--agenthub-muted);
+}
+
+.agenthub-app button.agenthub-button.is-danger {
+  border-color: color-mix(in srgb, var(--color-red) 45%, transparent);
+  color: var(--text-error);
+}
+
+.agenthub-app button.agenthub-button.is-danger:hover {
+  background: rgba(var(--color-red-rgb), 0.1);
 }
 
 .agenthub-permission-answer {
@@ -438,12 +802,23 @@
   margin-right: auto;
 }
 
+.agenthub-status-usage {
+  padding: 0 var(--size-4-2);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: var(--radius-m);
+  font-variant-numeric: tabular-nums;
+}
+
 .agenthub-composer {
   position: relative;
-  margin: var(--size-4-1) var(--size-4-3) var(--size-4-3);
-  border: var(--border-width) solid var(--background-modifier-border);
-  border-radius: var(--radius-m);
-  background: var(--background-modifier-form-field);
+  margin: var(--size-4-1) var(--agenthub-pad) var(--agenthub-pad);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: var(--radius-l);
+  background: var(--agenthub-surface);
+  box-shadow: var(--shadow-s);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 /* The box shows focus; the textarea inside stays flat and grows with its content. */
@@ -453,9 +828,10 @@
   min-height: 2.5rem;
   max-height: 12rem;
   field-sizing: content;
-  padding: var(--size-4-2) var(--size-4-3) var(--size-4-1);
+  padding: var(--size-4-3) var(--size-4-3) var(--size-4-1);
   border: none;
-  border-radius: var(--radius-m) var(--radius-m) 0 0;
+  border-radius: var(--radius-l) var(--radius-l) 0 0;
+  font-size: var(--agenthub-text);
   background: transparent;
   box-shadow: none;
   outline: none;
@@ -470,24 +846,40 @@
 
 .agenthub-composer-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--size-4-2);
+  gap: var(--size-4-1);
   padding: var(--size-4-1) var(--size-4-2) var(--size-4-2) var(--size-4-3);
 }
 
 .agenthub-composer-context {
-  flex: 1;
-  min-width: 0;
+  padding: var(--size-4-2) var(--size-4-3) 0;
 }
 
-.agenthub-composer-button {
+.agenthub-composer-context:empty {
+  display: none;
+}
+
+/* Round icon button, like the agents' own apps. */
+.agenthub-app .agenthub-composer-button {
   display: flex;
   align-items: center;
-  gap: var(--size-4-1);
+  justify-content: center;
   flex-shrink: 0;
-  height: 26px;
-  padding: 0 var(--size-4-3);
-  font-size: var(--font-ui-smaller);
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.agenthub-app .agenthub-composer-button:disabled {
+  opacity: 0.4;
+}
+
+.agenthub-app .agenthub-composer-button.is-stop {
+  background: var(--text-normal);
+  color: var(--background-primary);
 }
 
 /* ── Context chips ──────────────────────────────────────────────────────── */
@@ -505,9 +897,9 @@
   max-width: 100%;
   height: 26px;
   padding: 0 var(--size-4-2);
-  border: none;
-  border-radius: var(--radius-s);
-  background: var(--background-modifier-hover);
+  border: var(--border-width) solid var(--agenthub-border);
+  border-radius: var(--radius-m);
+  background: transparent;
   box-shadow: none;
   color: var(--text-muted);
   font-size: var(--font-ui-smaller);
@@ -520,10 +912,12 @@
 }
 
 .agenthub-chip.is-on {
+  background: var(--agenthub-muted);
   color: var(--text-normal);
 }
 
 .agenthub-chip.is-off {
+  border-style: dashed;
   background: transparent;
   color: var(--text-faint);
   text-decoration: line-through;
@@ -684,7 +1078,7 @@
 }
 
 .agenthub-app :is(button, select, input, summary):focus-visible {
-  outline: 2px solid var(--interactive-accent);
+  outline: 2px solid var(--agenthub-accent);
   outline-offset: 1px;
 }
 
@@ -755,15 +1149,15 @@
   line-height: 1;
 }
 
-/* The active agent tints the composer focus and the streaming status. */
+/* The accent (agent color or theme accent) tints the composer focus and the streaming status. */
 .agenthub-app .agenthub-composer:focus-within {
-  border-color: var(--agenthub-agent);
-  box-shadow: 0 0 0 1px var(--agenthub-agent);
+  border-color: var(--agenthub-accent);
+  box-shadow: var(--agenthub-ring);
 }
 
 .agenthub-app .agenthub-status.is-running .agenthub-status-text,
 .agenthub-app .agenthub-status.is-starting .agenthub-status-text {
-  color: var(--agenthub-agent);
+  color: var(--agenthub-accent);
 }
 
 /* ── Diffs (T6.1) ───────────────────────────────────────────────────────── */

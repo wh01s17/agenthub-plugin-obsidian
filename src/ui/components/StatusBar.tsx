@@ -40,8 +40,18 @@ export function contextPercent(usage: Usage | undefined): number | null {
   return Math.min(100, Math.round((usage.contextUsed / usage.contextSize) * 100));
 }
 
-export function StatusBar({ status, usage }: { status: SessionStatus; usage?: Usage }) {
-  const percent = contextPercent(usage);
+export function StatusBar({
+  status,
+  usage,
+  showUsage = true,
+}: {
+  status: SessionStatus;
+  usage?: Usage;
+  /** Context and cost badges (appearance setting). */
+  showUsage?: boolean;
+}) {
+  const percent = showUsage ? contextPercent(usage) : null;
+  const cost = showUsage ? usage?.costUsd : undefined;
   return (
     <div class={`agenthub-status is-${status}`}>
       {/* The only live region of the view: announces state changes, not streamed text. */}
@@ -51,10 +61,8 @@ export function StatusBar({ status, usage }: { status: SessionStatus; usage?: Us
       {percent !== null && (
         <span class="agenthub-status-usage">{t('contextUsage', { percent })}</span>
       )}
-      {usage?.costUsd !== undefined && usage.costUsd > 0 && (
-        <span class="agenthub-status-usage">
-          {t('costUsd', { cost: usage.costUsd.toFixed(2) })}
-        </span>
+      {cost !== undefined && cost > 0 && (
+        <span class="agenthub-status-usage">{t('costUsd', { cost: cost.toFixed(2) })}</span>
       )}
     </div>
   );

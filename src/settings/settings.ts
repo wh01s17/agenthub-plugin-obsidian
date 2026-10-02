@@ -61,6 +61,19 @@ const SettingsSchema = z.object({
   resolveLoginShell: z.boolean(),
   /** Directories put first in PATH for agent commands. */
   extraPath: z.array(z.string()),
+  // Appearance (ADR-032): applied as data attributes on the view, so every theme still applies.
+  /** User messages as right-aligned bubbles, accent cards, or plain terminal-like lines. */
+  messageStyle: z.enum(['bubbles', 'cards', 'plain']),
+  density: z.enum(['compact', 'comfortable']),
+  chatFontSize: z.enum(['small', 'medium', 'large']),
+  /** Focus rings and highlights follow the agent's color or the theme accent. */
+  accentColor: z.enum(['agent', 'theme']),
+  /** Where the agent's mode/model/effort selectors appear. */
+  optionsPlacement: z.enum(['header', 'composer']),
+  /** Open tool call details by default. */
+  expandToolCalls: z.boolean(),
+  /** Show context and cost usage in the status line. */
+  showUsage: z.boolean(),
 });
 
 export type AgentHubSettings = z.infer<typeof SettingsSchema>;
@@ -153,6 +166,13 @@ export function defaultSettings(): AgentHubSettings {
     knownConfigOptions: {},
     resolveLoginShell: true,
     extraPath: [],
+    messageStyle: 'bubbles',
+    density: 'comfortable',
+    chatFontSize: 'small',
+    accentColor: 'agent',
+    optionsPlacement: 'composer',
+    expandToolCalls: false,
+    showUsage: true,
   };
 }
 
@@ -207,6 +227,13 @@ export function migrate(raw: unknown): AgentHubSettings {
     knownConfigOptions: field('knownConfigOptions'),
     resolveLoginShell: field('resolveLoginShell'),
     extraPath: field('extraPath'),
+    messageStyle: field('messageStyle'),
+    density: field('density'),
+    chatFontSize: field('chatFontSize'),
+    accentColor: field('accentColor'),
+    optionsPlacement: field('optionsPlacement'),
+    expandToolCalls: field('expandToolCalls'),
+    showUsage: field('showUsage'),
   };
 }
 

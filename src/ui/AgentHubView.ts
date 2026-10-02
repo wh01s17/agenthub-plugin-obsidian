@@ -171,9 +171,14 @@ export class AgentHubView extends ItemView {
     }
   }
 
-  private renderApp(): void {
+  /** Redraws with the current settings (e.g. after an appearance change) without starting the agent. */
+  refresh(): void {
+    this.renderApp(false);
+  }
+
+  private renderApp(prepare = true): void {
     // Start the agent in the background so its options (mode, model…) can be chosen first.
-    void this.session?.prepare();
+    if (prepare) void this.session?.prepare();
     render(
       h(App, {
         host: this.host,

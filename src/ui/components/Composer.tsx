@@ -16,8 +16,10 @@ interface ComposerProps {
   commands: readonly SlashCommand[];
   onSend: (text: string) => void;
   onStop: () => void;
-  /** Shown in the composer toolbar, left of the send button (context chips). */
+  /** Shown at the top of the message box (context chips: what travels with the message). */
   children?: ComponentChildren;
+  /** The agent's options, when they live in the composer (ADR-032). */
+  options?: ComponentChildren;
 }
 
 interface Suggestions {
@@ -137,6 +139,7 @@ export function Composer(props: ComposerProps) {
           ))}
         </ul>
       )}
+      {props.children && <div class="agenthub-composer-context">{props.children}</div>}
       <textarea
         ref={ref}
         class="agenthub-composer-input"
@@ -157,16 +160,17 @@ export function Composer(props: ComposerProps) {
         onBlur={() => setSuggestions(null)}
       />
       <div class="agenthub-composer-toolbar">
-        <div class="agenthub-composer-context">{props.children}</div>
+        {props.options}
+        {/* Round icon buttons, like the agents' own apps; the name comes from `aria-label`/`title`. */}
         {busy ? (
           <button
             type="button"
-            class="agenthub-composer-button mod-warning"
+            class="agenthub-composer-button is-stop"
             onClick={onStop}
             aria-label={t('stop')}
+            title={t('stop')}
           >
             <Icon name="square" />
-            <span>{t('stop')}</span>
           </button>
         ) : (
           <button
@@ -175,9 +179,9 @@ export function Composer(props: ComposerProps) {
             onClick={send}
             disabled={disabled || !text.trim()}
             aria-label={t('send')}
+            title={t('send')}
           >
-            <Icon name="send" />
-            <span>{t('send')}</span>
+            <Icon name="arrow-up" />
           </button>
         )}
       </div>

@@ -2,6 +2,7 @@ import type { ConfigOption } from '../../core/types';
 import { t } from '../../i18n';
 import type { AgentConfig } from '../../settings/settings';
 import { AgentBadge } from './AgentBadge';
+import { ConfigOptions } from './ConfigOptions';
 import { Icon } from './Icon';
 import { dangerousModeOptions } from '../../core/permissionModes';
 
@@ -16,12 +17,8 @@ interface HeaderProps {
   onOpenSettings: () => void;
   /** Shown only when history is enabled. */
   onOpenHistory?: () => void;
-}
-
-function optionName(option: ConfigOption): string {
-  if (option.category === 'mode' && option.name === 'Mode') return t('configModeLabel');
-  if (option.category === 'model' && option.name === 'Model') return t('configModelLabel');
-  return option.name;
+  /** False when the options live in the composer instead (ADR-032). */
+  showOptions?: boolean;
 }
 
 /** Agent selector, the agent's own options (mode, model…: T2.9) and session actions. */
@@ -89,38 +86,13 @@ export function Header(props: HeaderProps) {
           </span>
         </div>
       )}
-      {configOptions.length > 0 && (
-        <div class="agenthub-config">
-          {configOptions.map((option) => (
-            // The visible name tells what each value means ("Off" alone is ambiguous).
-            <div
-              key={option.id}
-              class="agenthub-config-item"
-              title={option.description ?? optionName(option)}
-            >
-              <span class="agenthub-config-label" aria-hidden="true">
-                {optionName(option)}
-              </span>
-              <select
-                class="dropdown agenthub-config-select"
-                aria-label={optionName(option)}
-                value={option.currentValue}
-                disabled={busy}
-                onChange={(event) => {
-                  const value = event.currentTarget.value;
-                  event.currentTarget.value = option.currentValue;
-                  props.onConfigChange(option.id, value);
-                }}
-              >
-                {option.options.map((choice) => (
-                  <option key={choice.value} value={choice.value} title={choice.description}>
-                    {choice.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-        </div>
+      {props.showOptions !== false && (
+        <ConfigOptions
+          options={configOptions}
+          busy={busy}
+          onChange={props.onConfigChange}
+          variant="grid"
+        />
       )}
     </header>
   );

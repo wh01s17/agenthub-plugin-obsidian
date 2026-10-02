@@ -193,6 +193,10 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
     change(this.settings);
     this.agents.setAgents(this.settings.agents);
     await this.saveData(this.settings);
+    // Views read settings while rendering: redraw them so appearance changes apply at once.
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_AGENTHUB)) {
+      if (leaf.view instanceof AgentHubView) leaf.view.refresh();
+    }
   }
 
   detectAgent(id: string): Promise<DetectionResult> {

@@ -51,6 +51,10 @@ export function describeDetection(result: DetectionResult): string {
   }
 }
 
+/** Appearance settings shown as a dropdown. */
+type AppearanceChoice =
+  'messageStyle' | 'density' | 'chatFontSize' | 'accentColor' | 'optionsPlacement';
+
 /** One settings row: its name/description (indexed by Obsidian's settings search) and its controls. */
 interface Row {
   name: string;
@@ -135,6 +139,7 @@ export class AgentHubSettingTab extends PluginSettingTab {
     return [
       { heading: t('settingsAgents'), rows: this.agentRows() },
       { heading: t('settingsSessions'), rows: this.sessionRows() },
+      { heading: t('settingsAppearance'), rows: this.appearanceRows() },
       { heading: t('settingsEnvironment'), rows: this.environmentRows() },
     ];
   }
@@ -473,6 +478,72 @@ export class AgentHubSettingTab extends PluginSettingTab {
       }),
     );
     return rows;
+  }
+
+  // ── Appearance (ADR-032) ───────────────────────────────────────────────────
+
+  private appearanceRows(): Row[] {
+    const { settings } = this.host;
+    /** A dropdown bound to one enum setting; open views redraw when it changes. */
+    const choice = <K extends AppearanceChoice>(
+      key: K,
+      name: string,
+      desc: string,
+      options: Record<AgentHubSettings[K], string>,
+    ): Row => ({
+      name,
+      desc,
+      render: (setting) =>
+        setting.addDropdown((dropdown) => {
+          for (const [value, label] of Object.entries<string>(options)) {
+            dropdown.addOption(value, label);
+          }
+          dropdown.setValue(settings[key]).onChange((value) => {
+            if (!(value in options)) return;
+            this.save((s) => {
+              s[key] = value as AgentHubSettings[K];
+            });
+          });
+        }),
+    });
+    const toggle = (key: 'expandToolCalls' | 'showUsage', name: string, desc: string): Row => ({
+      name,
+      desc,
+      render: (setting) =>
+        setting.addToggle((component) =>
+          component.setValue(settings[key]).onChange((next) =>
+            this.save((s) => {
+              s[key] = next;
+            }),
+          ),
+        ),
+    });
+    return [
+      choice('messageStyle', t('settingsMessageStyle'), t('settingsMessageStyleDesc'), {
+        bubbles: t('settingsMessageBubbles'),
+        cards: t('settingsMessageCards'),
+        plain: t('settingsMessagePlain'),
+      }),
+      choice('density', t('settingsDensity'), t('settingsDensityDesc'), {
+        comfortable: t('settingsDensityComfortable'),
+        compact: t('settingsDensityCompact'),
+      }),
+      choice('chatFontSize', t('settingsFontSize'), t('settingsFontSizeDesc'), {
+        small: t('settingsFontSmall'),
+        medium: t('settingsFontMedium'),
+        large: t('settingsFontLarge'),
+      }),
+      choice('accentColor', t('settingsAccent'), t('settingsAccentDesc'), {
+        agent: t('settingsAccentAgent'),
+        theme: t('settingsAccentTheme'),
+      }),
+      choice('optionsPlacement', t('settingsOptionsPlacement'), t('settingsOptionsPlacementDesc'), {
+        header: t('settingsOptionsHeader'),
+        composer: t('settingsOptionsComposer'),
+      }),
+      toggle('expandToolCalls', t('settingsExpandTools'), t('settingsExpandToolsDesc')),
+      toggle('showUsage', t('settingsShowUsage'), t('settingsShowUsageDesc')),
+    ];
   }
 
   // ── Environment ────────────────────────────────────────────────────────────

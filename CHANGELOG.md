@@ -4,8 +4,15 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Appearance settings: message style (bubbles, cards, or plain), density, text size, accent color (agent or theme), placement of the agent options, expanded tool calls, and usage display. Changes apply to open views at once.
+- Agent options (mode, model, effort…) as pills in the message box, with a panel that lists each choice and its description; effort levels show as a level meter, and unrestricted modes are highlighted in red.
+
 ### Changed
 
+- Refreshed design: message bubbles, rounded message box with a round send button and context at the top, softer cards for tools and plans, and a permission card with one primary action.
+- Agent options appear in the message box by default; the previous selectors above the conversation remain available in settings.
 - README adds a table of contents and installation from the community plugin directory; screenshots are shown expanded, two per row.
 
 ## [0.1.1] - 2026-10-02
