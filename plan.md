@@ -1611,3 +1611,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   anticipado (ADR-024) nadie devolvía el estado a `idle` cuando el agente terminaba de iniciar sin un mensaje en curso.
   `ChatSession.startAgent` ahora pasa de `starting` a `idle` (si un mensaje enviado mientras arrancaba ya puso
   `running`, no lo toca). Test de regresión añadido. 177 tests.
+- **2026-10-01 · Claude (Opus 5.5)** — **Release 0.0.4 publicada** como *Latest* (T6.7 ajustes buscables y el arreglo
+  de "Starting the agent…"). Animación de los puntos de "Working…" (aparecen de uno en uno; texto plano para lectores de
+  pantalla; fijos con `prefers-reduced-motion`) hecha después del tag: irá en la próxima versión.
