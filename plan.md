@@ -1729,3 +1729,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **T6.12:** la lista de sugerencias (`@`, `/`) desplaza la opción activa a la vista al moverse con las flechas (`scrollIntoView({ block: 'nearest' })`), y las descripciones largas se limitan a dos líneas con `max-height` (sin `line-clamp`, para no sumar avisos de CSS en la revisión de la comunidad). 211 pruebas, lint y build correctos.
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **T6.12:** pastillas más compactas (22 px, iconos de 13 px, flecha discreta); los interruptores (p. ej. *Fast mode*) muestran solo el icono, con el nombre en el tooltip y el nombre accesible; la fila de opciones no salta de línea (desplazamiento horizontal) y el botón de enviar queda fijo; icono propio para *Collaboration mode* de Codex. 211 pruebas, lint y build correctos.
+
+- **2026-10-02 · usuario + Claude (Opus 5.5)** — **T6.12:** botón de parar rediseñado: tinte del color de acento, cuadrado relleno y arco giratorio mientras el agente trabaja (sin animación con movimiento reducido). Build correcto.

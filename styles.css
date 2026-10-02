@@ -643,7 +643,8 @@
     transition: none;
   }
 
-  .agenthub-panel {
+  .agenthub-panel,
+  .agenthub-composer-button.is-stop::before {
     animation: none;
   }
 }
@@ -906,9 +907,33 @@
   opacity: 0.4;
 }
 
+/* Stop: accent tint with a filled square and a spinning arc while the agent works. */
 .agenthub-app .agenthub-composer-button.is-stop {
-  background: var(--text-normal);
-  color: var(--background-primary);
+  position: relative;
+  border: none;
+  background: color-mix(in srgb, var(--agenthub-accent) 18%, transparent);
+  box-shadow: none;
+  color: var(--agenthub-accent);
+}
+
+.agenthub-app .agenthub-composer-button.is-stop:hover {
+  background: color-mix(in srgb, var(--agenthub-accent) 28%, transparent);
+}
+
+.agenthub-composer-button.is-stop svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+}
+
+.agenthub-composer-button.is-stop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-top-color: var(--agenthub-accent);
+  border-radius: 50%;
+  animation: agenthub-spin 1s linear infinite;
 }
 
 /* ── Context chips ──────────────────────────────────────────────────────── */
