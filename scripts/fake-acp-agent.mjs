@@ -11,6 +11,7 @@
 //   slow           escribe durante ~10 s (para probar cancelar)
 //   crash          muere a mitad de turno (exit 3)
 //   auth-required  session/new falla con "auth required"
+//   legacy-config anuncia modes/models sin configOptions (Gemini 0.62)
 // Las formas de los mensajes imitan lo grabado en tests/fixtures/acp/ (S2).
 import { Readable, Writable } from 'node:stream';
 import * as acp from '@agentclientprotocol/sdk';
@@ -23,6 +24,24 @@ const option = (name, fallback) => {
 const defaultScenario = option('scenario', 'echo');
 const delayMs = Number(option('delay', '15'));
 const resumable = !argv.includes('--no-resume');
+const legacyConfig = defaultScenario === 'legacy-config';
+
+const LEGACY_OPTIONS = () => ({
+  modes: {
+    currentModeId: state.mode,
+    availableModes: [
+      { id: 'manual', name: 'Manual' },
+      { id: 'yolo', name: 'Unrestricted' },
+    ],
+  },
+  models: {
+    currentModelId: state.model,
+    availableModels: [
+      { modelId: 'fake-small', name: 'Fake small' },
+      { modelId: 'fake-large', name: 'Fake large' },
+    ],
+  },
+});
 
 const CONFIG_OPTIONS = () => [
   {
@@ -81,18 +100,33 @@ acp
     if (defaultScenario === 'auth-required') throw acp.RequestError.authRequired();
     const sessionId = nextId('sess');
     state.sessions.set(sessionId, { abort: null });
-    return { sessionId, configOptions: CONFIG_OPTIONS() };
+    return {
+      sessionId,
+      ...(legacyConfig ? LEGACY_OPTIONS() : { configOptions: CONFIG_OPTIONS() }),
+      ...(defaultScenario === 'mixed-config' ? LEGACY_OPTIONS() : {}),
+    };
   })
   .onRequest(acp.methods.agent.session.resume, (ctx) => {
     // A fresh process: pretend the conversation continues under the same id.
     state.sessions.set(ctx.params.sessionId, { abort: null });
-    return { configOptions: CONFIG_OPTIONS() };
+    return legacyConfig ? LEGACY_OPTIONS() : { configOptions: CONFIG_OPTIONS() };
   })
   .onRequest(acp.methods.agent.session.setConfigOption, (ctx) => {
+    if (legacyConfig) throw acp.RequestError.methodNotFound();
     const { configId, value } = ctx.params;
     if (configId === 'mode') state.mode = String(value);
     if (configId === 'model') state.model = String(value);
     return { configOptions: CONFIG_OPTIONS() };
+  })
+  .onRequest(acp.methods.agent.session.setMode, (ctx) => {
+    if (!legacyConfig) throw acp.RequestError.methodNotFound();
+    state.mode = ctx.params.modeId;
+    return {};
+  })
+  .onRequest('session/set_model', { parse: (params) => params }, (ctx) => {
+    if (!legacyConfig) throw acp.RequestError.methodNotFound();
+    state.model = ctx.params.modelId;
+    return {};
   })
   .onNotification(acp.methods.agent.session.cancel, (ctx) => {
     state.sessions.get(ctx.params.sessionId)?.abort?.abort();
@@ -140,6 +174,7 @@ async function say(update, signal, text, size = 12) {
 
 async function runScenario(name, { text, update, signal, ctx }) {
   switch (name) {
+    case 'legacy-config':
     case 'echo':
       return say(update, signal, `Recibido: ${text}`);
     case 'stream-long': {

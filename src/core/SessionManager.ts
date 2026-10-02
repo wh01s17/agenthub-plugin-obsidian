@@ -3,6 +3,7 @@
 import type { AgentAdapter, SessionOptions } from './AgentAdapter';
 import { ChatSession, type HostServices } from './ChatSession';
 import type { AgentId, ConfigOption, TranscriptItem } from './types';
+import type { ConfirmDangerousMode } from './permissionModes';
 
 export interface SessionManagerDeps {
   getAdapter(agentId: AgentId): AgentAdapter | undefined;
@@ -14,6 +15,7 @@ export interface SessionManagerDeps {
   /** Options each agent announced when it last started (shown before it starts again). */
   knownConfigOptions?: (agentId: AgentId) => ConfigOption[] | undefined;
   rememberConfigOptions?: (agentId: AgentId, options: ConfigOption[]) => void;
+  confirmDangerousMode?: ConfirmDangerousMode;
 }
 
 export class SessionManager {
@@ -67,6 +69,7 @@ export class SessionManager {
 
   private configHooks(agentId: AgentId) {
     return {
+      confirmDangerousMode: this.deps.confirmDangerousMode,
       initialConfigOptions: this.deps.knownConfigOptions?.(agentId),
       onAgentReady: (options: ConfigOption[]) =>
         this.deps.rememberConfigOptions?.(agentId, options),

@@ -160,6 +160,46 @@ describe('AcpAdapter with the fake ACP agent', () => {
     await expect(turn).resolves.toBe('cancelled');
   });
 
+  it('uses legacy model/mode methods for Gemini-style sessions, including initial settings and resume', async () => {
+    const { session, events } = await start('legacy-config', { config: { model: 'fake-large' } });
+    expect(ofType(events, 'session.ready')[0]?.configOptions).toEqual([
+      expect.objectContaining({ id: 'mode', currentValue: 'manual' }),
+      expect.objectContaining({ id: 'model', currentValue: 'fake-large' }),
+    ]);
+    await session.setConfigOption?.('mode', 'yolo');
+    await session.setConfigOption?.('model', 'fake-small');
+    expect(ofType(events, 'config').at(-1)?.configOptions).toEqual([
+      expect.objectContaining({ id: 'mode', currentValue: 'yolo' }),
+      expect.objectContaining({ id: 'model', currentValue: 'fake-small' }),
+    ]);
+    const resumed = await makeAdapter('legacy-config').loadSession(
+      session.nativeSessionId!,
+      { cwd: process.cwd(), config: { model: 'fake-large' } },
+      makeHost().host,
+    );
+    sessions.push(resumed);
+    const resumedEvents: AgentEvent[] = [];
+    resumed.onEvent((event) => resumedEvents.push(event));
+    expect(resumed.restored).toBe(true);
+    expect(
+      ofType(resumedEvents, 'session.ready')[0]?.configOptions?.find((o) => o.id === 'model')
+        ?.currentValue,
+    ).toBe('fake-large');
+  });
+
+  it('prefers configOptions when an agent also announces legacy modes/models', async () => {
+    const { session, events } = await start('mixed-config', { config: { mode: 'auto' } });
+    const ready = ofType(events, 'session.ready')[0];
+    expect(ready?.configOptions).toHaveLength(2);
+    expect(ready?.configOptions?.find((o) => o.id === 'mode')?.currentValue).toBe('auto');
+    await session.setConfigOption?.('model', 'fake-large');
+    expect(
+      ofType(events, 'config')
+        .at(-1)
+        ?.configOptions?.find((o) => o.id === 'model')?.currentValue,
+    ).toBe('fake-large');
+  });
+
   it('cancels a turn that is waiting for a permission answer', async () => {
     const events: AgentEvent[] = [];
     const { host, requestPermission } = makeHost(() => new Promise(() => {}));

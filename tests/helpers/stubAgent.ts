@@ -34,6 +34,7 @@ export class StubSession implements AgentSession {
   restored = false;
   readonly prompts: PromptBlock[][] = [];
   disposed = false;
+  setConfigOption?: (id: string, value: string) => Promise<void>;
   private listeners = new Set<(event: AgentEvent) => void>();
   private cancelRequested = false;
 

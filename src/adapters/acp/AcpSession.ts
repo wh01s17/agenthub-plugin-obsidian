@@ -9,9 +9,14 @@ import type {
   HostBridge,
 } from '../../core/AgentAdapter';
 import { AgentError } from '../../core/errors';
-import type { AgentEvent, PromptBlock, StopReason } from '../../core/types';
+import type { AgentEvent, ConfigOption, PromptBlock, StopReason } from '../../core/types';
 import type { ManagedProcess } from '../../process/ProcessRunner';
-import { AcpUpdateMapper, mapConfigOptions, mapPermissionRequest } from './mapping';
+import {
+  AcpUpdateMapper,
+  mapConfigOptions,
+  mapLegacyConfigOptions,
+  mapPermissionRequest,
+} from './mapping';
 import { toContentBlocks } from './promptBlocks';
 
 /** JSON-RPC error code ACP uses for "authentication required". */
@@ -63,6 +68,8 @@ export class AcpSession implements AgentSession {
   private crashReported = false;
   /** Kills an agent that ignores `session/cancel`; cleared when the turn ends. */
   private cancelTimer: ReturnType<typeof setTimeout> | undefined;
+  private configOptions: ConfigOption[] = [];
+  private readonly legacyConfigIds = new Set<string>();
 
   private constructor(private readonly init: AcpSessionInit) {}
 
@@ -155,11 +162,34 @@ export class AcpSession implements AgentSession {
   }
 
   async setConfigOption(id: string, value: string): Promise<void> {
+    await this.applyConfigOption(id, value);
+    this.emit({ type: 'config', configOptions: this.configOptions });
+  }
+
+  private async applyConfigOption(id: string, value: string): Promise<void> {
+    if (this.legacyConfigIds.has(id)) {
+      if (id === 'mode') {
+        await this.connection.agent.request(acp.methods.agent.session.setMode, {
+          sessionId: this.requireSession(),
+          modeId: value,
+        });
+      } else {
+        // Gemini's verified legacy ACP method; SDK 1.6 no longer exports its literal/type.
+        await this.connection.agent.request('session/set_model', {
+          sessionId: this.requireSession(),
+          modelId: value,
+        });
+      }
+      this.configOptions = this.configOptions.map((option) =>
+        option.id === id ? { ...option, currentValue: value } : option,
+      );
+      return;
+    }
     const response = await this.connection.agent.request(
       acp.methods.agent.session.setConfigOption,
       { sessionId: this.requireSession(), configId: id, value },
     );
-    this.emit({ type: 'config', configOptions: mapConfigOptions(response.configOptions) });
+    this.configOptions = this.mergeConfigOptions(response.configOptions);
   }
 
   async dispose(): Promise<void> {
@@ -185,8 +215,24 @@ export class AcpSession implements AgentSession {
     this.connection = acp
       .client({ name: 'agenthub' })
       .onNotification(acp.methods.client.session.update, (ctx) => {
-        if (ctx.params.sessionId === this.sessionId && !this.replaying)
-          this.emitAll(this.mapper.map(ctx.params.update));
+        if (ctx.params.sessionId !== this.sessionId || this.replaying) return;
+        for (const event of this.mapper.map(ctx.params.update)) {
+          if (event.type === 'config') {
+            const legacy = this.configOptions.filter((option) =>
+              this.legacyConfigIds.has(option.id),
+            );
+            this.configOptions = [...event.configOptions, ...legacy];
+            this.emit({ ...event, configOptions: this.configOptions });
+          } else {
+            if (event.type === 'mode')
+              this.configOptions = this.configOptions.map((option) =>
+                option.category === 'mode'
+                  ? { ...option, currentValue: event.currentModeId }
+                  : option,
+              );
+            this.emit(event);
+          }
+        }
       })
       .onRequest(acp.methods.client.session.requestPermission, (ctx) =>
         this.askPermission(ctx.params),
@@ -220,22 +266,28 @@ export class AcpSession implements AgentSession {
     };
 
     const created = await this.openSession(init.agentCapabilities);
-    let configOptions = mapConfigOptions(created.configOptions);
-    for (const [id, value] of Object.entries(this.init.config ?? {})) {
-      const option = configOptions.find((o) => o.id === id);
-      if (!option || option.currentValue === value) continue;
-      const response = await this.connection.agent.request(
-        acp.methods.agent.session.setConfigOption,
-        { sessionId: created.sessionId, configId: id, value },
-      );
-      configOptions = mapConfigOptions(response.configOptions);
+    this.configOptions = mapConfigOptions(created.configOptions);
+    for (const option of mapLegacyConfigOptions(created)) {
+      if (
+        this.configOptions.some(
+          (modern) => modern.id === option.id || modern.category === option.category,
+        )
+      )
+        continue;
+      this.legacyConfigIds.add(option.id);
+      this.configOptions.push(option);
     }
-    this.caps.configOptions = configOptions.length > 0;
+    for (const [id, value] of Object.entries(this.init.config ?? {})) {
+      const option = this.configOptions.find((o) => o.id === id);
+      if (!option || option.currentValue === value) continue;
+      await this.applyConfigOption(id, value);
+    }
+    this.caps.configOptions = this.configOptions.length > 0;
 
     this.emit({
       type: 'session.ready',
       nativeSessionId: created.sessionId,
-      configOptions,
+      configOptions: this.configOptions,
       modes: created.modes?.availableModes.map((m) => ({
         id: m.id,
         name: m.name,
@@ -260,6 +312,13 @@ export class AcpSession implements AgentSession {
         });
       }, 0);
     });
+  }
+
+  private mergeConfigOptions(raw: unknown): ConfigOption[] {
+    return [
+      ...mapConfigOptions(raw),
+      ...this.configOptions.filter((option) => this.legacyConfigIds.has(option.id)),
+    ];
   }
 
   /**

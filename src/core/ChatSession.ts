@@ -9,6 +9,11 @@ import type {
   SessionOptions,
 } from './AgentAdapter';
 import { AgentError } from './errors';
+import {
+  dangerousModeOptions,
+  isDangerousMode,
+  type ConfirmDangerousMode,
+} from './permissionModes';
 import { createInitialState, reduce, type SessionAction } from './reducer';
 import type {
   AgentEvent,
@@ -34,6 +39,7 @@ export interface ChatSessionInit {
   initialConfigOptions?: ConfigOption[];
   /** Called with the options an agent announces when it starts (to remember them). */
   onAgentReady?: (configOptions: ConfigOption[]) => void;
+  confirmDangerousMode?: ConfirmDangerousMode;
   now?: () => number;
 }
 
@@ -54,6 +60,8 @@ export class ChatSession {
   private resumeAfterIdle: string | undefined;
   private lastActivityAt: number;
   private disposed = false;
+  private modeConfirmation: AbortController | null = null;
+  private configuring = false;
 
   constructor(private readonly init: ChatSessionInit) {
     this.lastActivityAt = this.now();
@@ -91,7 +99,7 @@ export class ChatSession {
   /** A turn is in progress. Starting the agent is not "busy": messages sent meanwhile wait for it. */
   get busy(): boolean {
     const { status } = this.state;
-    return status === 'running' || status === 'awaiting-permission';
+    return this.configuring || status === 'running' || status === 'awaiting-permission';
   }
 
   /** Sends one user message. Starts the agent on first use. Ignored while a turn is running. */
@@ -149,6 +157,7 @@ export class ChatSession {
   }
 
   async cancel(): Promise<void> {
+    this.modeConfirmation?.abort();
     this.resolveAllPending({ outcome: 'cancelled' });
     await this.agent?.cancel();
   }
@@ -162,31 +171,39 @@ export class ChatSession {
   }
 
   async setConfigOption(id: string, value: string): Promise<void> {
-    if (!this.agent) {
-      this.dispatch({
-        type: 'config',
-        configOptions: this.state.configOptions.map((option) =>
-          option.id === id ? { ...option, currentValue: value } : option,
-        ),
-      });
-      // Not started: apply it at start-up. Starting: it began with the old value, so set it after.
-      if (!this.starting) {
-        this.pendingConfig[id] = value;
-        return;
-      }
-      await this.starting;
-      if (!this.agent) return;
-    }
+    if (this.disposed || this.busy || this.configuring) return;
+    this.configuring = true;
     try {
+      if (isDangerousMode(value) && !(await this.approveMode(id, value))) return;
+      if (this.disposed) return;
+      if (!this.agent) {
+        this.dispatch({
+          type: 'config',
+          configOptions: this.state.configOptions.map((option) =>
+            option.id === id ? { ...option, currentValue: value } : option,
+          ),
+        });
+        // Not started: apply it at start-up. Starting: it began with the old value, so set it after.
+        if (!this.starting) {
+          this.pendingConfig[id] = value;
+          return;
+        }
+        await this.starting;
+        if (!this.agent) return;
+      }
       await this.agent.setConfigOption?.(id, value);
     } catch (error) {
       this.reportError(error);
+    } finally {
+      this.configuring = false;
+      if (!this.disposed) this.dispatch({ type: 'local.status', status: this.state.status });
     }
   }
 
   async dispose(): Promise<void> {
     if (this.disposed) return;
     this.disposed = true;
+    this.modeConfirmation?.abort();
     this.resolveAllPending({ outcome: 'cancelled' });
     this.dispatch({ type: 'local.status', status: 'closed' });
     this.listeners.clear();
@@ -214,6 +231,14 @@ export class ChatSession {
         ...this.init.options,
         config: { ...this.init.options.config, ...this.pendingConfig },
       };
+      const approved = new Map<string, string>();
+      for (const [id, value] of Object.entries(options.config)) {
+        if (!isDangerousMode(value)) continue;
+        if (!(await this.approveMode(id, value)))
+          throw new AgentError('unsafe-mode', 'Unrestricted mode was not enabled.');
+        approved.set(id, value);
+      }
+      if (this.disposed) return null;
       // Only the first agent of a reopened session resumes; after a crash we start fresh.
       const firstStart = this.agentStarts++ === 0;
       const resumeId =
@@ -228,6 +253,21 @@ export class ChatSession {
         return null;
       }
       agent.onEvent((event) => this.onAgentEvent(event));
+      try {
+        // Resuming can restore an upstream mode even when no dangerous initial setting was supplied.
+        for (const option of dangerousModeOptions(this.state.configOptions)) {
+          if (approved.get(option.id) === option.currentValue) continue;
+          if (!(await this.approveMode(option.id, option.currentValue)))
+            throw new AgentError('unsafe-mode', 'Unrestricted mode was not enabled.');
+        }
+      } catch (error) {
+        await agent.dispose();
+        throw error;
+      }
+      if (this.disposed) {
+        await agent.dispose();
+        return null;
+      }
       this.agent = agent;
       // Started ahead of a message (prepare): back to "Ready". A message sent meanwhile already
       // switched the status to running, so leave that alone.
@@ -241,6 +281,7 @@ export class ChatSession {
       }
       return agent;
     } catch (error) {
+      if (this.disposed) return null;
       this.reportError(error);
       this.dispatch({ type: 'local.status', status: 'error' });
       return null;
@@ -250,6 +291,7 @@ export class ChatSession {
   }
 
   private onAgentEvent(event: AgentEvent): void {
+    if (this.disposed) return;
     this.touch();
     if (event.type === 'session.ready' && event.configOptions && event.configOptions.length > 0) {
       this.init.onAgentReady?.(event.configOptions);
@@ -275,6 +317,24 @@ export class ChatSession {
       this.pending.set(request.id, resolve);
       this.dispatch({ type: 'local.permission.request', request });
     });
+  }
+
+  private async approveMode(optionId: string, value: string): Promise<boolean> {
+    if (!this.init.confirmDangerousMode || this.disposed) return false;
+    const controller = new AbortController();
+    this.modeConfirmation = controller;
+    const previous = this.state.status;
+    this.dispatch({ type: 'local.status', status: 'awaiting-permission' });
+    try {
+      const allowed = await this.init.confirmDangerousMode(
+        { agentId: this.state.agentId, optionId, value },
+        controller.signal,
+      );
+      return allowed && !controller.signal.aborted && !this.disposed;
+    } finally {
+      this.modeConfirmation = null;
+      if (!this.disposed) this.dispatch({ type: 'local.status', status: previous });
+    }
   }
 
   private resolveAllPending(outcome: PermissionOutcome): void {

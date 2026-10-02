@@ -43,6 +43,11 @@ Para que el primer arranque sea más rápido puedes instalar los adaptadores de 
 
 El plugin aún no está en la tienda de la comunidad. Hasta entonces:
 
+Con **BRAT**, usa el comando **BRAT: Add a beta plugin** y añade
+`wh01s17/agenthub-plugin-obsidian`. BRAT descarga los archivos de la release y gestiona las actualizaciones.
+
+Para instalarlo manualmente:
+
 1. Compila (ver [Desarrollo](#desarrollo)) o descarga `main.js`, `manifest.json` y `styles.css`.
 2. Cópialos en `<tu-vault>/.obsidian/plugins/agenthub/`.
 3. En **Settings → Community plugins**, activa **AgentHub**.
@@ -85,8 +90,10 @@ Comandos de la paleta (sin atajos por defecto; asígnalos en **Settings → Hotk
 - AgentHub lanza como procesos locales los agentes que tú ya tienes instalados. No hace llamadas de red
   propias ni envía telemetría; cada agente se conecta a su proveedor por su cuenta.
 - Los agentes pueden **leer y modificar archivos del vault y ejecutar comandos** según el modo de
-  permisos que elijas. Algunos (Codex en "Auto review", OpenCode) editan sin preguntar en su modo por
-  defecto: revisa el modo en la cabecera. Ten el vault bajo control de versiones o con copia de seguridad.
+  permisos que elijas. Codex empieza en **solo lectura** salvo que hayas configurado otro modo inicial.
+  Los modos `bypassPermissions`, `danger-full-access`, `agent-full-access` y `yolo` requieren
+  confirmación al activarse y muestran un aviso rojo en la cabecera. OpenCode conserva su modo
+  propio: revisa el selector. Ten el vault bajo control de versiones o con copia de seguridad.
 - Las notas pueden contener instrucciones maliciosas que un agente podría seguir; los permisos
   interactivos son tu control.
 - Las conversaciones se guardan en `<configDir>/plugins/agenthub/sessions/` (normalmente dentro de
@@ -101,6 +108,9 @@ Comandos de la paleta (sin atajos por defecto; asígnalos en **Settings → Hotk
   "Usar el PATH del shell de inicio" o añade la carpeta en "Carpetas extra de PATH".
 - **"El agente necesita que inicies sesión":** ejecuta en una terminal el comando de login de la tabla.
 - **La primera respuesta tarda:** `npx` está descargando el adaptador ACP; instálalo de forma global.
+- **Opciones de Gemini:** modelo y modo aparecen después de iniciar la sesión ACP, también en
+  versiones que usan los campos antiguos `models`/`modes`. Gemini 0.62 no ofrece un selector de
+  esfuerzo por ACP. Si falla el inicio de sesión, revisa el aviso de autenticación del chat.
 - **Errores al cargar:** consola de desarrollador con `Ctrl+Shift+I` (`Cmd+Opt+I` en macOS), filtra por
   `AgentHub`. Activa el **panel de depuración** en los ajustes para ver la salida cruda del agente.
 

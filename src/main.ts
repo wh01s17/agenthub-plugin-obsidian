@@ -31,6 +31,8 @@ import type { ViewHost } from './ui/ViewHost';
 import { exportFileName, sessionToMarkdown } from './storage/exportToNote';
 import { SessionStore } from './storage/SessionStore';
 import { noticeText } from './ui/components/NoticeItem';
+import { initialSessionConfig } from './core/permissionModes';
+import { confirmDangerousMode } from './ui/DangerousModeDialog';
 
 export default class AgentHubPlugin extends Plugin implements SettingsHost, ViewHost {
   override settings: AgentHubSettings = defaultSettings();
@@ -59,6 +61,13 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       debug: () => this.settings.debugPanel,
     }),
     sessionOptions: (agentId) => this.sessionOptions(agentId),
+    confirmDangerousMode: (request, signal) =>
+      confirmDangerousMode(
+        this.app.workspace.containerEl.ownerDocument,
+        request,
+        this.agents.config(request.agentId)?.label ?? request.agentId,
+        signal,
+      ),
     onCreate: (session) => this.sessionStore?.track(session),
     knownConfigOptions: (agentId) => this.settings.knownConfigOptions[agentId],
     rememberConfigOptions: (agentId, options) => {
@@ -269,7 +278,7 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
     const agent = this.agents.config(agentId);
     return {
       cwd: this.workingDirectory(),
-      config: agent?.config,
+      config: initialSessionConfig(agentId, agent?.config),
       systemPromptAppend: renderInstructions(this.settings.vaultInstructions, {
         configDir: this.app.vault.configDir,
       }),

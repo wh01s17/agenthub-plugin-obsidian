@@ -16,6 +16,8 @@ export function noticeText(notice: Notice): string {
           return t('errorStartup');
         case 'crash':
           return t('errorCrash');
+        case 'unsafe-mode':
+          return t('errorUnsafeMode');
         default:
           // Protocol errors carry the agent's own message, which we cannot translate.
           return notice.message;

@@ -91,6 +91,35 @@ export function mapConfigOptions(raw: unknown): ConfigOption[] {
   });
 }
 
+/** Older agents (including Gemini 0.62) announce modes/models outside configOptions. */
+export function mapLegacyConfigOptions(raw: unknown): ConfigOption[] {
+  if (!isObject(raw)) return [];
+  return (['mode', 'model'] as const).flatMap((category): ConfigOption[] => {
+    const state = raw[`${category}s`];
+    if (!isObject(state)) return [];
+    const currentValue = str(state[category === 'mode' ? 'currentModeId' : 'currentModelId']);
+    const options = arr(state[category === 'mode' ? 'availableModes' : 'availableModels']).flatMap(
+      (item) => {
+        if (!isObject(item)) return [];
+        const value = str(item[category === 'mode' ? 'id' : 'modelId']);
+        return value
+          ? [{ value, name: str(item.name) ?? value, description: str(item.description) }]
+          : [];
+      },
+    );
+    if (currentValue === undefined || options.length === 0) return [];
+    return [
+      {
+        id: category,
+        category,
+        name: category === 'mode' ? 'Mode' : 'Model',
+        currentValue,
+        options,
+      },
+    ];
+  });
+}
+
 export function mapPermissionRequest(params: unknown, id: string): PermissionRequest {
   const p = isObject(params) ? params : {};
   const toolCall = isObject(p.toolCall) ? p.toolCall : {};

@@ -35,6 +35,21 @@ function renderHeader(busy = false) {
 }
 
 describe('Header (T2.9)', () => {
+  it('announces an unrestricted mode with text as well as a warning style', () => {
+    render(
+      <Header
+        agents={AGENT_PRESETS}
+        agentId="codex-acp"
+        configOptions={[{ ...modeOption, currentValue: 'agent-full-access' }]}
+        busy={false}
+        onAgentChange={vi.fn()}
+        onConfigChange={vi.fn()}
+        onNewSession={vi.fn()}
+        onOpenSettings={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('status').textContent).toBe('Unrestricted mode: agent-full-access');
+  });
   it('exposes the agent and its config options as labelled selects', () => {
     const handlers = renderHeader();
     fireEvent.change(screen.getByRole('combobox', { name: 'Mode' }), { target: { value: 'plan' } });

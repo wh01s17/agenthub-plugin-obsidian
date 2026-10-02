@@ -1,5 +1,15 @@
 export const en = {
+  configModeLabel: 'Mode',
+  configModelLabel: 'Model',
   viewTitle: 'AgentHub',
+  dangerousModeTitle: 'Enable unrestricted mode?',
+  dangerousModeDescription:
+    '{agent} in {mode} can modify files and run commands without asking for permission. Enable this mode for this session?',
+  dangerousModeCancel: 'Keep current mode',
+  dangerousModeEnable: 'Enable unrestricted mode',
+  dangerousModeBadge: 'Unrestricted mode: {mode}',
+  errorUnsafeMode:
+    'Unrestricted mode was not enabled. Choose a safer initial mode in AgentHub settings and try again.',
   openView: 'Open AgentHub',
   emptyTitle: 'No session yet',
   emptyBody: 'Agents will appear here once they are connected.',

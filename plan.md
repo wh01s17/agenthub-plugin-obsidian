@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.2 en borrador |
-| Próxima tarea | Probar la release con BRAT (usuario) → envío a la comunidad (opcional) → Fase 7 (opcional) |
-| Tareas en paralelo posibles | T4.4 (exportación) puede desarrollarse sobre el formato de T4.1 |
+| Fase actual | **Fase 6 — Pulido**: Fases 0–4 cerradas y verificadas; Fase 5 condicional (ADR-025); release 0.0.4 publicada; 0.0.5 preparada |
+| Próxima tarea | Revisión con lector de pantalla y alto contraste nativo; publicar 0.0.5. Envío a la comunidad opcional. Fase 7 descartada (ADR-029). |
+| Tareas en paralelo posibles | Publicación opcional en la comunidad (Q3); Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno |
-| Última actualización | 2026-10-01 — T4.1, Codex (GPT-6) |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Lint y build pasan; 141 tests pasan, e2e real optativo. Rama `main`. |
+| Última actualización | 2026-10-01 — T6.8/T6.9 implementadas; BRAT y accesibilidad verificados en vault temporal, Codex |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Lint y build pasan; 198 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -114,7 +114,7 @@ expone en una **vista lateral (sidebar)** tipo chat:
 - Implementar un agente propio o llamar directamente a APIs de LLM. El plugin **no** gestiona API keys
   ni hace llamadas de red propias: los agentes se autentican y conectan por su cuenta.
 - Gestionar la instalación/actualización de los agentes (solo detectar y dar instrucciones).
-- Emulación de terminal completa en el MVP (queda como fase opcional, ver Fase 7).
+- Emulación de terminal completa: fuera del alcance por decisión del usuario (ADR-029).
 
 ### 1.5 Escenarios de uso principales
 
@@ -153,7 +153,7 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | RF-18 | Vista de diffs para ediciones de archivos. | Should | 6 |
 | RF-19 | Panel de depuración opcional con eventos crudos y stderr del agente. | Should | 2 |
 | RF-20 | Agentes ACP personalizados definidos solo por configuración (comando, args, env). | Must | 2 |
-| RF-21 | (Opcional) Modo terminal: TUI original del agente en el sidebar vía xterm.js. | Could | 7 |
+| RF-21 | Modo terminal: TUI original del agente en el sidebar vía xterm.js. **Descartado por decisión del usuario (ADR-029).** | Fuera de alcance | 7 (cancelada) |
 
 ### 2.2 No funcionales
 
@@ -345,7 +345,7 @@ con `--include-partial-messages`), `result` (subtype, `is_error`, `result`, `ses
 | `@openai/codex-sdk` | 0.159.3 | Alternativa evaluable (no prevista en el MVP). |
 | `preact` | 11.0.0 | UI. |
 | `eslint-plugin-obsidianmd` | 0.4.2 | Lint de guías de Obsidian. |
-| `@xterm/xterm` | 6.0.0 | Solo para el modo terminal opcional (Fase 7). |
+| `@xterm/xterm` | 6.0.0 | Referencia histórica; no se incorporará: Fase 7 descartada (ADR-029). |
 
 ### 3.8 Prior art a estudiar (⚠️ verificar estado actual antes de copiar patrones)
 
@@ -686,8 +686,10 @@ Notas referenciadas: Proyectos/A.md, Proyectos/B.md
 
 Reglas de UI: mientras haya un permiso pendiente, el estado es `awaiting-permission`, el compositor
 sigue activo pero el botón principal muestra "Detener"; notificación (`Notice`) si la vista no es visible.
-Modos peligrosos (`bypassPermissions`, `danger-full-access`, `yolo`) piden confirmación explícita
-cada vez que se activan y muestran un distintivo rojo en la cabecera.
+Modos peligrosos (`bypassPermissions`, `danger-full-access`, `agent-full-access`, `yolo`) piden confirmación explícita
+cada vez que se activan y muestran un distintivo rojo en la cabecera. También se confirma al iniciar o
+reanudar un proceso con un modo sin restricciones. Codex ACP inicia en `read-only` si no hay un modo
+explícito en los ajustes (ADR-030). Cancelar no aplica el cambio; cerrar la sesión cierra el diálogo.
 
 ### 4.10 Persistencia (`src/storage/SessionStore.ts`)
 
@@ -1248,19 +1250,23 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 
 - [x] **T6.1** Vista de diffs (jsdiff) para `ToolContent.diff` y `file_change`; botón "abrir archivo". *CA:* RF-18.
 - [x] **T6.2** i18n es/en completo; textos en *sentence case*.
-- [~] **T6.3** *(auditoría automática con axe-core hecha y sin violaciones; falta la revisión manual con teclado y lector de pantalla)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
+- [~] **T6.3** *(axe-core y pruebas de teclado/foco, temas claro/oscuro, zoom 200 % y emulación de alto contraste/movimiento reducido realizadas; falta lector de pantalla y alto contraste nativo; ver `docs/release-0.0.5.md`)* Accesibilidad (teclado, aria, foco tras enviar/permiso) y revisión de temas, siguiendo la checklist
   manual de la skill `accessibility` (teclado, lector de pantalla, zoom 200 %, alto contraste, movimiento reducido,
   orden de foco, tamaño de objetivos).
 - [x] **T6.4** Rendimiento: virtualización de la lista si S5/uso real lo exige; medir carga del plugin.
 - [x] **T6.5** README completo (capturas, requisitos, instalación de adaptadores, seguridad, privacidad).
 - [x] **T6.7** Pestaña de ajustes con la API declarativa `getSettingDefinitions()` (buscable en Obsidian 1.13+) y `display()` como respaldo para versiones anteriores; `minAppVersion` se mantiene en 1.8.7 (ADR-027).
-- [~] **T6.6** *(release **0.0.3** publicada en GitHub con sus 3 archivos; falta probar con BRAT y el envío a la comunidad)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
+- [~] **T6.6** *(release **0.0.4** publicada; BRAT 2.2.0 verificó instalación 0.0.3 y actualización a 0.0.4; 0.0.5 preparada. Falta publicación y el cierre de la checklist manual; envío a comunidad opcional)* Workflow de release + BRAT + checklist manual (§9) + envío a la comunidad.
 
-### Fase 7 — Opcional: modo terminal
+- [x] **T6.8** Confirmación explícita y aviso rojo para modos sin restricciones; Codex ACP en solo lectura por defecto (ADR-030).
+- [x] **T6.9** Mostrar y cambiar modelo/modo de agentes ACP que anuncian `models`/`modes` sin `configOptions` (Gemini 0.62); no fabricar opciones de esfuerzo ausentes (ADR-031).
 
-- [ ] **T7.1** Spike de PTY sin módulos nativos (helper Python `pty` o `script(1)` en Linux/macOS;
-  Windows: evaluar). Redimensionado de la terminal.
-- [ ] **T7.2** Vista con `@xterm/xterm` que ejecuta la TUI original del agente. *CA:* RF-21.
+### Fase 7 — Descartada: modo terminal
+
+**Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
+
+- **T7.1 — Cancelada:** spike de PTY sin módulos nativos y redimensionado de la terminal.
+- **T7.2 — Cancelada:** vista con `@xterm/xterm` que ejecuta la TUI original del agente (RF-21).
 
 ---
 
@@ -1275,7 +1281,7 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-005 | Un proceso de agente por sesión activa; reaper de inactividad; matar árbol de procesos al cerrar. | Aislamiento de fallos, `cwd` por sesión, sin huérfanos. | Una conexión ACP compartida multiplexando sesiones (fallo de una afecta a todas). | Aceptada |
 | ADR-006 | Resolver el entorno con el shell de login + rutas comunes + ruta manual. | Agentes instalados con mise/nvm no están en el PATH de apps GUI. | Exigir al usuario rutas absolutas (mala UX). | Aceptada |
 | ADR-007 | Transcripts locales en JSONL dentro de la carpeta del plugin; la reanudación del contexto la hace el agente. | Mostrar historial sin depender de formatos internos de cada agente. | Leer los logs nativos de `~/.claude` / `~/.codex` (frágil, privado). | Aceptada |
-| ADR-008 | Sin módulos nativos (`node-pty`); modo terminal pospuesto a Fase 7. | Los plugins de la comunidad solo distribuyen JS. | `node-pty` empaquetado (ABI de Electron, no distribuible). | Aceptada |
+| ADR-008 | Sin módulos nativos (`node-pty`); modo terminal pospuesto a Fase 7. | Los plugins de la comunidad solo distribuyen JS. | `node-pty` empaquetado (ABI de Electron, no distribuible). | Matizada por ADR-029: modo terminal descartado; se mantiene la exclusión de módulos nativos |
 | ADR-009 | Las escrituras `fs/write_text_file` de ACP pasan por la Vault API con guardia de rutas. | Obsidian refresca editores abiertos; control de `.obsidian/`. | Escritura directa con `fs` (desincroniza editores). | Aceptada |
 | ADR-010 | Fijar versiones de adaptadores ACP en los presets. | Los adaptadores evolucionan rápido (p. ej. renombres de paquetes). | `@latest` (roturas silenciosas). | Aceptada |
 | ADR-011 | `minAppVersion` 1.8.7 (antes 1.7.2). | `getLanguage()` (i18n) existe desde 1.8.7; el entorno usa 1.13.7. | Leer el idioma de `localStorage` (no documentado). | Aceptada |
@@ -1294,6 +1300,9 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | ADR-026 | El Markdown de los agentes se renderiza **por bloques** (párrafos fuera de bloques de código) y con una **cola de ≤ 8 ms por tarea**. | S5 en Obsidian real: renderizar el mensaje entero bloqueaba la UI hasta 603 ms; con bloques + cola, 0 tareas largas y 33 ms de hueco máximo. | Renderizar entero con throttle (bloqueos visibles); texto plano durante el streaming (pierde formato mientras escribe). | Aceptada |
 | ADR-027 | Ajustes definidos una vez como secciones y filas: `getSettingDefinitions()` los entrega a Obsidian 1.13+ (aparecen en su buscador; las filas de detalle por agente con `searchable: false`) y `display()` dibuja las mismas filas en versiones anteriores; cambios de estructura con `update()` (1.13+) o `display()`. **`minAppVersion` sigue en 1.8.7.** | La documentación de 1.13 indica que `display()` no se llama si hay definiciones y recomienda conservarlo para versiones antiguas: no hace falta excluir usuarios. Verificado en Obsidian 1.13.7 real. | Subir `minAppVersion` a 1.13 (excluye usuarios sin necesidad). | Aceptada (reemplaza ADR-019) |
 | ADR-028 | Los agentes conocidos (Claude, Codex, Gemini, OpenCode) se identifican con su **logo original en su color**; los personalizados conservan el monograma de color (ADR-023). SVG de Lobe Icons (MIT) convertidos a datos (`src/ui/logos.ts`) y dibujados con Preact sin `innerHTML`, con ids de degradado únicos por instancia. | Pedido del usuario; reconocer cada herramienta de un vistazo. Uso solo identificativo de las marcas (habitual en integraciones). OpenAI/Codex no está en Simple Icons; Lobe Icons tiene los cuatro. | Monogramas (menos reconocibles); Simple Icons (sin Codex). | Aceptada |
+| ADR-029 | La Fase 7 (modo terminal), T7.1, T7.2 y RF-21 quedan fuera del alcance y cancelados. | El usuario decidió que no realizará la Fase 7. | Mantener el modo terminal como tarea opcional pendiente. | Aceptada (decidido por el usuario; matiza ADR-008) |
+| ADR-030 | Codex ACP usa `read-only` por defecto; las opciones explícitas prevalecen. Confirmación por activación/inicio/reanudación de los cuatro modos sin restricciones y distintivo rojo; rechazo o cierre bloquean el cambio. | Resolver Q8 y cumplir §10 y §4.9 también al restaurar sesiones. | Mantener Auto review como valor implícito; confiar solo en el selector. | Aceptada; resuelve Q8 |
+| ADR-031 | Normalizar `modes`/`models` ACP antiguos a `ConfigOption` cuando falta su equivalente moderno. Cambios mediante `session/set_mode` y `session/set_model`; `configOptions` tiene prioridad. | Gemini 0.62 real anuncia estas opciones y no ofrece esfuerzo por ACP. | Inventar una lista de modelos/esfuerzos; usar `set_config_option` con agentes que no lo implementan. | Aceptada; completa ADR-015 |
 | ADR-013 | **pnpm** como gestor de paquetes; config en `pnpm-workspace.yaml` (`allowBuilds: esbuild`, `strictPeerDependencies: false`); lockfile `pnpm-lock.yaml`. | Preferencia del usuario. | npm (usado al inicio, reemplazado). | Aceptada |
 | ADR-012 | TypeScript 6.0.x (no 7) y ESLint 9 (no 10); `strictPeerDependencies: false` en `pnpm-workspace.yaml`. | `typescript-eslint` 8.71 exige TS < 6.1; `eslint-plugin-obsidianmd` 0.4.2 exige ESLint ≥ 9 y declara `obsidian@1.8.7` como peer exacto. Vitest 5 necesita `vite` explícito. | Seguir los peers exactos (tipos de Obsidian antiguos). | Aceptada |
 
@@ -1328,8 +1337,8 @@ aprobar y denegar un permiso, cancelar un turno; al cerrar la vista o desactivar
 | Q3 | ¿Publicar en la tienda de la comunidad o uso personal/BRAT? | Diseñar para publicar; decidir en Fase 6. |
 | Q4 | ¿Prioridad de agentes para el MVP? | Claude Code y Codex (vía ACP); Gemini/OpenCode "gratis" por ACP. |
 | Q5 | ¿Idioma principal de la UI? | Inglés por defecto + español completo (sigue el idioma de Obsidian). |
-| Q6 | ¿Se requiere el modo directo si ACP funciona bien en S2? | Sí, pero en Fase 5 y re-evaluable tras S2. |
-| Q8 | Codex por ACP arranca en modo `agent` (*Auto review*) y escribe sin pedir permiso; OpenCode tampoco pide. ¿AgentHub debe forzar un modo más conservador al crear la sesión (p. ej. `read-only` / `workspace-write` en Codex)? | Respetar el modo por defecto del agente pero mostrarlo siempre en la cabecera; decidir antes de T2.9. |
+| Q6 | ¿Se requiere el modo directo si ACP funciona bien en S2? | Resuelta: Fase 5 condicional, solo ante una limitación real (ADR-025). |
+| Q8 | Codex por ACP arranca en modo `agent` (*Auto review*) y escribe sin pedir permiso; OpenCode tampoco pide. ¿AgentHub debe forzar un modo más conservador al crear la sesión (p. ej. `read-only` / `workspace-write` en Codex)? | Resuelta por ADR-030: Codex ACP en `read-only` salvo configuración explícita; modos sin restricciones con confirmación y aviso. |
 | Q7 | ¿Ofrecer instalación automática de adaptadores (`npm i -g …`) desde ajustes? | No en MVP; solo instrucciones y botón copiar comando. |
 
 ---
@@ -1619,3 +1628,9 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
   original** de cada agente (ADR-028): Claude (estrella `#D97757`), Codex y Gemini con sus degradados, OpenCode
   monocromo siguiendo el tema; agentes personalizados con monograma. `src/ui/logos.ts` (generado desde Lobe Icons, MIT)
   y `AgentBadge`. Crédito y nota de marcas en el README. 182 tests.
+- **2026-10-01 · usuario + Codex** — El usuario decide que **no realizará la Fase 7**. Se registra
+  **ADR-029**: modo terminal fuera del alcance, T7.1/T7.2 canceladas y RF-21 descartado. Actualizadas las
+  referencias del roadmap, no-objetivos y próxima tarea. Quedan por cerrar accesibilidad manual y distribución
+  (T6.3/T6.6); la Fase 5 conserva su carácter condicional (ADR-025). Cambio exclusivamente documental.
+
+- **2026-10-01 · Codex** — **T6.8/T6.9 completas:** guardia de modos sin restricciones en el núcleo y diálogo modal nativo con Escape, foco inicial en cancelar, restauración de foco y cancelación al cerrar. Codex ACP inicia en solo lectura; ADR-030 resuelve Q8. Respaldo ACP `modes`/`models` con RPC antiguos y prioridad de `configOptions` (ADR-031). Gemini 0.62 real inició una sesión y cambió desde el selector a `gemini-2.5-pro`; no se envió ningún prompt ni se inventó esfuerzo. BRAT 2.2.0 instaló 0.0.3 y actualizó a 0.0.4 en vault temporal. Corregido contraste de etiquetas/estado y aviso, botones adaptables a zoom. 198 pruebas pasan y 2 e2e omitidas fuera del sandbox; las pruebas de tuberías fallan dentro del sandbox. Versión 0.0.5 preparada con logos/animaciones posteriores a 0.0.4. Evidencias y límites en `docs/release-0.0.5.md`; lector de pantalla y alto contraste nativo siguen pendientes. Fase 7 sigue descartada.

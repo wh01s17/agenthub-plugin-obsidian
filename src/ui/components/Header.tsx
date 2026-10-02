@@ -3,6 +3,7 @@ import { t } from '../../i18n';
 import type { AgentConfig } from '../../settings/settings';
 import { AgentBadge } from './AgentBadge';
 import { Icon } from './Icon';
+import { dangerousModeOptions } from '../../core/permissionModes';
 
 interface HeaderProps {
   agents: readonly AgentConfig[];
@@ -17,9 +18,16 @@ interface HeaderProps {
   onOpenHistory?: () => void;
 }
 
+function optionName(option: ConfigOption): string {
+  if (option.category === 'mode' && option.name === 'Mode') return t('configModeLabel');
+  if (option.category === 'model' && option.name === 'Model') return t('configModelLabel');
+  return option.name;
+}
+
 /** Agent selector, the agent's own options (mode, model…: T2.9) and session actions. */
 export function Header(props: HeaderProps) {
   const { agents, agentId, configOptions, busy } = props;
+  const dangerous = dangerousModeOptions(configOptions);
   return (
     <header class="agenthub-header">
       <div class="agenthub-header-row">
@@ -71,6 +79,16 @@ export function Header(props: HeaderProps) {
           <Icon name="settings" />
         </button>
       </div>
+      {dangerous.length > 0 && (
+        <div class="agenthub-dangerous-mode" role="status">
+          <Icon name="shield-alert" />
+          <span>
+            {t('dangerousModeBadge', {
+              mode: dangerous.map((option) => option.currentValue).join(', '),
+            })}
+          </span>
+        </div>
+      )}
       {configOptions.length > 0 && (
         <div class="agenthub-config">
           {configOptions.map((option) => (
@@ -78,17 +96,21 @@ export function Header(props: HeaderProps) {
             <div
               key={option.id}
               class="agenthub-config-item"
-              title={option.description ?? option.name}
+              title={option.description ?? optionName(option)}
             >
               <span class="agenthub-config-label" aria-hidden="true">
-                {option.name}
+                {optionName(option)}
               </span>
               <select
                 class="dropdown agenthub-config-select"
-                aria-label={option.name}
+                aria-label={optionName(option)}
                 value={option.currentValue}
                 disabled={busy}
-                onChange={(event) => props.onConfigChange(option.id, event.currentTarget.value)}
+                onChange={(event) => {
+                  const value = event.currentTarget.value;
+                  event.currentTarget.value = option.currentValue;
+                  props.onConfigChange(option.id, value);
+                }}
               >
                 {option.options.map((choice) => (
                   <option key={choice.value} value={choice.value} title={choice.description}>

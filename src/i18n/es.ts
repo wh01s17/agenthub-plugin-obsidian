@@ -1,7 +1,17 @@
 import type { Messages } from './en';
 
 export const es: Messages = {
+  configModeLabel: 'Modo',
+  configModelLabel: 'Modelo',
   viewTitle: 'AgentHub',
+  dangerousModeTitle: '¿Activar el modo sin restricciones?',
+  dangerousModeDescription:
+    '{agent} en {mode} puede modificar archivos y ejecutar comandos sin pedir permiso. ¿Activar este modo para esta sesión?',
+  dangerousModeCancel: 'Conservar el modo actual',
+  dangerousModeEnable: 'Activar modo sin restricciones',
+  dangerousModeBadge: 'Modo sin restricciones: {mode}',
+  errorUnsafeMode:
+    'No se activó el modo sin restricciones. Elige un modo inicial más seguro en los ajustes de AgentHub y vuelve a intentarlo.',
   openView: 'Abrir AgentHub',
   emptyTitle: 'Todavía no hay sesión',
   emptyBody: 'Los agentes aparecerán aquí cuando estén conectados.',

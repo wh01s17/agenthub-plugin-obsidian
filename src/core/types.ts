@@ -5,7 +5,8 @@
 export type AgentId = string;
 
 /** Why an agent failed, so the UI can explain it in the user's language. */
-export type AgentErrorKind = 'missing-binary' | 'auth' | 'startup' | 'crash' | 'protocol';
+export type AgentErrorKind =
+  'missing-binary' | 'auth' | 'startup' | 'crash' | 'protocol' | 'unsafe-mode';
 
 export type ToolKind =
   'read' | 'edit' | 'delete' | 'move' | 'search' | 'execute' | 'think' | 'fetch' | 'other';

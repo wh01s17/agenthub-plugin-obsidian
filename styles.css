@@ -886,6 +886,7 @@
   max-height: calc(100vh - 2rem);
   box-sizing: border-box;
   overflow: auto;
+  overflow-wrap: anywhere;
   padding: var(--size-4-4);
   color: var(--text-normal);
   background: var(--background-primary);
@@ -907,6 +908,16 @@
 .agenthub-mode-dialog button {
   min-width: 24px;
   min-height: 24px;
+  max-width: 100%;
+  height: auto;
+  white-space: normal;
+  padding-block: var(--size-4-2);
+}
+
+.agenthub-mode-dialog button.mod-warning {
+  color: var(--text-normal);
+  background: var(--background-primary-alt);
+  border: 1px solid var(--text-error);
 }
 
 .agenthub-mode-dialog button:focus-visible {

@@ -7,6 +7,7 @@ import { ChatSession } from '../../src/core/ChatSession';
 import type { TranscriptItem } from '../../src/core/types';
 import { App } from '../../src/ui/App';
 import { HistoryPanel } from '../../src/ui/components/HistoryPanel';
+import { DangerousModeDialog } from '../../src/ui/DangerousModeDialog';
 import { StubAdapter, hostServices } from '../helpers/stubAgent';
 import { makeViewHost } from '../helpers/viewHost';
 
@@ -76,6 +77,26 @@ const transcript: TranscriptItem[] = [
 ];
 
 describe('accessibility audit (axe-core)', () => {
+  it('unrestricted mode confirmation has named controls and a labelled description', async () => {
+    const { container } = render(
+      // jsdom does not implement native dialog visibility; audit the equivalent ARIA wrapper.
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mode-title"
+        aria-describedby="mode-description"
+      >
+        <DangerousModeDialog
+          agent="Codex"
+          value="agent-full-access"
+          titleId="mode-title"
+          descriptionId="mode-description"
+          onDecision={vi.fn()}
+        />
+      </div>,
+    );
+    expect(await audit(container)).toEqual([]);
+  });
   it('chat view with every kind of transcript item has no violations', async () => {
     const { host } = makeViewHost(() => 'end_turn');
     host.notes.activeNotePath = () => 'A.md';
