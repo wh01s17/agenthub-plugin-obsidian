@@ -43,6 +43,16 @@ describe('permission modes', () => {
     },
   );
 
+  it('tells the dialog which session (tab) asks', async () => {
+    const { session, confirm } = setup(true);
+    session.rename('Reorganize folders');
+    await session.setConfigOption('mode', 'yolo');
+    expect(confirm.mock.calls[0]?.[0]).toMatchObject({
+      value: 'yolo',
+      sessionTitle: 'Reorganize folders',
+    });
+  });
+
   it('does not send a rejected initial dangerous mode to the adapter', async () => {
     const { session, adapter, confirm } = setup(false, { mode: 'bypassPermissions' });
     await session.send([{ type: 'text', text: 'go' }]);

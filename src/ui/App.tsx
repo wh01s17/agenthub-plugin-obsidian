@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import type { ChatSession } from '../core/ChatSession';
 import {
@@ -33,6 +34,10 @@ export interface AppProps {
   onOpenSession?: (localId: string) => void;
   /** Deletes a saved session from the history panel. */
   onDeleteSession?: (localId: string) => Promise<void>;
+  /** Tab bar shown under the header (ADR-033). */
+  tabBar?: ComponentChildren;
+  /** Tabs the user is not looking at stay mounted (draft, scroll) but hidden. */
+  hidden?: boolean;
 }
 
 export function App(props: AppProps) {
@@ -118,6 +123,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
     <div
       class="agenthub-app"
       data-session-id={state.localId}
+      hidden={props.hidden}
       data-agent-color={agentIdentity(state.agentId, agentLabel).color}
       {...appearanceAttributes(settings)}
     >
@@ -133,6 +139,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         onOpenSettings={() => host.openSettings()}
         onOpenHistory={history ? () => setShowHistory((open) => !open) : undefined}
       />
+      {props.tabBar}
       {showHistory && history ? (
         <HistoryPanel
           history={history}
@@ -145,6 +152,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
             setShowHistory(false);
             props.onOpenSession?.(localId);
           }}
+          onRename={(localId, title) => host.sessions.get(localId)?.rename(title)}
           onDelete={(localId) => props.onDeleteSession?.(localId) ?? Promise.resolve()}
           onClose={() => setShowHistory(false)}
         />

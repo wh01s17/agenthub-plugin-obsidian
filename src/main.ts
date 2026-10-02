@@ -162,6 +162,27 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       name: t('cmdStop'),
       callback: () => this.run(this.withView((view) => view.stop())),
     });
+    // Tabs (ADR-033): no default hotkeys, like the other commands.
+    this.addCommand({
+      id: 'new-tab',
+      name: t('cmdNewTab'),
+      callback: () => this.run(this.withView((view) => view.newTab())),
+    });
+    this.addCommand({
+      id: 'close-tab',
+      name: t('cmdCloseTab'),
+      callback: () => this.run(this.withView((view) => view.closeTab())),
+    });
+    this.addCommand({
+      id: 'next-tab',
+      name: t('cmdNextTab'),
+      callback: () => this.run(this.withView((view) => view.cycleTab(1))),
+    });
+    this.addCommand({
+      id: 'previous-tab',
+      name: t('cmdPreviousTab'),
+      callback: () => this.run(this.withView((view) => view.cycleTab(-1))),
+    });
     this.registerEvent(
       this.app.workspace.on('editor-menu', (menu, editor, info) => {
         const selection = selectionFrom(editor, info);

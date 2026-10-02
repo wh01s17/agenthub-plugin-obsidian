@@ -7,14 +7,28 @@ import { makeViewHost } from '../helpers/viewHost';
 const noop = () => 'end_turn' as const;
 
 describe('parseViewState', () => {
-  it('keeps a valid session id', () => {
-    expect(parseViewState({ sessionId: 'abc' })).toEqual({ sessionId: 'abc' });
+  it('keeps the tabs and the active one', () => {
+    expect(parseViewState({ tabs: ['a', 'b', 'a', 3, ''], activeTab: 'b' })).toEqual({
+      tabs: ['a', 'b'],
+      activeTab: 'b',
+    });
   });
 
-  it.each([undefined, null, 'x', {}, { sessionId: 3 }, { sessionId: '' }])(
+  it('reads the single session saved by 0.2.x', () => {
+    expect(parseViewState({ sessionId: 'abc' })).toEqual({ tabs: ['abc'], activeTab: 'abc' });
+  });
+
+  it('falls back to the first tab when the active one is unknown', () => {
+    expect(parseViewState({ tabs: ['a', 'b'], activeTab: 'zzz' })).toEqual({
+      tabs: ['a', 'b'],
+      activeTab: 'a',
+    });
+  });
+
+  it.each([undefined, null, 'x', {}, { sessionId: 3 }, { sessionId: '' }, { tabs: 'a' }])(
     'ignores invalid state %j',
     (state) => {
-      expect(parseViewState(state)).toEqual({ sessionId: null });
+      expect(parseViewState(state)).toEqual({ tabs: [], activeTab: null });
     },
   );
 });
@@ -28,7 +42,11 @@ describe('AgentHubView', () => {
     await view.onOpen();
     const [session] = sessions.list();
     expect(session?.getState().agentId).toBe('claude-acp');
-    expect(view.getState()).toMatchObject({ sessionId: session?.localId });
+    expect(view.getState()).toMatchObject({
+      tabs: [session?.localId],
+      activeTab: session?.localId,
+      sessionId: session?.localId,
+    });
     expect(view.contentEl.querySelector('.agenthub-composer-input')).not.toBeNull();
 
     await view.onClose();

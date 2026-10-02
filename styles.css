@@ -1123,6 +1123,158 @@
   margin: var(--size-4-1) 0;
 }
 
+/* ── Tabs (ADR-033) ─────────────────────────────────────────────────────── */
+
+/* Hidden tabs stay mounted (draft, scroll) but take no space. */
+.agenthub-app[hidden] {
+  display: none;
+}
+
+.agenthub-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  padding: var(--size-4-1) var(--size-4-2);
+  border-bottom: var(--border-width) solid var(--background-modifier-border);
+}
+
+.agenthub-tab-list {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 2px;
+  min-width: 0;
+  /* Many tabs scroll sideways, like the option pills. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.agenthub-tab-list::-webkit-scrollbar {
+  display: none;
+}
+
+.agenthub-tab {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  max-width: 11rem;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-m);
+  color: var(--text-muted);
+}
+
+.agenthub-tab:hover {
+  background: var(--background-modifier-hover);
+}
+
+.agenthub-tab.is-active {
+  border-color: var(--agenthub-border);
+  background: var(--agenthub-surface);
+  color: var(--text-normal);
+}
+
+.agenthub-app .agenthub-tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 2px 0 6px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-tab .agenthub-agent-badge {
+  min-width: 16px;
+  height: 16px;
+  font-size: 9px;
+}
+
+.agenthub-tab .agenthub-agent-logo {
+  width: 14px;
+  height: 14px;
+}
+
+.agenthub-tab-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenthub-tab-indicator {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--agenthub-agent);
+}
+
+.agenthub-tab[data-indicator='working'] .agenthub-tab-indicator {
+  animation: agenthub-tab-pulse 1.2s ease-in-out infinite;
+}
+
+.agenthub-tab[data-indicator='permission'] .agenthub-tab-indicator {
+  width: 8px;
+  height: 8px;
+  background: var(--color-orange);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-orange) 30%, transparent);
+}
+
+.agenthub-tab[data-indicator='error'] .agenthub-tab-indicator {
+  background: var(--color-red);
+}
+
+.agenthub-tab[data-indicator='unread'] .agenthub-tab-indicator {
+  background: var(--interactive-accent);
+}
+
+.agenthub-app .agenthub-tab-close {
+  width: 18px;
+  height: 18px;
+  margin-right: 3px;
+  padding: 0;
+  opacity: 0;
+}
+
+.agenthub-tab.is-active .agenthub-tab-close,
+.agenthub-tab:hover .agenthub-tab-close,
+.agenthub-tab:focus-within .agenthub-tab-close {
+  opacity: 1;
+}
+
+.agenthub-tab-close .agenthub-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.agenthub-tab-rename {
+  width: 8rem;
+  height: 22px;
+  font-size: var(--font-ui-smaller);
+}
+
+@keyframes agenthub-tab-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agenthub-tab[data-indicator='working'] .agenthub-tab-indicator {
+    animation: none;
+  }
+}
+
+.agenthub-mode-dialog-session {
+  color: var(--text-muted);
+}
+
 /* ── Shared ─────────────────────────────────────────────────────────────── */
 
 .agenthub-icon {

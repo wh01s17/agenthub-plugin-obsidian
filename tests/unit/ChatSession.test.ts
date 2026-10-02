@@ -42,6 +42,15 @@ describe('ChatSession', () => {
     expect(listener).toHaveBeenCalled();
   });
 
+  it('renames the session, ignoring empty titles', async () => {
+    const { session } = makeSession(say('Hola'));
+    await session.send([{ type: 'text', text: 'first message' }]);
+    session.rename('  Carpetas  ');
+    expect(session.getState().title).toBe('Carpetas');
+    session.rename('   ');
+    expect(session.getState().title).toBe('Carpetas');
+  });
+
   it('reuses the agent across turns and ignores sends while busy', async () => {
     let release!: () => void;
     const { adapter, session } = makeSession(

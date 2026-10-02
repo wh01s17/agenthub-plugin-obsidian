@@ -50,7 +50,11 @@ export class ItemView extends Component {
 export class Plugin extends Component {}
 
 export class Notice {
-  constructor(public message: string) {}
+  /** Messages shown since the last reset, for assertions. */
+  static readonly shown: string[] = [];
+  constructor(public message: string) {
+    Notice.shown.push(message);
+  }
 }
 
 export class PluginSettingTab {

@@ -5,12 +5,15 @@ import { t } from '../i18n';
 export function DangerousModeDialog({
   agent,
   value,
+  session,
   titleId,
   descriptionId,
   onDecision,
 }: {
   agent: string;
   value: string;
+  /** Title of the session (tab) asking; omitted while it has none. */
+  session?: string;
   titleId: string;
   descriptionId: string;
   onDecision: (allowed: boolean) => void;
@@ -19,6 +22,9 @@ export function DangerousModeDialog({
     <div class="agenthub-mode-dialog-content">
       <h2 id={titleId}>{t('dangerousModeTitle')}</h2>
       <p id={descriptionId}>{t('dangerousModeDescription', { agent, mode: value })}</p>
+      {session && (
+        <p class="agenthub-mode-dialog-session">{t('dangerousModeSession', { title: session })}</p>
+      )}
       <div class="agenthub-mode-dialog-actions">
         <button type="button" onClick={() => onDecision(false)}>
           {t('dangerousModeCancel')}
@@ -74,6 +80,7 @@ export function confirmDangerousMode(
       <DangerousModeDialog
         agent={agent}
         value={request.value}
+        session={request.sessionTitle || undefined}
         titleId={`${id}-title`}
         descriptionId={`${id}-description`}
         onDecision={finish}

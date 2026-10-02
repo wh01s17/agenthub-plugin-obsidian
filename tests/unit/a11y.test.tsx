@@ -7,6 +7,7 @@ import { ChatSession } from '../../src/core/ChatSession';
 import type { TranscriptItem } from '../../src/core/types';
 import { App } from '../../src/ui/App';
 import { HistoryPanel } from '../../src/ui/components/HistoryPanel';
+import { TabBar } from '../../src/ui/components/TabBar';
 import { DangerousModeDialog } from '../../src/ui/DangerousModeDialog';
 import { StubAdapter, hostServices } from '../helpers/stubAgent';
 import { makeViewHost } from '../helpers/viewHost';
@@ -97,6 +98,27 @@ describe('accessibility audit (axe-core)', () => {
     );
     expect(await audit(container)).toEqual([]);
   });
+  it('tab bar with every indicator has named controls', async () => {
+    const indicators = ['permission', 'working', 'error', 'unread', null] as const;
+    const { container } = render(
+      <TabBar
+        tabs={indicators.map((indicator, n) => ({
+          id: `t${n}`,
+          agentId: n % 2 ? 'codex-acp' : 'claude-acp',
+          agentLabel: n % 2 ? 'Codex' : 'Claude Code',
+          title: `Tab ${n}`,
+          indicator,
+        }))}
+        activeId="t0"
+        onSelect={vi.fn()}
+        onClose={vi.fn()}
+        onNew={vi.fn()}
+        onRename={vi.fn()}
+      />,
+    );
+    expect(await audit(container)).toEqual([]);
+  });
+
   it('chat view with every kind of transcript item has no violations', async () => {
     const { host } = makeViewHost(() => 'end_turn');
     host.notes.activeNotePath = () => 'A.md';

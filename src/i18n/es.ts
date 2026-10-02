@@ -10,6 +10,7 @@ export const es: Messages = {
   dangerousModeCancel: 'Conservar el modo actual',
   dangerousModeEnable: 'Activar modo sin restricciones',
   dangerousModeBadge: 'Modo sin restricciones: {mode}',
+  dangerousModeSession: 'Lo pide la pestaña «{title}».',
   errorUnsafeMode:
     'No se activó el modo sin restricciones. Elige un modo inicial más seguro en los ajustes de AgentHub y vuelve a intentarlo.',
   openView: 'Abrir AgentHub',
@@ -205,6 +206,20 @@ export const es: Messages = {
   settingsIdleTimeoutDesc:
     'Libera el proceso del agente cuando una sesión no se usa. La conversación continúa al volver a escribir. 0 = nunca.',
   cmdOpenNewView: 'Abrir AgentHub en un panel nuevo',
+  // Pestañas (ADR-033)
+  tabsLabel: 'Conversaciones',
+  tabNew: 'Pestaña nueva',
+  tabClose: 'Cerrar «{title}»',
+  tabRename: 'Renombrar pestaña',
+  tabPermission: 'esperando permiso',
+  tabWorking: 'trabajando',
+  tabError: 'error',
+  tabUnread: 'terminada, sin leer',
+  tabPermissionNotice: 'AgentHub: «{tab}» espera tu permiso.',
+  cmdNewTab: 'Abrir una pestaña nueva de AgentHub',
+  cmdCloseTab: 'Cerrar la pestaña actual de AgentHub',
+  cmdNextTab: 'Ir a la siguiente pestaña de AgentHub',
+  cmdPreviousTab: 'Ir a la pestaña anterior de AgentHub',
 
   // Diffs (T6.1)
   diffAdded: 'Añadido: ',

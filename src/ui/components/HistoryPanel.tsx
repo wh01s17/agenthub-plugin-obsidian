@@ -15,6 +15,8 @@ interface HistoryPanelProps {
   currentId: string | null;
   agentLabel: (agentId: string) => { label: string; enabled: boolean };
   onOpen: (localId: string) => void;
+  /** Renames a session that is also open in a tab, so its live title follows. */
+  onRename?: (localId: string, title: string) => void;
   /** Deletes a saved session (the view closes it first if it is the current one). */
   onDelete: (localId: string) => Promise<void>;
   onClose: () => void;
@@ -142,7 +144,9 @@ export function HistoryPanel(props: HistoryPanelProps) {
               agent={props.agentLabel(entry.agentId)}
               onOpen={() => props.onOpen(entry.localId)}
               onRename={(title) => {
-                if (title) void history.rename(entry.localId, title).then(reload);
+                if (!title) return;
+                props.onRename?.(entry.localId, title);
+                void history.rename(entry.localId, title).then(reload);
               }}
               onDelete={() => {
                 void props.onDelete(entry.localId).then(reload);

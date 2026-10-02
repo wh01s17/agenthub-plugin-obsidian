@@ -16,6 +16,9 @@ export function makeViewHost(
   store?: SessionStore,
 ) {
   const adapter = new StubAdapter(script, 'claude-acp', 'Claude Code');
+  // A second agent so tabs can run different agents side by side (ADR-033).
+  const codex = new StubAdapter(script, 'codex-acp', 'Codex');
+  const adapters = new Map([adapter, codex].map((a) => [a.id, a]));
   const agents = new AgentRegistry({
     resolveCommand: () => Promise.resolve(null),
     processes: new ProcessRegistry(),
@@ -24,7 +27,7 @@ export function makeViewHost(
   const merged = { ...defaultSettings(), ...settings };
   agents.setAgents(merged.agents);
   const sessions = new SessionManager({
-    getAdapter: (id) => (agents.config(id)?.enabled && id === adapter.id ? adapter : undefined),
+    getAdapter: (id) => (agents.config(id)?.enabled ? adapters.get(id) : undefined),
     host: hostServices,
     sessionOptions: () => ({ cwd: '/vault' }),
     onCreate: (session) => store?.track(session),
@@ -52,5 +55,5 @@ export function makeViewHost(
     exportSession: vi.fn(() => Promise.resolve()),
     workingDirectory: () => '/vault',
   };
-  return { host, adapter, sessions };
+  return { host, adapter, codex, sessions };
 }

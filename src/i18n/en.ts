@@ -8,6 +8,7 @@ export const en = {
   dangerousModeCancel: 'Keep current mode',
   dangerousModeEnable: 'Enable unrestricted mode',
   dangerousModeBadge: 'Unrestricted mode: {mode}',
+  dangerousModeSession: 'Requested by the tab "{title}".',
   errorUnsafeMode:
     'Unrestricted mode was not enabled. Choose a safer initial mode in AgentHub settings and try again.',
   openView: 'Open AgentHub',
@@ -205,6 +206,20 @@ export const en = {
   settingsIdleTimeoutDesc:
     'Frees the agent process when a session is unused. The conversation continues when you write again. 0 = never.',
   cmdOpenNewView: 'Open AgentHub in a new pane',
+  // Tabs (ADR-033)
+  tabsLabel: 'Conversations',
+  tabNew: 'New tab',
+  tabClose: 'Close "{title}"',
+  tabRename: 'Rename tab',
+  tabPermission: 'waiting for permission',
+  tabWorking: 'working',
+  tabError: 'error',
+  tabUnread: 'finished, not read yet',
+  tabPermissionNotice: 'AgentHub: "{tab}" is waiting for your permission.',
+  cmdNewTab: 'Open a new AgentHub tab',
+  cmdCloseTab: 'Close the current AgentHub tab',
+  cmdNextTab: 'Go to the next AgentHub tab',
+  cmdPreviousTab: 'Go to the previous AgentHub tab',
 
   // Diffs (T6.1)
   diffAdded: 'Added: ',

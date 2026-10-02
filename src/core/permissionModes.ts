@@ -11,6 +11,8 @@ export interface DangerousModeRequest {
   agentId: string;
   optionId: string;
   value: string;
+  /** Title of the session asking, so the dialog says which tab it comes from. */
+  sessionTitle?: string;
 }
 export type ConfirmDangerousMode = (
   request: DangerousModeRequest,

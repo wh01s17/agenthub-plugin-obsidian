@@ -123,6 +123,13 @@ export class ChatSession {
     }
   }
 
+  /** Renames the session (tab and history); an empty title is ignored. */
+  rename(title: string): void {
+    const trimmed = title.trim();
+    if (this.disposed || !trimmed || trimmed === this.state.title) return;
+    this.dispatch({ type: 'local.title', title: trimmed });
+  }
+
   /** When the session last did something (a message, an agent event). */
   get lastActivity(): number {
     return this.lastActivityAt;
@@ -331,7 +338,7 @@ export class ChatSession {
     this.dispatch({ type: 'local.status', status: 'awaiting-permission' });
     try {
       const allowed = await this.init.confirmDangerousMode(
-        { agentId: this.state.agentId, optionId, value },
+        { agentId: this.state.agentId, optionId, value, sessionTitle: this.state.title },
         controller.signal,
       );
       return allowed && !controller.signal.aborted && !this.disposed;
