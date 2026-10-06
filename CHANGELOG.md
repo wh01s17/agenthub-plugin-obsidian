@@ -4,6 +4,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Fixed
+
+- In a narrow pane the whole view could scroll sideways and push the message box buttons out of sight: the label of an on/off option pill escaped the pill row. Long note paths in messages and tool details now wrap instead of widening the view.
+
 ## [0.5.0] - 2026-10-05
 
 ### Added

@@ -125,6 +125,9 @@
 }
 
 .agenthub-app button.agenthub-pill {
+  /* Anchors the pill's hidden label inside the row that scrolls; otherwise it escapes the row's
+     clipping and widens the whole view. The option panel is a sibling, so it still spans the box. */
+  position: relative;
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -471,6 +474,12 @@
   font-size: var(--font-ui-smaller);
 }
 
+/* Long note paths wrap instead of widening the message. */
+.agenthub-attachments > li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .agenthub-markdown {
   overflow-wrap: anywhere;
   user-select: text;
@@ -597,6 +606,7 @@
   padding: 0;
   list-style: none;
   font-family: var(--font-monospace);
+  overflow-wrap: anywhere;
 }
 
 .agenthub-tool-exit,

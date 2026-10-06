@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **0.5.0 publicada como Latest** (Fase 9: imágenes pegadas, arrastradas o adjuntas en el chat, ADR-035). |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.5.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
+| Próxima tarea | Confirmar en Obsidian el arreglo del scroll horizontal en paneles estrechos (en `main`, sin publicar) y, con confirmación del usuario, release 0.5.1 (PATCH). Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
 | Última actualización | 2026-10-05 — Release 0.5.0: imágenes en el chat. Claude (Opus 5.5). |
@@ -1834,3 +1834,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-05 · usuario + Claude (Opus 5.5)** — **T9.3:** el usuario revisó las imágenes en Obsidian y las aprobó («funciona de pana»). Fase 9 cerrada; falta solo la release 0.5.0, que requiere su confirmación.
 
 - **2026-10-05 · usuario + Claude (Opus 5.5)** — **Release 0.5.0 publicada como Latest** con confirmación del usuario: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.0. Push conjunto de `main` y del tag `0.5.0`; CI y Release correctos; `main.js`, `manifest.json` y `styles.css` del borrador coinciden por SHA-256 con el build local; `gh attestation verify` de `main.js` correcto; notas tomadas del CHANGELOG. Pendiente: que el usuario pulse **Check for new releases** en community.obsidian.md.
+
+- **2026-10-06 · usuario + Claude (Opus 5.5)** — **Fix de scroll horizontal** reportado por el usuario tras 0.5.0 (panel estrecho: barra horizontal y botones del cuadro de mensaje fuera de la vista). No se reproducía con el CSS de Obsidian 1.14.4 + tema Tokyo Night + letra 20 px en un arnés con Chromium headless (componentes reales, `playwright-core` fuera del repo); un snippet en la consola del usuario mostró `view-content` con `scrollWidth` 478 frente a `clientWidth` 331 y las pastillas como lo que sobresalía. Causa: la etiqueta `.agenthub-visually-hidden` (absoluta) de la pastilla de dos estados tomaba como bloque contenedor el cuadro de mensaje y escapaba del recorte de la fila desplazable `.agenthub-config.is-inline`; el botón de adjuntar de 0.5.0 empujó las pastillas y lo dejó a la vista. Arreglo: `position: relative` en `.agenthub-pill` (el panel de opciones es hermano del botón y sigue ocupando el ancho del cuadro, comprobado). De paso, las rutas largas de adjuntos y de ubicaciones de herramientas se parten. Verificado en el arnés a 500/380/300/240 px sin desbordamiento. Pendiente: confirmación del usuario en Obsidian y release 0.5.1 (PATCH) con su confirmación.
