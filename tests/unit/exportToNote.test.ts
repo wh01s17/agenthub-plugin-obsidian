@@ -8,6 +8,7 @@ const labels = {
   thinking: 'Reasoning',
   plan: 'Plan',
   permission: 'Permission requested',
+  image: 'Image',
   notice: () => 'Stopped.',
   vaultPath: (path: string) => (path.startsWith('/v/') ? path.slice(3) : null),
 };

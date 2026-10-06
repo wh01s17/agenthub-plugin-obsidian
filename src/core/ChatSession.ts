@@ -123,17 +123,29 @@ export class ChatSession {
 
     const agent = await this.ensureAgent();
     if (!agent) return;
+    const prompt = this.supportedBlocks(blocks, agent);
+    if (prompt.length === 0) {
+      this.dispatch({ type: 'local.status', status: 'idle' });
+      return;
+    }
     const release = this.init.turns ? await this.waitForTurn(this.init.turns) : undefined;
     if (release === null) return;
     this.dispatch({ type: 'local.status', status: 'running' });
     try {
-      await agent.prompt(blocks);
+      await agent.prompt(prompt);
     } catch (error) {
       this.reportError(error);
       this.dispatch({ type: 'turn.end', stopReason: 'error' });
     } finally {
       release?.();
     }
+  }
+
+  /** Drops images the agent cannot take, saying so in the conversation (ADR-035). */
+  private supportedBlocks(blocks: PromptBlock[], agent: AgentSession): PromptBlock[] {
+    if (agent.capabilities.images || !blocks.some((block) => block.type === 'image')) return blocks;
+    this.dispatch({ type: 'local.notice', level: 'warning', notice: { key: 'imagesNotSent' } });
+    return blocks.filter((block) => block.type !== 'image');
   }
 
   /** Waits (shown as queued) while too many agents are working; `null` if stopped meanwhile. */

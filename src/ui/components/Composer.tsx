@@ -1,9 +1,12 @@
+import { Notice } from 'obsidian';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { imageDataUrl, MAX_IMAGES_PER_MESSAGE, type ImageBlock } from '../../core/images';
 import type { PromptHistory } from '../../core/PromptHistory';
 import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
 import type { SlashCommand } from '../../core/types';
 import { t } from '../../i18n';
+import { draggingFiles, pastedImages, readImage, type ImageResult } from '../imageFiles';
 import { Icon } from './Icon';
 
 interface ComposerProps {
@@ -17,7 +20,8 @@ interface ComposerProps {
   history?: PromptHistory;
   /** Agent slash commands for `/` completion. */
   commands: readonly SlashCommand[];
-  onSend: (text: string) => void;
+  /** The message text (trimmed, may be empty if images go along) and the attached images. */
+  onSend: (text: string, images: ImageBlock[]) => void;
   onStop: () => void;
   /** Shown at the top of the message box (context chips: what travels with the message). */
   children?: ComponentChildren;
@@ -33,6 +37,18 @@ interface Suggestions {
 
 const LISTBOX_ID = 'agenthub-suggestions';
 
+interface PendingImage {
+  key: number;
+  block: ImageBlock;
+}
+
+function rejectionText(result: Extract<ImageResult, { ok: false }>): string {
+  const name = result.name;
+  if (result.reason === 'type') return t('imageUnsupportedType', { name });
+  if (result.reason === 'size') return t('imageTooLarge', { name });
+  return t('imageReadFailed', { name });
+}
+
 /** Whether a key press should send, given the user's preference (plan §4.11). */
 export function isSendKey(
   event: Pick<KeyboardEvent, 'key' | 'shiftKey' | 'ctrlKey' | 'metaKey' | 'isComposing'>,
@@ -47,7 +63,13 @@ export function Composer(props: ComposerProps) {
   const { agentLabel, busy, disabled, sendWith, onSend, onStop } = props;
   const [text, setText] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestions | null>(null);
+  const [images, setImagesState] = useState<PendingImage[]>([]);
+  const [dropping, setDropping] = useState(false);
+  // Mirrors `images` so reads that finish later add to the current list, not a stale one.
+  const imagesRef = useRef<PendingImage[]>([]);
+  const imageKey = useRef(0);
   const ref = useRef<HTMLTextAreaElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   // Position while browsing the history (`null`: editing a new prompt) and the text it replaced.
   const recall = useRef<{ index: number; draft: string } | null>(null);
 
@@ -115,13 +137,39 @@ export function Composer(props: ComposerProps) {
     return false;
   };
 
+  const setImages = (next: PendingImage[]) => {
+    imagesRef.current = next;
+    setImagesState(next);
+  };
+
+  /** Reads pasted, dropped or picked files; problems are reported with a notice (ADR-035). */
+  const attach = async (files: File[]) => {
+    if (files.length === 0 || disabled) return;
+    const results = await Promise.all(files.map(readImage));
+    const added: PendingImage[] = [];
+    for (const result of results) {
+      if (!result.ok) new Notice(rejectionText(result));
+      else added.push({ key: ++imageKey.current, block: result.image });
+    }
+    const room = MAX_IMAGES_PER_MESSAGE - imagesRef.current.length;
+    if (added.length > room) new Notice(t('imageLimit', { max: MAX_IMAGES_PER_MESSAGE }));
+    if (added.length > 0 && room > 0) setImages([...imagesRef.current, ...added.slice(0, room)]);
+  };
+
+  const removeImage = (key: number) => {
+    setImages(imagesRef.current.filter((image) => image.key !== key));
+    ref.current?.focus();
+  };
+
   const send = () => {
     const message = text.trim();
-    if (!message || busy || disabled) return;
-    props.history?.add(message);
+    const attached = imagesRef.current.map((image) => image.block);
+    if ((!message && attached.length === 0) || busy || disabled) return;
+    if (message) props.history?.add(message);
     recall.current = null;
-    onSend(message);
+    onSend(message, attached);
     setText('');
+    setImages([]);
     setSuggestions(null);
     ref.current?.focus();
   };
@@ -163,8 +211,28 @@ export function Composer(props: ComposerProps) {
       ?.scrollIntoView?.({ block: 'nearest' });
   }, [activeId]);
 
+  const hasContext = Boolean(props.children) || images.length > 0;
+
   return (
-    <div class="agenthub-composer">
+    <div
+      class={`agenthub-composer ${dropping ? 'is-dropping' : ''}`}
+      onDragOver={(event) => {
+        if (disabled || !draggingFiles(event.dataTransfer)) return;
+        event.preventDefault();
+        setDropping(true);
+      }}
+      onDragLeave={(event) => {
+        // Moving over a child also fires `dragleave` on the box: only leaving it counts.
+        const next = event.relatedTarget as Node | null;
+        if (!next || !event.currentTarget.contains(next)) setDropping(false);
+      }}
+      onDrop={(event) => {
+        if (!draggingFiles(event.dataTransfer)) return;
+        event.preventDefault();
+        setDropping(false);
+        void attach(Array.from(event.dataTransfer?.files ?? []));
+      }}
+    >
       {suggestions && (
         <ul
           ref={listRef}
@@ -192,7 +260,32 @@ export function Composer(props: ComposerProps) {
           ))}
         </ul>
       )}
-      {props.children && <div class="agenthub-composer-context">{props.children}</div>}
+      {hasContext && (
+        <div class="agenthub-composer-context">
+          {props.children}
+          {images.length > 0 && (
+            <ul class="agenthub-image-strip" aria-label={t('imagesAttached')}>
+              {images.map((image, index) => (
+                <li key={image.key} class="agenthub-image-chip">
+                  <img
+                    src={imageDataUrl(image.block) ?? undefined}
+                    alt={t('imageAlt', { n: index + 1 })}
+                  />
+                  <button
+                    type="button"
+                    class="clickable-icon agenthub-image-remove"
+                    aria-label={t('imageRemove', { n: index + 1 })}
+                    title={t('imageRemove', { n: index + 1 })}
+                    onClick={() => removeImage(image.key)}
+                  >
+                    <Icon name="x" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       <textarea
         ref={ref}
         class="agenthub-composer-input"
@@ -212,9 +305,38 @@ export function Composer(props: ComposerProps) {
           updateSuggestions(el.value, el.selectionStart);
         }}
         onKeyDown={onKeyDown}
+        onPaste={(event) => {
+          const files = pastedImages(event.clipboardData);
+          if (files.length === 0) return;
+          event.preventDefault();
+          void attach(files);
+        }}
         onBlur={() => setSuggestions(null)}
       />
       <div class="agenthub-composer-toolbar">
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(event) => {
+            const files = Array.from(event.currentTarget.files ?? []);
+            // Clear it so picking the same file again still fires `change`.
+            event.currentTarget.value = '';
+            void attach(files);
+          }}
+        />
+        <button
+          type="button"
+          class="clickable-icon agenthub-composer-attach"
+          disabled={disabled}
+          aria-label={t('imageAttach')}
+          title={t('imageAttach')}
+          onClick={() => fileInput.current?.click()}
+        >
+          <Icon name="image-plus" />
+        </button>
         {props.options}
         {/* Round icon buttons, like the agents' own apps; the name comes from `aria-label`/`title`. */}
         {busy ? (
@@ -232,7 +354,7 @@ export function Composer(props: ComposerProps) {
             type="button"
             class="agenthub-composer-button mod-cta"
             onClick={send}
-            disabled={disabled || !text.trim()}
+            disabled={disabled || (!text.trim() && images.length === 0)}
             aria-label={t('send')}
             title={t('send')}
           >

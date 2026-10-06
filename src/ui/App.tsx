@@ -7,6 +7,7 @@ import {
   type NoteRef,
   type SelectionRef,
 } from '../core/PromptBuilder';
+import type { ImageBlock } from '../core/images';
 import { t } from '../i18n';
 import { AgentBadge } from './components/AgentBadge';
 import { Composer } from './components/Composer';
@@ -63,7 +64,11 @@ async function sendWithContext(
   host: ViewHost,
   session: ChatSession,
   text: string,
-  context: { activeNotePath: string | null; selection: SelectionRef | null },
+  context: {
+    activeNotePath: string | null;
+    selection: SelectionRef | null;
+    images: ImageBlock[];
+  },
 ): Promise<void> {
   const read = (path: string) => host.notes.readNote(path);
   const isNote = (note: NoteRef | null): note is NoteRef => note !== null;
@@ -74,6 +79,7 @@ async function sendWithContext(
   await session.send(
     buildPrompt({
       text,
+      images: context.images,
       mentions,
       activeNote: activeNote ?? undefined,
       selection: context.selection ?? undefined,
@@ -113,8 +119,8 @@ function ChatView(props: AppProps & { session: ChatSession }) {
   const optionsInComposer = settings.optionsPlacement === 'composer';
   const onConfigChange = (id: string, value: string) => void session.setConfigOption(id, value);
 
-  const onSend = (text: string) => {
-    const context = { activeNotePath: includeActive ? activeNotePath : null, selection };
+  const onSend = (text: string, images: ImageBlock[]) => {
+    const context = { activeNotePath: includeActive ? activeNotePath : null, selection, images };
     props.onClearSelection?.();
     void sendWithContext(host, session, text, context);
   };

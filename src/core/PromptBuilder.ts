@@ -1,6 +1,7 @@
 // Turns what the user typed plus Obsidian context into prompt blocks (plan §4.8). Pure: the host
 // resolves notes and reads their text beforehand.
 
+import type { ImageBlock } from './images';
 import type { PromptBlock } from './types';
 
 export interface NoteRef {
@@ -20,6 +21,8 @@ export interface SelectionRef {
 
 export interface PromptInput {
   text: string;
+  /** Pasted or dropped images (ADR-035). */
+  images?: ImageBlock[];
   activeNote?: NoteRef;
   selection?: SelectionRef;
   /** Notes referenced with `@[[path]]` in the text, already resolved. */
@@ -42,7 +45,11 @@ export function extractMentions(text: string): string[] {
 }
 
 export function buildPrompt(input: PromptInput): PromptBlock[] {
-  const blocks: PromptBlock[] = [{ type: 'text', text: input.text }];
+  const images = input.images ?? [];
+  // A message made only of images needs no empty text block.
+  const blocks: PromptBlock[] =
+    input.text || images.length === 0 ? [{ type: 'text', text: input.text }] : [];
+  blocks.push(...images);
   let budget = input.maxEmbeddedChars ?? DEFAULT_BUDGET;
   const seen = new Set<string>();
 

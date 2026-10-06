@@ -1,11 +1,12 @@
 // Automated accessibility audit (axe-core, WCAG 2.x A/AA) of every chat component (plan T6.3).
 // Color contrast is not checked here: jsdom cannot compute styles; Obsidian themes own the colors.
-import { render, waitFor } from '@testing-library/preact';
+import { fireEvent, render, screen, waitFor } from '@testing-library/preact';
 import axe from 'axe-core';
 import { describe, expect, it, vi } from 'vitest';
 import { ChatSession } from '../../src/core/ChatSession';
 import type { TranscriptItem } from '../../src/core/types';
 import { App } from '../../src/ui/App';
+import { Composer } from '../../src/ui/components/Composer';
 import { HistoryPanel } from '../../src/ui/components/HistoryPanel';
 import { TabBar } from '../../src/ui/components/TabBar';
 import { DangerousModeDialog } from '../../src/ui/DangerousModeDialog';
@@ -32,6 +33,7 @@ const transcript: TranscriptItem[] = [
     blocks: [
       { type: 'text', text: 'resume' },
       { type: 'file', path: 'A.md', absPath: '/v/A.md' },
+      { type: 'image', mimeType: 'image/png', data: 'iVBORw==' },
     ],
   },
   { kind: 'thought', id: 't1', text: 'pensando', streaming: false },
@@ -142,6 +144,27 @@ describe('accessibility audit (axe-core)', () => {
         selection={{ path: 'A.md', text: 'x', fromLine: 1, toLine: 2 }}
       />,
     );
+    expect(await audit(container)).toEqual([]);
+  });
+
+  it('message box with attached images has named controls', async () => {
+    const { container } = render(
+      <Composer
+        agentLabel="Claude Code"
+        busy={false}
+        disabled={false}
+        sendWith="enter"
+        notes={() => []}
+        commands={[]}
+        onSend={vi.fn()}
+        onStop={vi.fn()}
+      />,
+    );
+    const shot = new File([new Uint8Array([0x89, 0x50])], 'shot.png', { type: 'image/png' });
+    fireEvent.paste(screen.getByRole('textbox'), {
+      clipboardData: { types: ['Files'], files: [shot], getData: () => '' },
+    });
+    await screen.findByRole('img', { name: 'Image 1' });
     expect(await audit(container)).toEqual([]);
   });
 

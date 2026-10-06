@@ -46,7 +46,10 @@ describe('composer history (arrow keys)', () => {
     const { input, send, onSend } = renderComposer(history);
     send('uno');
     send('dos');
-    expect(onSend.mock.calls).toEqual([['uno'], ['dos']]);
+    expect(onSend.mock.calls).toEqual([
+      ['uno', []],
+      ['dos', []],
+    ]);
     expect(history.entries()).toEqual(['uno', 'dos']);
 
     fireEvent.input(input, { target: { value: 'borrador' } });

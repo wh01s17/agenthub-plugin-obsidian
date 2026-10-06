@@ -82,6 +82,8 @@ const notice = z.discriminatedUnion('key', [
     detail: z.string().optional(),
   }),
   z.object({ key: z.literal('permissionDenied'), toolName: z.string() }),
+  z.object({ key: z.literal('contextNotRestored') }),
+  z.object({ key: z.literal('imagesNotSent') }),
   z.object({
     key: z.literal('turnStopped'),
     stopReason: z.enum(['max_tokens', 'max_turn_requests', 'refusal', 'cancelled', 'error']),

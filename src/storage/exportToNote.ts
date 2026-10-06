@@ -8,6 +8,8 @@ export interface ExportLabels {
   thinking: string;
   plan: string;
   permission: string;
+  /** Stands for an image sent with a message; the image itself stays out of the note. */
+  image: string;
   notice: (item: TranscriptItem & { kind: 'notice' }) => string;
   /** Vault-relative path for a file inside the vault, or `null` for paths outside it. */
   vaultPath?: (path: string) => string | null;
@@ -22,11 +24,12 @@ const quote = (text: string) =>
 
 const yamlString = (value: string) => JSON.stringify(value);
 
-function userMarkdown(blocks: readonly PromptBlock[]): string {
+function userMarkdown(blocks: readonly PromptBlock[], imageLabel: string): string {
   const text = blocks.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('\n\n');
   const attachments = blocks.flatMap((b) => {
     if (b.type === 'file') return [`- [[${b.path}]]`];
     if (b.type === 'selection') return [`- [[${b.path}]] (${b.fromLine}–${b.toLine})`];
+    if (b.type === 'image') return [`- ${imageLabel} (${b.mimeType})`];
     return [];
   });
   return attachments.length > 0 ? `${text}\n\n${attachments.join('\n')}` : text;
@@ -74,7 +77,7 @@ export function sessionToMarkdown(
   const body = state.items.map((item): string => {
     switch (item.kind) {
       case 'user':
-        return `## ${labels.you}\n\n${userMarkdown(item.blocks)}`;
+        return `## ${labels.you}\n\n${userMarkdown(item.blocks, labels.image)}`;
       case 'assistant':
         return `## ${labels.agent}\n\n${item.text}`;
       case 'thought':

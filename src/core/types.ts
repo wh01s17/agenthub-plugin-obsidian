@@ -151,6 +151,8 @@ export type Notice =
   | { key: 'permissionDenied'; toolName: string }
   /** A stored session was reopened but the agent could not continue its previous context. */
   | { key: 'contextNotRestored' }
+  /** The agent does not take images: the message went without them (ADR-035). */
+  | { key: 'imagesNotSent' }
   | { key: 'turnStopped'; stopReason: Exclude<StopReason, 'end_turn'> };
 
 export type TranscriptItem =

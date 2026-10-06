@@ -1,5 +1,6 @@
 import type { App } from 'obsidian';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
+import { imageDataUrl } from '../../core/images';
 import type { PermissionOutcome, PromptBlock, TranscriptItem } from '../../core/types';
 import { t } from '../../i18n';
 import { Icon } from './Icon';
@@ -52,6 +53,32 @@ function Attachments({ blocks }: { blocks: readonly PromptBlock[] }) {
   );
 }
 
+/** Images sent with a message (ADR-035); a click shows one at full width. */
+function Images({ blocks }: { blocks: readonly PromptBlock[] }) {
+  const [open, setOpen] = useState<number | null>(null);
+  const images = blocks.flatMap((block) => {
+    const src = block.type === 'image' ? imageDataUrl(block) : null;
+    return src ? [src] : [];
+  });
+  if (images.length === 0) return null;
+  return (
+    <div class="agenthub-message-images">
+      {images.map((src, index) => (
+        <button
+          key={index}
+          type="button"
+          class={`agenthub-message-image ${open === index ? 'is-open' : ''}`}
+          aria-pressed={open === index}
+          title={t(open === index ? 'imageShrink' : 'imageEnlarge')}
+          onClick={() => setOpen(open === index ? null : index)}
+        >
+          <img src={src} alt={t('imageAlt', { n: index + 1 })} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Item({
   app,
   item,
@@ -63,14 +90,17 @@ function Item({
   textLabel,
 }: Omit<MessageListProps, 'items'> & { item: TranscriptItem }) {
   switch (item.kind) {
-    case 'user':
+    case 'user': {
+      const text = userText(item.blocks);
       return (
         <div class="agenthub-message is-user">
           <div class="agenthub-message-author">{t('you')}</div>
-          <div class="agenthub-message-text">{userText(item.blocks)}</div>
+          {text && <div class="agenthub-message-text">{text}</div>}
+          <Images blocks={item.blocks} />
           <Attachments blocks={item.blocks} />
         </div>
       );
+    }
     case 'assistant':
       return (
         <div class="agenthub-message is-assistant">

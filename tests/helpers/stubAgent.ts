@@ -22,7 +22,7 @@ const CAPABILITIES: AgentCapabilities = {
   interactivePermissions: true,
   loadSession: false,
   embeddedContext: true,
-  images: false,
+  images: true,
   configOptions: false,
   slashCommands: false,
   usage: false,
@@ -30,7 +30,7 @@ const CAPABILITIES: AgentCapabilities = {
 
 export class StubSession implements AgentSession {
   readonly nativeSessionId: string = 'stub-native';
-  readonly capabilities = CAPABILITIES;
+  readonly capabilities: AgentCapabilities = { ...CAPABILITIES };
   restored = false;
   readonly prompts: PromptBlock[][] = [];
   disposed = false;
@@ -80,6 +80,8 @@ export class StubAdapter implements AgentAdapter {
   failWith: Error | null = null;
   /** Whether `loadSession` keeps the previous context (like ACP resume/load). */
   canRestore = true;
+  /** Whether new sessions accept image blocks (ACP `promptCapabilities.image`). */
+  images = true;
 
   constructor(
     private readonly script: StubScript,
@@ -106,6 +108,7 @@ export class StubAdapter implements AgentAdapter {
     this.options.push(options);
     if (this.failWith) return Promise.reject(this.failWith);
     const session = new StubSession(this.script, host);
+    session.capabilities.images = this.images;
     this.sessions.push(session);
     return Promise.resolve(session);
   }

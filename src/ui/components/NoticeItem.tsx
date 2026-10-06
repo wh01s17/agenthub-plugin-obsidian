@@ -26,6 +26,8 @@ export function noticeText(notice: Notice): string {
       return t('noticePermissionDenied', { tool: notice.toolName });
     case 'contextNotRestored':
       return t('noticeContextNotRestored');
+    case 'imagesNotSent':
+      return t('noticeImagesNotSent');
     case 'turnStopped':
       switch (notice.stopReason) {
         case 'cancelled':
