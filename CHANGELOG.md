@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-05
+
 ### Added
 
 - Images in the chat: paste a screenshot (**Ctrl/Cmd+V**), drop image files on the message box, or pick them with the **Attach images** button. Thumbnails can be removed before sending, and you can send images without text. Sent images appear in the conversation (click to enlarge) and in the session history.
@@ -149,7 +151,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.0
 [0.4.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.1
 [0.4.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.0
 [0.3.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.3.0

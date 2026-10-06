@@ -1132,7 +1132,7 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
    automática analice la versión nueva.
 
 **Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1,
-0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) publicada; 0.4.1 (PATCH: hover y foco de las filas del historial) publicada.
+0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) publicada; 0.4.1 (PATCH: hover y foco de las filas del historial) publicada. 0.5.0 (MINOR: imágenes pegadas, arrastradas o adjuntas en el chat, ADR-035).
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
