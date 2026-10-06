@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-10-06
+
 ### Fixed
 
 - In a narrow pane the whole view could scroll sideways and push the message box buttons out of sight: the label of an on/off option pill escaped the pill row. Long note paths in messages and tool details now wrap instead of widening the view.
@@ -155,7 +157,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.5.1...HEAD
+[0.5.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.1
 [0.5.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.0
 [0.4.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.1
 [0.4.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.0
