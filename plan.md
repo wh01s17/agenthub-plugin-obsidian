@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 9 — Imágenes en el chat** completa y revisada por el usuario (sin publicar). 0.4.1 sigue siendo la Latest. |
-| Próxima tarea | Release **0.5.0** (MINOR, §8.4) cuando el usuario la confirme. Pendiente aparte: que el usuario pulse **Check for new releases** en community.obsidian.md para 0.4.1. |
+| Fase actual | **0.5.0 publicada como Latest** (Fase 9: imágenes pegadas, arrastradas o adjuntas en el chat, ADR-035). |
+| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.5.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-05 — Fase 9: imágenes pegadas, arrastradas o adjuntas en el chat (ADR-035). Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 260 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Última actualización | 2026-10-05 — Release 0.5.0: imágenes en el chat. Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, 0.5.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 260 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -1367,8 +1367,7 @@ Origen: pedido del usuario (2026-10-05). Decisión en ADR-035. RF-26.
   cuadro de mensaje con imágenes (`a11y.test.tsx`).
 - [x] **T9.3** Revisión del usuario en Obsidian: pegar una captura, arrastrar una imagen y adjuntar con el botón; enviarlas
   a Claude Code y a Codex y comprobar que el agente las describe; imagen grande (> 3,75 MB) reducida; reabrir la sesión
-  desde el historial con las imágenes. Aprobada por el usuario el 2026-10-05 («funciona de pana»). Falta la release 0.5.0
-  con confirmación del usuario (§8.4).
+  desde el historial con las imágenes. Aprobada por el usuario el 2026-10-05 («funciona de pana»). Publicada en 0.5.0.
 
 ### Fase 7 — Descartada: modo terminal
 
@@ -1833,3 +1832,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-05 · Claude (Opus 5.5)** — **Fase 9 (T9.1, T9.2): imágenes en el chat** a pedido del usuario («agregar soporte para pegar capturas o imágenes en el chat»). Partida en verde (242 tests). El modelo ya tenía el bloque `image`, el esquema lo aceptaba y `toContentBlocks` lo traducía si el agente anuncia `promptCapabilities.image` (los fixtures de Claude, Codex, Gemini y OpenCode lo anuncian), pero no había forma de adjuntarlas ni de verlas. Nuevo: `core/images.ts` (límites), `ui/imageFiles.ts` (lectura y redimensionado con canvas), pegar/arrastrar/botón en `Composer`, miniaturas, imágenes en la conversación (clic para ampliar), aviso `imagesNotSent` en `ChatSession` y lista en la exportación. Los tests encontraron que un mensaje solo de imágenes a un agente sin soporte dejaba la sesión ocupada: ahora vuelve a `idle`. De paso, el esquema del transcript acepta `contextNotRestored`, que faltaba. ADR-035, RF-26, §10.7. Lint (1 aviso intencionado), 260 tests y build en verde. Falta: T9.3 (revisión del usuario en Obsidian con agentes reales; no probado aún contra Claude/Codex reales ni el canvas de Electron) y release 0.5.0 con su confirmación.
 
 - **2026-10-05 · usuario + Claude (Opus 5.5)** — **T9.3:** el usuario revisó las imágenes en Obsidian y las aprobó («funciona de pana»). Fase 9 cerrada; falta solo la release 0.5.0, que requiere su confirmación.
+
+- **2026-10-05 · usuario + Claude (Opus 5.5)** — **Release 0.5.0 publicada como Latest** con confirmación del usuario: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.0. Push conjunto de `main` y del tag `0.5.0`; CI y Release correctos; `main.js`, `manifest.json` y `styles.css` del borrador coinciden por SHA-256 con el build local; `gh attestation verify` de `main.js` correcto; notas tomadas del CHANGELOG. Pendiente: que el usuario pulse **Check for new releases** en community.obsidian.md.
