@@ -4,6 +4,16 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Images in the chat: paste a screenshot (**Ctrl/Cmd+V**), drop image files on the message box, or pick them with the **Attach images** button. Thumbnails can be removed before sending, and you can send images without text. Sent images appear in the conversation (click to enlarge) and in the session history.
+- Large images are scaled down to fit the agents' limits, and formats they do not accept (such as BMP) are converted. Up to 10 images per message.
+- If an agent does not accept images, the message is sent without them and the conversation says so.
+
+### Fixed
+
+- Saved conversations that included the "could not continue the previous conversation" notice lost that entry when reopened.
+
 ## [0.4.1] - 2026-10-02
 
 ### Fixed

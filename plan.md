@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.4.1 publicada como Latest** (hover del historial sobre 0.4.0; Fase 8 completa: pestañas, límite de agentes a la vez, aviso de ediciones compartidas, reordenar). |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.4.1. Sin tareas abiertas en la Fase 8. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **Fase 9 — Imágenes en el chat** completa y revisada por el usuario (sin publicar). 0.4.1 sigue siendo la Latest. |
+| Próxima tarea | Release **0.5.0** (MINOR, §8.4) cuando el usuario la confirme. Pendiente aparte: que el usuario pulse **Check for new releases** en community.obsidian.md para 0.4.1. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-02 — Release 0.4.1: hover de las filas del historial. Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 242 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Última actualización | 2026-10-05 — Fase 9: imágenes pegadas, arrastradas o adjuntas en el chat (ADR-035). Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 260 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -158,6 +158,7 @@ expone en una **vista lateral (sidebar)** tipo chat:
 | RF-23 | Las opciones elegidas de cada agente (modo, modelo, esfuerzo…) se conservan entre sesiones y reinicios; los modos sin restricciones se confirman en cada inicio. | Should | 6 (T6.13) |
 | RF-24 | Historial de prompts con ↑/↓ en el compositor, solo en memoria. | Could | 6 (T6.14) |
 | RF-25 | Pestañas: varias conversaciones (con agentes distintos) trabajando a la vez en una misma vista, con indicadores de estado y aviso de permisos en pestañas ocultas; se conservan al reiniciar y se reordenan. Límite opcional de agentes trabajando a la vez y aviso de ediciones compartidas. | Should | 8 (T8.1–T8.6, ADR-033, ADR-034) |
+| RF-26 | Imágenes en el chat: pegar capturas (Ctrl/Cmd+V), arrastrar archivos de imagen o elegirlos con un botón; miniaturas quitables antes de enviar, imágenes visibles en la conversación y en el historial; aviso si el agente no las acepta. | Should | 9 (T9.1–T9.3, ADR-035) |
 
 ### 2.2 No funcionales
 
@@ -992,6 +993,7 @@ agenthub-plugin-obsidian/
 │   │   ├── reducer.ts              # (state, event) → state, puro
 │   │   ├── SessionManager.ts       # crea/reanuda/cierra sesiones, hooks de configuración
 │   │   ├── PromptBuilder.ts        # §4.8
+│   │   ├── images.ts               # límites de imágenes adjuntas (ADR-035)
 │   │   ├── PromptHistory.ts        # historial de prompts en memoria (T6.14)
 │   │   ├── permissionModes.ts      # modos sin restricciones, config inicial (ADR-030)
 │   │   ├── pathGuard.ts            # guardia de rutas del canal fs/* (ADR-014)
@@ -1002,7 +1004,8 @@ agenthub-plugin-obsidian/
 │   ├── storage/                    # SessionStore.ts, sessionSchema.ts, exportToNote.ts
 │   └── ui/
 │       ├── AgentHubView.ts         # ItemView con pestañas (ADR-033) que monta Preact; refresh() al cambiar ajustes
-│       ├── App.tsx, ViewHost.ts, hooks.ts, DangerousModeDialog.tsx, tabs.ts (indicadores de pestañas)
+│       ├── App.tsx, ViewHost.ts, hooks.ts, DangerousModeDialog.tsx, tabs.ts (indicadores de pestañas),
+│       │   imageFiles.ts (leer/redimensionar imágenes, ADR-035)
 │       ├── agentIdentity.ts, logos.ts, diffLines.ts, markdownBlocks.ts, renderQueue.ts
 │       └── components/             # Header, ConfigOptions, OptionPicker (pastillas y panel), MessageList, Markdown,
 │                                   # ToolCallCard, DiffView, PermissionCard, PlanView, NoticeItem, Composer,
@@ -1176,7 +1179,9 @@ comprobar que no quedan procesos (`pgrep -fa 'claude|codex|gemini|opencode|acp'`
    por sesión exigido en cabecera/URL; apagarlo con el plugin.
 6. **Sin telemetría ni red propia.** Declararlo en el README (requisito de la revisión de Obsidian),
    junto con el uso de procesos externos y la condición de solo escritorio.
-7. **Inyección de prompts desde notas:** el contenido del vault puede contener instrucciones
+7. **Imágenes (ADR-035):** las imágenes pegadas o adjuntas viajan al agente y se guardan en el historial de sesiones
+   (`sessions/*.jsonl`, en base64) como el resto del mensaje; si el vault se sincroniza, también ellas. El README lo dice.
+8. **Inyección de prompts desde notas:** el contenido del vault puede contener instrucciones
    maliciosas; por eso los permisos interactivos importan. Mencionarlo en el README.
 
 ---
@@ -1343,6 +1348,28 @@ Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
   las ediciones de transcripts reabiertos cuentan pero no avisan solas. Reordenar pestañas arrastrando o con
   Ctrl/Cmd+Shift+←/→ (`AgentHubView.moveTab`). *CA:* `TurnLimiter.test.ts`, `EditConflicts.test.ts`, `Tabs.test.tsx`.
 
+### Fase 9 — Imágenes en el chat (0.5.0)
+
+Origen: pedido del usuario (2026-10-05). Decisión en ADR-035. RF-26.
+
+- [x] **T9.1** Núcleo y adaptador: `src/core/images.ts` (formatos PNG/JPEG/GIF/WebP, máx. 3,75 MB por archivo para no
+  pasar de 5 MB en base64, lado máximo 8000 px, 10 imágenes por mensaje); `buildPrompt({ images })` pone las imágenes tras
+  el texto y omite el bloque de texto vacío si solo hay imágenes; `ChatSession.send` quita las imágenes si el agente no
+  anuncia `promptCapabilities.image` y deja el aviso `imagesNotSent` (si no queda nada, la sesión vuelve a `idle`). El
+  bloque `image` ya existía en el modelo, el esquema y `toContentBlocks`. Esquema: se añade también `contextNotRestored`,
+  que faltaba (un transcript con ese aviso perdía el registro al leerse). *CA:* `tests/unit/Images.test.tsx`.
+- [x] **T9.2** UI: pegar (si el portapapeles trae también texto plano se pega el texto, como hojas de cálculo), arrastrar
+  archivos al cuadro de mensaje (borde de acento al arrastrar) y botón *Adjuntar imágenes* con selector de archivos;
+  `src/ui/imageFiles.ts` lee en base64 y redibuja en un canvas lo que excede los límites (lado 2048 px, PNG o JPEG sobre
+  blanco) o los formatos que los agentes no aceptan (BMP…); los rechazos salen en un `Notice`. Miniaturas con botón de
+  quitar sobre el texto; se puede enviar solo imágenes; la conversación las muestra y un clic las amplía; la exportación
+  a nota las lista sin incrustarlas. i18n es/en; README y CHANGELOG. *CA:* `Images.test.tsx` y auditoría axe del
+  cuadro de mensaje con imágenes (`a11y.test.tsx`).
+- [x] **T9.3** Revisión del usuario en Obsidian: pegar una captura, arrastrar una imagen y adjuntar con el botón; enviarlas
+  a Claude Code y a Codex y comprobar que el agente las describe; imagen grande (> 3,75 MB) reducida; reabrir la sesión
+  desde el historial con las imágenes. Aprobada por el usuario el 2026-10-05 («funciona de pana»). Falta la release 0.5.0
+  con confirmación del usuario (§8.4).
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1388,6 +1415,7 @@ Origen: [`next.md`](next.md) §1. Decisión en ADR-033.
 | ADR-030 | Codex ACP usa `read-only` por defecto; las opciones explícitas prevalecen. Confirmación por activación/inicio/reanudación de los cuatro modos sin restricciones y distintivo rojo; rechazo o cierre bloquean el cambio. | Resolver Q8 y cumplir §10 y §4.9 también al restaurar sesiones. | Mantener Auto review como valor implícito; confiar solo en el selector. | Aceptada; resuelve Q8 |
 | ADR-031 | Normalizar `modes`/`models` ACP antiguos a `ConfigOption` cuando falta su equivalente moderno. Cambios mediante `session/set_mode` y `session/set_model`; `configOptions` tiene prioridad. | Gemini 0.62 real anuncia estas opciones y no ofrece esfuerzo por ACP. | Inventar una lista de modelos/esfuerzos; usar `set_config_option` con agentes que no lo implementan. | Aceptada; completa ADR-015 |
 | ADR-034 | Límite de turnos simultáneos y aviso de ediciones compartidas en el núcleo, comunes a todas las vistas y pestañas: `SessionManager` posee un `TurnLimiter` (FIFO, límite leído en cada petición, 0 = sin límite) que `ChatSession.send` usa tras arrancar el agente (arrancar no cuenta); el estado `queued` solo aparece si hay que esperar y cuenta como ocupado. `EditConflictWatcher` sigue a cada sesión creada y avisa sin bloquear. | Cerrar los riesgos de `next.md` §1 (consumo de varios agentes, conflictos de edición) sin cambiar el modelo de permisos. | Rechazar el mensaje al superar el límite (pierde el texto); bloquear la segunda edición (los agentes que escriben solos, ADR-014, no pasan por AgentHub); detectar conflictos solo dentro de una vista. | Aceptada |
+| ADR-035 | Imágenes en el prompt como bloques `image` de ACP (base64 + `mimeType`), sin escribir archivos en el vault. Se adjuntan al pegar, arrastrar o con un botón; los límites viven en el núcleo (`src/core/images.ts`) y la lectura/redimensionado en la UI (`src/ui/imageFiles.ts`, canvas solo si hace falta). Se guardan en el JSONL del historial como el resto del mensaje (los límites acotan el tamaño) y la exportación a nota las lista sin incrustarlas. Si el agente no anuncia `promptCapabilities.image`, `ChatSession` las quita y lo dice en la conversación en vez de descartarlas en silencio. Un pegado que trae texto plano se trata como texto. | RF-26: pedir sobre capturas sin guardarlas a mano en el vault. Los cuatro agentes incluidos anuncian `image: true` en sus fixtures ACP. | Guardar las imágenes como adjuntos del vault y mandar `resource_link` (ensucia el vault, no todos los agentes leen imágenes por ruta); no guardarlas en el historial (al reabrir se perdería qué se preguntó); redimensionar siempre (pierde detalle que el modelo puede usar). | Aceptada |
 | ADR-033 | Pestañas en la vista: `AgentHubView` guarda una lista de `ChatSession` (una por pestaña, cada una con su proceso, ADR-005) y la activa; el núcleo no cambia salvo `ChatSession.rename()` y `sessionTitle` en la petición de modo sin restricciones. Todas las pestañas quedan montadas y las ocultas llevan `hidden` (conservan borrador y scroll); `TabActivity` vigila estado y título de cada una para los indicadores y el `Notice` de permisos en segundo plano. Estado de vista `{tabs, activeTab, sessionId}`, compatible con 0.2.x; al restaurar, solo la pestaña visible arranca su agente y el reaper (T4.5) libera las olvidadas. Sin límite de pestañas trabajando a la vez por ahora. *Open AgentHub in a new pane* se mantiene. | Varias conversaciones a la vez sin ocupar más paneles (RF-25, `next.md` §1). | Solo varias vistas (RF-11: ocupa espacio, hay que cambiar de panel para ver quién terminó); montar solo la pestaña activa (pierde borrador y scroll); un `SessionManager` por vista. | Aceptada |
 | ADR-032 | Apariencia configurable: ajustes planos validados campo a campo (`messageStyle`, `density`, `chatFontSize`, `accentColor`, `optionsPlacement`, `expandToolCalls`, `showUsage`) que la vista expone como atributos `data-*` en `.agenthub-app`; `styles.css` solo cambia tokens propios derivados de variables de Obsidian. Formas de componentes según shadcn/ui y las apps oficiales, sin copiar a Claudian: las opciones del agente son pastillas con panel propio (lista con descripciones o medidor de niveles) y se ubican por defecto en el cuadro de mensaje. Amplía ADR-018. | Personalización sin romper temas ni la revisión de la comunidad; menos selectores nativos en el sidebar. | Temas CSS propios (rompen temas de Obsidian); variables CSS editables por el usuario (difícil de mantener); copiar el selector combinado de Claudian. | Aceptada |
 
@@ -1802,3 +1830,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 
 - **2026-10-02 · usuario + Claude (Opus 5.5)** — **Fix y release 0.4.1** a pedido del usuario: el hover de las filas del historial se veía tosco (el estilo de botón de Obsidian ganaba al botón interno y dibujaba borde y sombra dentro de la fila; la fila tenía la esquina izquierda recta). Fila redondeada (`--radius-m`) con transición corta, botón interno sin borde/sombra/relleno con más especificidad (`.agenthub-app button.agenthub-history-open`), sesión actual con barra de acento interna y anillo de foco de teclado en toda la fila (`:has(:focus-visible)`). PATCH por §8.4. Publicada con autorización del usuario («si»): push conjunto de `main` y tag, assets verificados por SHA-256 y attestation.
 
+- **2026-10-05 · Claude (Opus 5.5)** — **Fase 9 (T9.1, T9.2): imágenes en el chat** a pedido del usuario («agregar soporte para pegar capturas o imágenes en el chat»). Partida en verde (242 tests). El modelo ya tenía el bloque `image`, el esquema lo aceptaba y `toContentBlocks` lo traducía si el agente anuncia `promptCapabilities.image` (los fixtures de Claude, Codex, Gemini y OpenCode lo anuncian), pero no había forma de adjuntarlas ni de verlas. Nuevo: `core/images.ts` (límites), `ui/imageFiles.ts` (lectura y redimensionado con canvas), pegar/arrastrar/botón en `Composer`, miniaturas, imágenes en la conversación (clic para ampliar), aviso `imagesNotSent` en `ChatSession` y lista en la exportación. Los tests encontraron que un mensaje solo de imágenes a un agente sin soporte dejaba la sesión ocupada: ahora vuelve a `idle`. De paso, el esquema del transcript acepta `contextNotRestored`, que faltaba. ADR-035, RF-26, §10.7. Lint (1 aviso intencionado), 260 tests y build en verde. Falta: T9.3 (revisión del usuario en Obsidian con agentes reales; no probado aún contra Claude/Codex reales ni el canvas de Electron) y release 0.5.0 con su confirmación.
+
+- **2026-10-05 · usuario + Claude (Opus 5.5)** — **T9.3:** el usuario revisó las imágenes en Obsidian y las aprobó («funciona de pana»). Fase 9 cerrada; falta solo la release 0.5.0, que requiere su confirmación.

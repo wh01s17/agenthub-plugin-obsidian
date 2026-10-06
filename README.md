@@ -23,6 +23,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 - **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission. Drag tabs (or press **Ctrl/Cmd+Shift+Left/Right**) to reorder them.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
 - **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
+- **Images:** paste screenshots, drop image files on the message box, or attach them with the image button. Large images are scaled down to fit the agents' limits.
 - **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
 - **Prompt history:** press **Up** and **Down** in the message box to recall the prompts sent since Obsidian started.
 - **Session history:** save, search, rename, delete, and resume conversations. Restore your conversation after restarting Obsidian.
@@ -147,7 +148,7 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 - Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header; the mode pill also turns red. If such a mode is saved as your choice, AgentHub asks again every time the agent starts. OpenCode uses its own mode: check its selector.
 - The prompt history used by **Up** and **Down** stays in memory and is cleared when Obsidian restarts.
 - Notes can contain malicious instructions that an agent might follow. Review permission requests before approving them.
-- Conversations, attached notes, and selections are stored in `<configDir>/plugins/agenthub/sessions/`, usually inside `.obsidian`. Vault sync or Git may include these files. You can disable history or change its retention limit in settings; the default is 200 sessions.
+- Conversations, attached notes, selections, and images are stored in `<configDir>/plugins/agenthub/sessions/`, usually inside `.obsidian`. Vault sync or Git may include these files. You can disable history or change its retention limit in settings; the default is 200 sessions.
 - Per-agent environment variables are stored as plain text in the plugin's settings data.
 
 ## Troubleshooting
