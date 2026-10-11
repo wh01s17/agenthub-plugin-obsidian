@@ -4,6 +4,12 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Keep writing while the agent works: messages sent during a turn are queued above the message box and sent in order when the turn ends. Each queued message can be edited, removed, or sent now (which stops the current turn). Stopping a turn pauses the queue; the next message resumes it.
+- GitHub Copilot (`copilot --acp`) and Grok (`grok agent stdio`) as built-in agents. Existing installations get them disabled; enable them in settings.
+- Copilot's Autopilot mode and its allow-all switch ask for confirmation like the other unrestricted modes.
+
 ## [0.5.1] - 2026-10-06
 
 ### Fixed

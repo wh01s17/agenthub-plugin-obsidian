@@ -1,6 +1,6 @@
 # AgentHub
 
-A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini CLI**, **OpenCode**, and other coding agents from a sidebar, with your notes as context.
+A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **GitHub Copilot**, **Grok**, **Gemini CLI**, **OpenCode**, and other coding agents from a sidebar, with your notes as context.
 
 ## Contents
 
@@ -21,6 +21,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **Gemini 
 - **Agent chat:** streaming responses rendered with Obsidian's Markdown engine.
 - **Visible tools:** file reads, edits, and commands appear in the conversation. Edits show a diff, and file links open the corresponding note.
 - **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission. Drag tabs (or press **Ctrl/Cmd+Shift+Left/Right**) to reorder them.
+- **Keep writing while the agent works:** messages sent during a turn wait in a queue above the message box and go out, in order, when the turn ends. Edit or remove them, or use **Send now** to stop the current turn and send one right away.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
 - **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
 - **Images:** paste screenshots, drop image files on the message box, or attach them with the image button. Large images are scaled down to fit the agents' limits.
@@ -64,6 +65,8 @@ Claude Code summarizing the open note and a linked one, with a tool call, an ans
 | Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0` | Sign in with `claude` (`/login`). |
 | Codex | `npx -y @agentclientprotocol/codex-acp@2.1.1` | Run `codex login`. |
 | OpenCode | `opencode acp` | Run `opencode auth login`. |
+| GitHub Copilot | `copilot --acp` | Run `copilot login`. |
+| Grok | `grok agent stdio` | Run `grok login`. Grok does not accept images through ACP. |
 | Gemini CLI | `gemini --acp` | Disabled by default: personal Gemini Code Assist accounts do not support this client. |
 | Custom agents | Any agent that speaks [ACP](https://agentclientprotocol.com) over stdio | Add it in settings. |
 
@@ -105,6 +108,7 @@ Back up your vault or keep it under version control before allowing an agent to 
 
 - Open the sidebar using the **robot ribbon icon** or the **Open AgentHub** command.
 - Choose an agent in the header and its options with the pills in the message box, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
+- While the agent works, keep typing and press **Enter** (or **Add to queue**) to queue more instructions. **Stop** pauses the queue; sending another message or **Send now** resumes it.
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
 - Use the **clock icon** for session history and the **pencil icon** for a new session in the current tab.
@@ -137,7 +141,7 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 ### Disclosures
 
 - **External processes:** AgentHub runs the agent commands configured in its settings as local child processes. It does not bundle or run any agent itself.
-- **Network use:** the plugin makes no network requests and sends no telemetry. The agents you run connect to their own providers (for example Anthropic for Claude Code, OpenAI for Codex, Google for Gemini CLI, or the provider configured in OpenCode) to generate responses, under those providers' terms.
+- **Network use:** the plugin makes no network requests and sends no telemetry. The agents you run connect to their own providers (for example Anthropic for Claude Code, OpenAI for Codex, GitHub for Copilot, xAI for Grok, Google for Gemini CLI, or the provider configured in OpenCode) to generate responses, under those providers' terms.
 - **Adapter downloads:** AgentHub never installs or updates itself, the agents, or their adapters. The default Claude Code and Codex commands call `npx` with a **pinned adapter version**; on first use, `npx` (not AgentHub) fetches that version from the npm registry. To avoid any download at runtime, install the adapters globally (see [Requirements](#requirements)) and change the command to the installed binary, or use any other command you trust.
 - **Accounts:** an account with each agent's provider is required, signed in through the agent's own CLI. Depending on the provider, this may require a paid subscription or API usage. AgentHub never sees or stores your credentials.
 - **Files outside the vault:** agents run with the vault (or the working directory you choose) as their working directory, but they are regular programs: depending on their permission mode they can read or write files and run commands anywhere your user account can. When an agent reads or writes through AgentHub itself (the ACP file channel), access is limited to the vault, and writes to the Obsidian configuration folder are blocked. AgentHub also looks up the agents' executables in your `PATH` and, when the login shell PATH fallback is enabled, runs your login shell once to read its `PATH`.
@@ -145,7 +149,7 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 ### Security
 
 - Agents can **read and modify vault files and execute commands** according to their permission mode. Codex starts in **read-only** mode unless you configure another initial mode.
-- Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, or `yolo` requires confirmation and displays a red warning in the header; the mode pill also turns red. If such a mode is saved as your choice, AgentHub asks again every time the agent starts. OpenCode uses its own mode: check its selector.
+- Activating `bypassPermissions`, `danger-full-access`, `agent-full-access`, `yolo`, Copilot's **Autopilot** mode, or Copilot's **allow all** switch requires confirmation and displays a red warning in the header; the mode pill also turns red. If such a mode is saved as your choice, AgentHub asks again every time the agent starts. OpenCode uses its own mode: check its selector.
 - The prompt history used by **Up** and **Down** stays in memory and is cleared when Obsidian restarts.
 - Notes can contain malicious instructions that an agent might follow. Review permission requests before approving them.
 - Conversations, attached notes, selections, and images are stored in `<configDir>/plugins/agenthub/sessions/`, usually inside `.obsidian`. Vault sync or Git may include these files. You can disable history or change its retention limit in settings; the default is 200 sessions.
