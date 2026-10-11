@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-11
+
 ### Added
 
 - Keep writing while the agent works: messages sent during a turn are queued above the message box and sent in order when the turn ends. Each queued message can be edited, removed, or sent now (which stops the current turn). Stopping a turn pauses the queue; the next message resumes it.
