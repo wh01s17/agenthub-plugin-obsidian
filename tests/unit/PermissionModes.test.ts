@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ChatSession } from '../../src/core/ChatSession';
-import { initialSessionConfig, type ConfirmDangerousMode } from '../../src/core/permissionModes';
+import {
+  initialSessionConfig,
+  isDangerousMode,
+  type ConfirmDangerousMode,
+} from '../../src/core/permissionModes';
 import type { SessionOptions } from '../../src/core/AgentAdapter';
 import { StubAdapter, hostServices } from '../helpers/stubAgent';
 
@@ -30,6 +34,26 @@ describe('permission modes', () => {
       'workspace-write',
     );
     expect(initialSessionConfig('custom', { mode: 'manual' })).toEqual({ mode: 'manual' });
+  });
+
+  it('recognises Copilot autopilot and its allow-all switch, and only that switch', () => {
+    expect(
+      isDangerousMode('https://agentclientprotocol.com/protocol/session-modes#autopilot'),
+    ).toBe(true);
+    expect(isDangerousMode('on', 'allow_all')).toBe(true);
+    expect(isDangerousMode('off', 'allow_all')).toBe(false);
+    expect(isDangerousMode('on', 'fast')).toBe(false);
+    expect(isDangerousMode('on')).toBe(false);
+  });
+
+  it('confirms turning on an allow-all switch', async () => {
+    const { session, confirm, chosen } = setup(false);
+    await session.setConfigOption('allow_all', 'on');
+    expect(confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ optionId: 'allow_all', value: 'on' }),
+      expect.anything(),
+    );
+    expect(chosen).not.toHaveBeenCalled();
   });
 
   it.each(['bypassPermissions', 'danger-full-access', 'agent-full-access', 'yolo'])(

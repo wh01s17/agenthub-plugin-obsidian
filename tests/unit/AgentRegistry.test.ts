@@ -28,7 +28,13 @@ function makeRegistry(found: string[]) {
 describe('AgentRegistry', () => {
   it('only exposes enabled agents', () => {
     const { registry } = makeRegistry([]);
-    expect(registry.enabled().map((a) => a.id)).toEqual(['claude-acp', 'codex-acp', 'opencode']);
+    expect(registry.enabled().map((a) => a.id)).toEqual([
+      'claude-acp',
+      'codex-acp',
+      'opencode',
+      'copilot',
+      'grok',
+    ]);
     expect(registry.get('claude-acp')?.label).toBe('Claude Code');
     expect(registry.get('gemini')).toBeUndefined();
   });

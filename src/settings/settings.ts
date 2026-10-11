@@ -137,6 +137,34 @@ export const AGENT_PRESETS: readonly AgentConfig[] = [
     loginCommand: 'gemini',
     builtin: true,
   },
+  {
+    // ✅ GitHub Copilot CLI 1.0.95 speaks ACP with `--acp` (handshake checked 2026-10-11).
+    id: 'copilot',
+    label: 'GitHub Copilot',
+    enabled: true,
+    transport: 'acp',
+    command: 'copilot',
+    args: ['--acp'],
+    env: {},
+    config: {},
+    installCommand: 'npm i -g @github/copilot',
+    loginCommand: 'copilot login',
+    builtin: true,
+  },
+  {
+    // ✅ Grok CLI 1.0.5 (xAI) speaks ACP with `agent stdio` (handshake checked 2026-10-11).
+    id: 'grok',
+    label: 'Grok',
+    enabled: true,
+    transport: 'acp',
+    command: 'grok',
+    args: ['agent', 'stdio'],
+    env: {},
+    config: {},
+    installCommand: 'npm i -g @xai-official/grok',
+    loginCommand: 'grok login',
+    builtin: true,
+  },
 ];
 
 export const DEFAULT_VAULT_INSTRUCTIONS = [

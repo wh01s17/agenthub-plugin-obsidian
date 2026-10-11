@@ -72,7 +72,7 @@ export function OptionPicker({ option, label, busy, onChange }: OptionPickerProp
   const trigger = useRef<HTMLButtonElement>(null);
   const current = option.options.find((choice) => choice.value === option.currentValue);
   const currentName = current?.name ?? option.currentValue;
-  const dangerous = isDangerousMode(option.currentValue);
+  const dangerous = isDangerousMode(option.currentValue, option.id);
   const level = isLevelOption(option);
   const panelId = `agenthub-option-${option.id}`;
 

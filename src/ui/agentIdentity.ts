@@ -18,6 +18,8 @@ const KNOWN: { match: RegExp; identity: AgentIdentity }[] = [
   { match: /codex/i, identity: { color: 'green', monogram: 'Cx', logo: 'codex' } },
   { match: /gemini/i, identity: { color: 'blue', monogram: 'G', logo: 'gemini' } },
   { match: /opencode/i, identity: { color: 'purple', monogram: 'O', logo: 'opencode' } },
+  { match: /copilot/i, identity: { color: 'cyan', monogram: 'Cp' } },
+  { match: /grok/i, identity: { color: 'red', monogram: 'Gk' } },
 ];
 
 /** Custom agents get a stable color from their id. */

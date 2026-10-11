@@ -5,7 +5,12 @@ const UNRESTRICTED_MODES = new Set([
   'danger-full-access',
   'agent-full-access',
   'yolo',
+  // GitHub Copilot CLI 1.0.95 (`copilot --acp`): runs until done with every tool allowed.
+  'https://agentclientprotocol.com/protocol/session-modes#autopilot',
 ]);
+
+/** Options whose "on" value allows every tool, e.g. Copilot's `allow_all` switch. */
+const UNRESTRICTED_SWITCHES: Record<string, string> = { allow_all: 'on' };
 
 export interface DangerousModeRequest {
   agentId: string;
@@ -19,12 +24,16 @@ export type ConfirmDangerousMode = (
   signal: AbortSignal,
 ) => Promise<boolean>;
 
-export function isDangerousMode(value: string): boolean {
-  return UNRESTRICTED_MODES.has(value);
+/** Whether choosing `value` (for option `optionId`, when known) lifts the permission prompts. */
+export function isDangerousMode(value: string, optionId?: string): boolean {
+  return (
+    UNRESTRICTED_MODES.has(value) ||
+    (optionId !== undefined && UNRESTRICTED_SWITCHES[optionId] === value)
+  );
 }
 
 export function dangerousModeOptions(options: readonly ConfigOption[]): ConfigOption[] {
-  return options.filter((option) => isDangerousMode(option.currentValue));
+  return options.filter((option) => isDangerousMode(option.currentValue, option.id));
 }
 
 /** Explicit settings win; Codex's upstream Auto review default is never our implicit default. */

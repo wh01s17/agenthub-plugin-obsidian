@@ -32,7 +32,7 @@ describe('AgentHubSettingTab', () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
 
     expect(__thenCalls()).toBe(0);
-    expect(detectAgent).toHaveBeenCalledTimes(3); // enabled presets only
+    expect(detectAgent).toHaveBeenCalledTimes(5); // enabled presets only
     expect(tab.containerEl.textContent).toContain('Available: /bin/npx');
     expect(tab.containerEl.textContent).toContain('Disabled'); // Gemini
   });

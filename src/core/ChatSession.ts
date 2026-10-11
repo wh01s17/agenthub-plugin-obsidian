@@ -299,7 +299,7 @@ export class ChatSession {
     if (this.disposed || this.busy || this.configuring) return;
     this.configuring = true;
     try {
-      if (isDangerousMode(value) && !(await this.approveMode(id, value))) return;
+      if (isDangerousMode(value, id) && !(await this.approveMode(id, value))) return;
       if (this.disposed) return;
       if (!this.agent) {
         this.dispatch({
@@ -363,7 +363,7 @@ export class ChatSession {
       };
       const approved = new Map<string, string>();
       for (const [id, value] of Object.entries(options.config)) {
-        if (!isDangerousMode(value)) continue;
+        if (!isDangerousMode(value, id)) continue;
         if (!(await this.approveMode(id, value)))
           throw new AgentError('unsafe-mode', 'Unrestricted mode was not enabled.');
         approved.set(id, value);

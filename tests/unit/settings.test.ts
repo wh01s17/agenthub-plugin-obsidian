@@ -53,6 +53,8 @@ describe('migrate', () => {
       'codex-acp',
       'opencode',
       'gemini',
+      'copilot',
+      'grok',
     ]);
     expect(settings.agents.find((a) => a.id === 'codex-acp')?.enabled).toBe(false);
   });
