@@ -40,12 +40,12 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **Fase 10 en curso** (sin publicar): cola de mensajes mientras el agente trabaja (ADR-036) y presets GitHub Copilot y Grok (ADR-037). Última publicada: 0.5.1. |
-| Próxima tarea | **T10.4**: revisión del usuario en Obsidian (cola y agentes nuevos); antes, el usuario ejecuta `grok login` para cerrar el ⚠️ de ADR-037. Luego release 0.6.0 (MINOR) con confirmación. |
+| Fase actual | **0.6.0 publicada como Latest** (Fase 10: cola de mensajes mientras el agente trabaja, ADR-036; presets GitHub Copilot y Grok, ADR-037). |
+| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.6.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-11 — Fase 10 (T10.1–T10.3): cola de mensajes, Copilot y Grok. Claude (Opus 5.5). |
-| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, 0.5.0). Cola de mensajes y presets Copilot/Grok (Fase 10, sin publicar). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 268 tests pasan, 2 e2e omitidos. Rama `main`. |
+| Última actualización | 2026-10-11 — Release 0.6.0: cola de mensajes, GitHub Copilot y Grok. Claude (Opus 5.5). |
+| Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, 0.5.0). Cola de mensajes y presets Copilot/Grok (Fase 10, 0.6.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 268 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
 
@@ -1863,3 +1863,5 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 
 - **2026-10-11 · usuario + Claude (Opus 5.5)** — **Fase 10 (T10.1–T10.3).** Cola de mensajes (ADR-036): mientras el agente trabaja, Enter o *Añadir a la cola* encola; al terminar el turno se envía el siguiente; *Enviar ahora* detiene el turno y lo envía; *Editar*/*Quitar*; Detener o un fallo pausan la cola. Verificado que el SDK ACP 1.6.0 no tiene *steering*. Presets GitHub Copilot (`copilot --acp`, Copilot CLI 1.0.95) y Grok (`grok agent stdio`, Grok 1.0.5) con handshake ACP verificado sin enviar prompts; Copilot expone modos con URL, `allow_all` y un selector de agente; Grok no acepta imágenes y exige iniciar sesión (⚠️ ADR-037). Autopilot y `allow_all: on` piden confirmación. 268 tests, lint y build correctos. Falta T10.4 (revisión manual) y `grok login` del usuario. Sin commits ni publicación.
 - **2026-10-11 · usuario + Claude (Opus 5.5)** — Aclaración del usuario: pidió **Microsoft Copilot**, no GitHub Copilot (se mantiene el preset de GitHub). Búsqueda: Microsoft Copilot no tiene CLI ni agente ACP local (el *Intelligent Terminal* de Windows usa ACP como cliente, con GitHub Copilot por defecto). Sin cambios de código; anotado en ADR-037. El usuario lo descarta.
+
+- **2026-10-11 · usuario + Claude (Opus 5.5)** — **Release 0.6.0 publicada como Latest** con confirmación del usuario («ya está testeado, todo ok, latest»): https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.6.0. Commits por tarea (T10.1–T10.3, cada uno compila y pasa sus tests), `chore(release): 0.6.0 [T10.4]`, tag anotado y push conjunto de `main` y del tag. Workflows Release y CI en verde; SHA-256 de `main.js`, `manifest.json` y `styles.css` del borrador iguales al build local; `gh attestation verify main.js` correcto (firmado por `release.yml` en `refs/tags/0.6.0`). Notas de la release tomadas del CHANGELOG. Pendiente: **Check for new releases** en community.obsidian.md (lo hace el usuario).
