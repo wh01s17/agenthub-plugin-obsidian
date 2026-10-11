@@ -94,6 +94,52 @@ describe('chat view', () => {
     await waitFor(() => expect(screen.getByText('Stopped.')).toBeTruthy());
     expect(screen.getByRole('button', { name: 'Send' })).toBeTruthy();
   });
+
+  it('queues messages written while the agent works, and edits or sends them now (ADR-036)', async () => {
+    const finishers: (() => void)[] = [];
+    const { session } = renderChat(
+      ({ cancelled }) =>
+        new Promise((resolve) => {
+          const timer = setInterval(() => {
+            if (cancelled()) {
+              clearInterval(timer);
+              resolve('cancelled');
+            }
+          }, 5);
+          finishers.push(() => {
+            clearInterval(timer);
+            resolve('end_turn');
+          });
+        }),
+    );
+    fireEvent.input(input(), { target: { value: 'uno' } });
+    fireEvent.keyDown(input(), { key: 'Enter' });
+    await screen.findByRole('button', { name: 'Stop' });
+
+    fireEvent.input(input(), { target: { value: 'dos' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Add to queue' }));
+    fireEvent.input(input(), { target: { value: 'tres' } });
+    fireEvent.keyDown(input(), { key: 'Enter' });
+    const queue = await screen.findByRole('region', { name: 'Queued messages' });
+    expect(queue.textContent).toContain('dos');
+    expect(queue.textContent).toContain('tres');
+    expect(screen.queryByRole('button', { name: 'Add to queue' })).toBeNull();
+
+    // Edit brings the text back into the box and out of the queue.
+    fireEvent.click(screen.getByRole('button', { name: 'Edit message 1' }));
+    expect((input() as HTMLTextAreaElement).value).toBe('dos');
+    expect(session?.getState().queue).toHaveLength(1);
+
+    // Send now stops the running turn and sends it straight away.
+    fireEvent.click(screen.getByRole('button', { name: /Send message 1 now/ }));
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: 'Queued messages' })).toBeNull(),
+    );
+    expect(screen.getByText('tres')).toBeTruthy();
+    await waitFor(() => expect(finishers).toHaveLength(2));
+    finishers[1]?.();
+    await waitFor(() => expect(screen.getByRole('status').textContent).toBe('Ready'));
+  });
 });
 
 describe('ToolCallCard', () => {

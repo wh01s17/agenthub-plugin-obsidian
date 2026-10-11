@@ -195,6 +195,10 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         commands={state.commands}
         onSend={onSend}
         onStop={() => void session.cancel()}
+        queue={state.queue}
+        queuePaused={state.queuePaused}
+        onSendNow={(id) => void session.sendNow(id)}
+        onUnqueue={(id) => session.unqueue(id)}
         options={
           optionsInComposer ? (
             <ConfigOptions

@@ -1713,3 +1713,78 @@
     outline-color: Highlight;
   }
 }
+
+/* ── Queued messages (ADR-036) ──────────────────────────────────────────── */
+
+.agenthub-queue {
+  padding: var(--size-4-2) var(--size-4-3) 0;
+}
+
+.agenthub-queue-title {
+  margin: 0 0 var(--size-4-1);
+  color: var(--text-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-queue.is-paused .agenthub-queue-title {
+  color: var(--text-warning);
+}
+
+.agenthub-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2-1);
+  max-height: 8rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.agenthub-queue-item {
+  display: flex;
+  align-items: center;
+  gap: var(--size-4-1);
+  min-width: 0;
+  padding: var(--size-2-1) var(--size-4-1) var(--size-2-1) var(--size-4-2);
+  border-radius: var(--radius-m);
+  background: var(--agenthub-muted);
+  font-size: var(--font-ui-smaller);
+}
+
+.agenthub-queue-marker,
+.agenthub-queue-images {
+  flex-shrink: 0;
+  color: var(--text-faint);
+}
+
+.agenthub-queue-images {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2-1);
+}
+
+.agenthub-queue-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agenthub-app .agenthub-queue-item .clickable-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+.agenthub-queue-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* "Add to queue" sits next to Stop: only the first button pushes to the right. */
+.agenthub-app .agenthub-composer-button + .agenthub-composer-button {
+  margin-left: 0;
+}

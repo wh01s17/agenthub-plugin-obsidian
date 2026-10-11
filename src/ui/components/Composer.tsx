@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { imageDataUrl, MAX_IMAGES_PER_MESSAGE, type ImageBlock } from '../../core/images';
 import type { PromptHistory } from '../../core/PromptHistory';
 import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
-import type { SlashCommand } from '../../core/types';
+import type { PromptBlock, QueuedMessage, SlashCommand } from '../../core/types';
 import { t } from '../../i18n';
 import { draggingFiles, pastedImages, readImage, type ImageResult } from '../imageFiles';
 import { Icon } from './Icon';
+import { QueuedMessages, typedText } from './QueuedMessages';
 
 interface ComposerProps {
   agentLabel: string;
@@ -23,6 +24,12 @@ interface ComposerProps {
   /** The message text (trimmed, may be empty if images go along) and the attached images. */
   onSend: (text: string, images: ImageBlock[]) => void;
   onStop: () => void;
+  /** Messages waiting for the turn to end (ADR-036). */
+  queue?: readonly QueuedMessage[];
+  queuePaused?: boolean;
+  onSendNow?: (id: string) => void;
+  /** Takes a message out of the queue; returns its blocks (to edit it) if it was there. */
+  onUnqueue?: (id: string) => PromptBlock[] | undefined;
   /** Shown at the top of the message box (context chips: what travels with the message). */
   children?: ComponentChildren;
   /** The agent's options, when they live in the composer (ADR-032). */
@@ -164,13 +171,29 @@ export function Composer(props: ComposerProps) {
   const send = () => {
     const message = text.trim();
     const attached = imagesRef.current.map((image) => image.block);
-    if ((!message && attached.length === 0) || busy || disabled) return;
+    if ((!message && attached.length === 0) || disabled) return;
     if (message) props.history?.add(message);
     recall.current = null;
     onSend(message, attached);
     setText('');
     setImages([]);
     setSuggestions(null);
+    ref.current?.focus();
+  };
+
+  /** Brings a queued message back into the box, ahead of whatever is being written. */
+  const editQueued = (id: string) => {
+    const blocks = props.onUnqueue?.(id);
+    if (!blocks) return;
+    const queued = typedText(blocks);
+    const draft = text.trim();
+    const value = queued && draft ? `${queued}\n\n${draft}` : queued || draft;
+    recall.current = null;
+    showRecalled(value);
+    const restored = blocks.flatMap((block) =>
+      block.type === 'image' ? [{ key: ++imageKey.current, block }] : [],
+    );
+    setImages([...restored, ...imagesRef.current].slice(0, MAX_IMAGES_PER_MESSAGE));
     ref.current?.focus();
   };
 
@@ -212,6 +235,7 @@ export function Composer(props: ComposerProps) {
   }, [activeId]);
 
   const hasContext = Boolean(props.children) || images.length > 0;
+  const hasDraft = text.trim().length > 0 || images.length > 0;
 
   return (
     <div
@@ -260,6 +284,16 @@ export function Composer(props: ComposerProps) {
           ))}
         </ul>
       )}
+      <QueuedMessages
+        queue={props.queue ?? []}
+        paused={props.queuePaused ?? false}
+        onSendNow={(id) => props.onSendNow?.(id)}
+        onEdit={editQueued}
+        onRemove={(id) => {
+          props.onUnqueue?.(id);
+          ref.current?.focus();
+        }}
+      />
       {hasContext && (
         <div class="agenthub-composer-context">
           {props.children}
@@ -296,7 +330,9 @@ export function Composer(props: ComposerProps) {
         aria-controls={suggestions ? LISTBOX_ID : undefined}
         aria-activedescendant={activeId}
         aria-label={t('composerLabel')}
-        placeholder={t('composerPlaceholder', { agent: agentLabel })}
+        placeholder={t(busy ? 'composerPlaceholderBusy' : 'composerPlaceholder', {
+          agent: agentLabel,
+        })}
         onInput={(event) => {
           const el = event.currentTarget;
           // Editing a recalled prompt makes it the new draft.
@@ -339,7 +375,19 @@ export function Composer(props: ComposerProps) {
         </button>
         {props.options}
         {/* Round icon buttons, like the agents' own apps; the name comes from `aria-label`/`title`. */}
-        {busy ? (
+        {(!busy || hasDraft) && (
+          <button
+            type="button"
+            class="agenthub-composer-button mod-cta"
+            onClick={send}
+            disabled={disabled || !hasDraft}
+            aria-label={t(busy ? 'queueAdd' : 'send')}
+            title={t(busy ? 'queueAdd' : 'send')}
+          >
+            <Icon name={busy ? 'list-plus' : 'arrow-up'} />
+          </button>
+        )}
+        {busy && (
           <button
             type="button"
             class="agenthub-composer-button is-stop"
@@ -348,17 +396,6 @@ export function Composer(props: ComposerProps) {
             title={t('stop')}
           >
             <Icon name="square" />
-          </button>
-        ) : (
-          <button
-            type="button"
-            class="agenthub-composer-button mod-cta"
-            onClick={send}
-            disabled={disabled || (!text.trim() && images.length === 0)}
-            aria-label={t('send')}
-            title={t('send')}
-          >
-            <Icon name="arrow-up" />
           </button>
         )}
       </div>
