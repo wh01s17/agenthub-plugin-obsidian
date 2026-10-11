@@ -174,6 +174,12 @@ export type SessionStatus =
   | 'error'
   | 'closed';
 
+/** A message written while the agent was working, sent when the turn ends (ADR-036). */
+export interface QueuedMessage {
+  id: string;
+  blocks: PromptBlock[];
+}
+
 /** Immutable snapshot rendered by the UI; the reducer returns a new object on every change. */
 export interface SessionViewState {
   /** AgentHub's own id for the session. */
@@ -192,4 +198,8 @@ export interface SessionViewState {
   readonly currentModelId?: string;
   readonly commands: readonly SlashCommand[];
   readonly usage?: Usage;
+  /** Messages waiting for the current turn to end, oldest first. */
+  readonly queue: readonly QueuedMessage[];
+  /** The queue stopped after a stopped or failed turn; the next send resumes it. */
+  readonly queuePaused: boolean;
 }

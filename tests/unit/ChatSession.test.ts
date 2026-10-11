@@ -51,25 +51,126 @@ describe('ChatSession', () => {
     expect(session.getState().title).toBe('Carpetas');
   });
 
-  it('reuses the agent across turns and ignores sends while busy', async () => {
+  it('reuses the agent across turns and queues sends while busy (ADR-036)', async () => {
     let release!: () => void;
     const { adapter, session } = makeSession(
       () => new Promise((resolve) => (release = () => resolve('end_turn'))),
     );
     const first = session.send([{ type: 'text', text: 'uno' }]);
     await vi.waitFor(() => expect(session.getState().status).toBe('running'));
-    await session.send([{ type: 'text', text: 'ignorado' }]);
+    await session.send([{ type: 'text', text: 'dos' }]);
+    expect(session.getState().queue.map((m) => m.blocks[0])).toEqual([
+      { type: 'text', text: 'dos' },
+    ]);
+    release();
+    // The queued message goes out on its own once the first turn ends.
+    await vi.waitFor(() => expect(adapter.sessions[0]?.prompts).toHaveLength(2));
+    expect(session.getState().queue).toEqual([]);
     release();
     await first;
-    const second = session.send([{ type: 'text', text: 'dos' }]);
-    await vi.waitFor(() => expect(session.getState().status).toBe('running'));
-    release();
-    await second;
     expect(adapter.sessions).toHaveLength(1);
     expect(adapter.sessions[0]?.prompts.map((p) => p[0])).toEqual([
       { type: 'text', text: 'uno' },
       { type: 'text', text: 'dos' },
     ]);
+    expect(session.getState().items.filter((i) => i.kind === 'user')).toHaveLength(2);
+    expect(session.getState().status).toBe('idle');
+  });
+
+  describe('queue (ADR-036)', () => {
+    /** Each turn waits until `finish` (end_turn) or a cancel (cancelled). */
+    function controlled() {
+      let finish!: () => void;
+      const made = makeSession(
+        ({ cancelled }) =>
+          new Promise((resolve) => {
+            finish = () => resolve('end_turn');
+            const timer = setInterval(() => {
+              if (cancelled()) {
+                clearInterval(timer);
+                resolve('cancelled');
+              }
+            }, 1);
+            const done = finish;
+            finish = () => {
+              clearInterval(timer);
+              done();
+            };
+          }),
+      );
+      const texts = () =>
+        made.adapter.sessions[0]?.prompts.map((p) => (p[0]?.type === 'text' ? p[0].text : '')) ??
+        [];
+      return { ...made, finish: () => finish(), texts };
+    }
+
+    it('pauses the queue when the user stops the turn and resumes it on the next send', async () => {
+      const { session, texts, finish } = controlled();
+      const turn = session.send([{ type: 'text', text: 'uno' }]);
+      await vi.waitFor(() => expect(session.getState().status).toBe('running'));
+      void session.send([{ type: 'text', text: 'dos' }]);
+      await session.cancel();
+      await turn;
+      expect(texts()).toEqual(['uno']);
+      expect(session.getState().queuePaused).toBe(true);
+      expect(session.getState().status).toBe('idle');
+
+      // Writing again keeps the order: the older message goes first.
+      void session.send([{ type: 'text', text: 'tres' }]);
+      await vi.waitFor(() => expect(texts()).toEqual(['uno', 'dos']));
+      expect(session.getState().queuePaused).toBe(false);
+      finish();
+      await vi.waitFor(() => expect(texts()).toEqual(['uno', 'dos', 'tres']));
+      finish();
+      await vi.waitFor(() => expect(session.getState().status).toBe('idle'));
+    });
+
+    it('sends a queued message now by stopping the current turn', async () => {
+      const { session, texts, finish } = controlled();
+      void session.send([{ type: 'text', text: 'uno' }]);
+      await vi.waitFor(() => expect(session.getState().status).toBe('running'));
+      void session.send([{ type: 'text', text: 'dos' }]);
+      void session.send([{ type: 'text', text: 'tres' }]);
+      const urgent = session.getState().queue[1]?.id ?? '';
+
+      await session.sendNow(urgent);
+      await vi.waitFor(() => expect(texts()).toEqual(['uno', 'tres']));
+      expect(session.getState().queuePaused).toBe(false);
+      finish();
+      await vi.waitFor(() => expect(texts()).toEqual(['uno', 'tres', 'dos']));
+      finish();
+      await vi.waitFor(() => expect(session.getState().status).toBe('idle'));
+      expect(session.getState().queue).toEqual([]);
+    });
+
+    it('takes a message out of the queue without sending it', async () => {
+      const { session, texts, finish } = controlled();
+      void session.send([{ type: 'text', text: 'uno' }]);
+      await vi.waitFor(() => expect(session.getState().status).toBe('running'));
+      void session.send([{ type: 'text', text: 'dos' }]);
+      const id = session.getState().queue[0]?.id ?? '';
+      expect(session.unqueue(id)).toEqual([{ type: 'text', text: 'dos' }]);
+      expect(session.unqueue(id)).toBeUndefined();
+      finish();
+      await vi.waitFor(() => expect(session.getState().status).toBe('idle'));
+      expect(texts()).toEqual(['uno']);
+    });
+
+    it('pauses the queue after a failed turn', async () => {
+      let calls = 0;
+      let finish!: () => void;
+      const { adapter, session } = makeSession(() => {
+        calls++;
+        if (calls === 1) return new Promise((resolve) => (finish = () => resolve('error')));
+        return 'end_turn';
+      });
+      void session.send([{ type: 'text', text: 'uno' }]);
+      await vi.waitFor(() => expect(session.getState().status).toBe('running'));
+      void session.send([{ type: 'text', text: 'dos' }]);
+      finish();
+      await vi.waitFor(() => expect(session.getState().queuePaused).toBe(true));
+      expect(adapter.sessions[0]?.prompts).toHaveLength(1);
+    });
   });
 
   it('routes permission requests through the view state', async () => {

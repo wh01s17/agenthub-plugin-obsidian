@@ -16,7 +16,35 @@ describe('reduce', () => {
       items: [],
       configOptions: [],
       commands: [],
+      queue: [],
+      queuePaused: false,
     });
+  });
+
+  it('keeps queued messages in order, moves one to the front and unpauses an empty queue', () => {
+    const message = (id: string) => ({ id, blocks: [{ type: 'text' as const, text: id }] });
+    const queued = run(
+      { type: 'local.queue.add', message: message('a') },
+      { type: 'local.queue.add', message: message('b') },
+      { type: 'local.queue.front', id: 'b' },
+      { type: 'local.queue.pause', paused: true },
+    );
+    expect(queued.queue.map((m) => m.id)).toEqual(['b', 'a']);
+    expect(queued.queuePaused).toBe(true);
+    expect(reduce(queued, { type: 'local.queue.front', id: 'b' })).toBe(queued);
+    expect(reduce(queued, { type: 'local.queue.remove', id: 'zz' })).toBe(queued);
+    const emptied = run(
+      { type: 'local.queue.remove', id: 'a' },
+      { type: 'local.queue.remove', id: 'b' },
+    );
+    expect(emptied.queuePaused).toBe(false);
+    const drained = [
+      { type: 'local.queue.remove', id: 'a' } as const,
+      { type: 'local.queue.remove', id: 'b' } as const,
+    ].reduce(reduce, queued);
+    expect(drained).toMatchObject({ queue: [], queuePaused: false });
+    // Nothing to pause in an empty queue.
+    expect(run({ type: 'local.queue.pause', paused: true }).queuePaused).toBe(false);
   });
 
   it('never mutates the previous state', () => {

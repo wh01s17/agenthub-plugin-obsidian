@@ -9,6 +9,7 @@ import type {
   PermissionOutcome,
   PermissionRequest,
   PromptBlock,
+  QueuedMessage,
   SessionStatus,
   SessionViewState,
   ToolCall,
@@ -23,7 +24,12 @@ export type LocalAction =
   | { type: 'local.permission.request'; request: PermissionRequest }
   | { type: 'local.permission.resolve'; id: string; outcome: PermissionOutcome }
   | { type: 'local.notice'; level: 'info' | 'warning' | 'error'; notice: Notice }
-  | { type: 'local.title'; title: string };
+  | { type: 'local.title'; title: string }
+  | { type: 'local.queue.add'; message: QueuedMessage }
+  /** Removes a queued message (sent, edited or dropped). */
+  | { type: 'local.queue.remove'; id: string }
+  | { type: 'local.queue.front'; id: string }
+  | { type: 'local.queue.pause'; paused: boolean };
 
 export type SessionAction = AgentEvent | LocalAction;
 
@@ -58,6 +64,8 @@ export function createInitialState({
     items,
     configOptions,
     commands: [],
+    queue: [],
+    queuePaused: false,
   };
 }
 
@@ -168,6 +176,23 @@ export function reduce(state: SessionViewState, action: SessionAction): SessionV
       return pushNotice(state, action.level, action.notice);
     case 'local.title':
       return { ...state, title: action.title };
+    case 'local.queue.add':
+      return { ...state, queue: [...state.queue, action.message] };
+    case 'local.queue.remove': {
+      const queue = state.queue.filter((message) => message.id !== action.id);
+      if (queue.length === state.queue.length) return state;
+      // An empty queue has nothing to hold back.
+      return { ...state, queue, queuePaused: queue.length > 0 && state.queuePaused };
+    }
+    case 'local.queue.front': {
+      const message = state.queue.find((queued) => queued.id === action.id);
+      if (!message || state.queue[0] === message) return state;
+      return { ...state, queue: [message, ...state.queue.filter((queued) => queued !== message)] };
+    }
+    case 'local.queue.pause': {
+      const paused = action.paused && state.queue.length > 0;
+      return paused === state.queuePaused ? state : { ...state, queuePaused: paused };
+    }
   }
 }
 

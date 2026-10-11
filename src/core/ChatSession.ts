@@ -68,6 +68,11 @@ export class ChatSession {
   private modeConfirmation: AbortController | null = null;
   private turnWait: AbortController | null = null;
   private configuring = false;
+  /** A turn (and the queued messages after it) is being sent. */
+  private driving = false;
+  /** Set by `sendNow`: the turn it stops does not pause the queue. */
+  private skipPause = false;
+  private queueCounter = 0;
 
   constructor(private readonly init: ChatSessionInit) {
     this.lastActivityAt = this.now();
@@ -113,29 +118,93 @@ export class ChatSession {
     );
   }
 
-  /** Sends one user message. Starts the agent on first use. Ignored while a turn is running. */
+  /**
+   * Sends one user message, starting the agent on first use. While a turn is running (or the
+   * queue is paused) the message waits in the queue and goes out when the turn ends (ADR-036).
+   */
   async send(blocks: PromptBlock[]): Promise<void> {
-    if (this.disposed || this.busy || blocks.length === 0) return;
+    if (this.disposed || blocks.length === 0) return;
+    if (this.driving || this.busy || this.state.queue.length > 0) {
+      const message = { id: `queued-${++this.queueCounter}`, blocks };
+      this.dispatch({ type: 'local.queue.add', message });
+      // Writing again resumes a queue paused by a stopped turn.
+      this.dispatch({ type: 'local.queue.pause', paused: false });
+      await this.drain();
+      return;
+    }
+    await this.drive(blocks);
+  }
+
+  /** Sends a queued message right away, stopping the turn in progress (ADR-036). */
+  async sendNow(id: string): Promise<void> {
+    if (this.disposed || !this.state.queue.some((message) => message.id === id)) return;
+    this.dispatch({ type: 'local.queue.front', id });
+    this.dispatch({ type: 'local.queue.pause', paused: false });
+    if (!this.driving) return this.drain();
+    // The turn stopped here is not the user giving up: the queue carries on with this message.
+    this.skipPause = true;
+    await this.cancel();
+  }
+
+  /** Takes a message out of the queue, to edit or drop it. Returns what it would have sent. */
+  unqueue(id: string): PromptBlock[] | undefined {
+    const message = this.state.queue.find((queued) => queued.id === id);
+    if (message) this.dispatch({ type: 'local.queue.remove', id });
+    return message?.blocks;
+  }
+
+  /** Sends the oldest queued message when nothing else is going on. */
+  private async drain(): Promise<void> {
+    if (this.disposed || this.driving || this.busy || this.state.queuePaused) return;
+    const next = this.state.queue[0];
+    if (!next) return;
+    this.dispatch({ type: 'local.queue.remove', id: next.id });
+    await this.drive(next.blocks);
+  }
+
+  /** Runs turns until the queue is empty. A turn stopped by the user or failed pauses the queue. */
+  private async drive(first: PromptBlock[]): Promise<void> {
+    this.driving = true;
+    try {
+      let blocks: PromptBlock[] | undefined = first;
+      while (blocks && !this.disposed) {
+        const completed = await this.runTurn(blocks);
+        if (!completed && !this.skipPause)
+          this.dispatch({ type: 'local.queue.pause', paused: true });
+        this.skipPause = false;
+        const next = this.state.queuePaused ? undefined : this.state.queue[0];
+        if (next) this.dispatch({ type: 'local.queue.remove', id: next.id });
+        blocks = next?.blocks;
+      }
+    } finally {
+      this.driving = false;
+    }
+  }
+
+  /** One turn; `true` if the agent finished it (not stopped, not failed). */
+  private async runTurn(blocks: PromptBlock[]): Promise<boolean> {
     const now = this.init.now?.() ?? Date.now();
     this.touch();
     this.dispatch({ type: 'local.user', id: `user-${++this.turnCounter}`, blocks, at: now });
     if (!this.state.title) this.dispatch({ type: 'local.title', title: titleFrom(blocks) });
 
     const agent = await this.ensureAgent();
-    if (!agent) return;
+    if (!agent) return false;
     const prompt = this.supportedBlocks(blocks, agent);
     if (prompt.length === 0) {
       this.dispatch({ type: 'local.status', status: 'idle' });
-      return;
+      return true;
     }
     const release = this.init.turns ? await this.waitForTurn(this.init.turns) : undefined;
-    if (release === null) return;
+    if (release === null) return false;
     this.dispatch({ type: 'local.status', status: 'running' });
     try {
-      await agent.prompt(prompt);
+      const stopReason = await agent.prompt(prompt);
+      return stopReason !== 'cancelled' && stopReason !== 'error';
     } catch (error) {
       this.reportError(error);
       this.dispatch({ type: 'turn.end', stopReason: 'error' });
+      return false;
     } finally {
       release?.();
     }
@@ -203,6 +272,8 @@ export class ChatSession {
   /** Starts the agent ahead of the first message so its options can be set first. */
   async prepare(): Promise<void> {
     if (!this.disposed && !this.agent) await this.ensureAgent();
+    // Messages written while an unrestricted mode was being confirmed waited for this.
+    await this.drain();
   }
 
   async cancel(): Promise<void> {
@@ -253,6 +324,8 @@ export class ChatSession {
     } finally {
       this.configuring = false;
       if (!this.disposed) this.dispatch({ type: 'local.status', status: this.state.status });
+      // Messages written while the option was changing waited for it.
+      void this.drain();
     }
   }
 
