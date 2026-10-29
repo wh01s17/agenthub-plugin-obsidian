@@ -18,6 +18,7 @@ export default defineConfig([
             'scripts/spikes/*.mjs',
             'tests/helpers/*.mjs',
           ],
+          maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 16,
         },
       },
     },
