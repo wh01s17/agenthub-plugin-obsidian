@@ -40,11 +40,11 @@
 
 | Campo | Valor |
 |---|---|
-| Fase actual | **0.6.0 publicada como Latest** (Fase 10: cola de mensajes mientras el agente trabaja, ADR-036; presets GitHub Copilot y Grok, ADR-037). |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.6.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
+| Fase actual | **Fase 11** (comandos `/` y menciones `@` como en las CLI, 0.7.0). T11.1–T11.4 hechas. 0.6.0 publicada como Latest. |
+| Próxima tarea | **T11.5:** revisión del usuario en Obsidian (`pnpm build && pnpm link-vault`) y release 0.7.0 con su confirmación. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-11 — Release 0.6.0: cola de mensajes, GitHub Copilot y Grok. Claude (Opus 5.5). |
+| Última actualización | 2026-10-28 — Fase 11: T11.1–T11.4 (comandos del cliente, sugeridor con `$` y grupos, `@` con archivos/carpetas/imágenes). Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, 0.5.0). Cola de mensajes y presets Copilot/Grok (Fase 10, 0.6.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 268 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -767,7 +767,8 @@ esfuerzo, interruptor directo para opciones de dos estados y modo sin restriccio
   formateado o comando), salida truncada con "mostrar más"; rutas clicables si están dentro del vault.
 - **Pensamiento (thinking):** colapsado por defecto (ajuste `showThoughts`).
 - **Compositor:** `Enter` envía / `Shift+Enter` nueva línea (o `Mod+Enter` según ajuste);
-  `@` abre sugeridor de archivos (fuzzy), `/` abre slash commands; historial de prompts con `↑`.
+  `@` abre sugeridor de archivos y carpetas (fuzzy), `/` abre comandos (los de AgentHub primero, ADR-038), `$` skills
+  de Codex; historial de prompts con `↑`.
 - **Lista de mensajes:** auto-scroll solo si el usuario está al final. Las sesiones largas muestran solo el final y un
   botón «Show earlier» (T6.4); no hubo que virtualizar.
 - **Sin `innerHTML`**: usar JSX/`createEl`; todo texto de agentes se trata como no confiable.
@@ -1389,6 +1390,46 @@ Codex» y «soporte para Microsoft Copilot y Grok». Decisiones en ADR-036 y ADR
   Enviar ahora, Editar; conversación con Copilot y con Grok (Grok exige `grok login`). Aprobada por el usuario el
   2026-10-11 («ya está testeado, todo ok»). Publicada en 0.6.0.
 
+### Fase 11 — Comandos `/` y menciones `@` como en las CLI (0.7.0)
+
+Origen: pedido del usuario (2026-10-28): «¿se pueden agregar las opciones de `/`, `@`, etc. de Codex, Claude Code…
+al plugin?». Ya existen `/` (T3.4, comandos de `available_commands_update`, solo al inicio, 8 resultados) y `@` (T3.3,
+solo notas Markdown: `listNotes()` usa `getMarkdownFiles()`, no incluye carpetas pese a lo que dice T3.3). Decisiones
+en ADR-038 (propuesta).
+
+- [x] **T11.1** Verificar qué comandos anuncia cada adaptador ACP. ✅ 2026-10-28 con `scripts/spikes/acp-commands.mjs`
+  (`initialize` + `session/new`, sin prompt, espera 15 s):
+
+  | Agente | Comandos | Propios de la CLI (no skills) | Observaciones |
+  |---|---|---|---|
+  | Claude (`claude-agent-acp@0.85.0`) | 328 | `compact`, `init`, `context`, `usage`, `model`, `mcp`, `rename`, `agents`, `code-review`, `simplify`, `loop`, `doctor`, `debug`… | Casi todo son skills y comandos de plugins (`vercel:deploy`), con la descripción prefijada `(plugin)`. |
+  | Codex (`codex-acp@2.1.1`) | 235 | `plan`, `mcp`, `skills`, `status`, `review`, `review-branch`, `review-commit`, `compact`, `goal`, `rename`, `logout` | Las skills llegan **con el nombre `$skill`** (`$anatomy`, `$plugin:skill`) en la misma lista; hoy el sugeridor insertaría `/$skill`. |
+  | OpenCode 1.18 | 5 | `init`, `review`, `compact` | Más dos prompts de un MCP. |
+  | GitHub Copilot CLI | 97 | `compact`, `init`, `review`, `context`, `usage`, `model`, `memory`, `permissions`, `mcp`, `rename`, `plan`, `add-dir`, `session`, `autopilot`, `allow-all`… | Las skills llevan la pista `<instructions for the skill>`. `allow-all` y `autopilot` cambian permisos (ADR-037). |
+  | Grok 1.0.5 | — | — | No verificable: `session/new` → *Authentication required* y el usuario no tiene cuenta de Grok (2026-10-28). No bloquea la fase. |
+
+  Ninguno anuncia `clear`/`new`, `resume`, `export` ni `help`. Chocan con posibles comandos del cliente: `model`
+  (Claude, Copilot), `status` (Codex), `rename` (todos salvo OpenCode), `context`/`usage` (Claude, Copilot).
+- [x] **T11.2** Comandos del cliente (ADR-038): `src/core/clientCommands.ts` (lista, filtrado por choques, parseo,
+  `matchOptionValue`). `/new` y `/clear` → nueva sesión; `/resume` → historial (si está activo); `/export`; `/help`
+  muestra la lista `/` en el cuadro; `/model` y `/mode` abren la pastilla (o enfocan el selector con
+  `optionsPlacement: 'header'`) y con argumento fijan el valor (`/model opus`; sin coincidencia única, `Notice`). Los
+  intercepta `Composer` al enviar (sin imágenes adjuntas) y los ejecuta `App`; un nombre que el agente anuncia va al
+  agente. Fijar un modo peligroso pasa por la confirmación de siempre (`setConfigOption`). *CA:*
+  `clientCommands.test.ts`, `ClientCommands.test.tsx`.
+- [x] **T11.3** Sugeridor: hasta 50 entradas con scroll, primero las de AgentHub (etiqueta *AgentHub* y línea antes de
+  las del agente), `inputHint` junto al nombre; `$` dispara el sugeridor (tras espacio o al inicio) con las entradas
+  `$…` del agente, que dejan de aparecer en `/`, y se insertan como `$skill`. Claude no distingue por ACP sus skills
+  de sus comandos (llegan todos como comandos), así que no hay grupo *Skills* aparte. *CA:* `suggest.test.ts`,
+  `ClientCommands.test.tsx`.
+- [x] **T11.4** `@` lista todos los archivos (`getFiles()`) y carpetas (`getAllFolders()`, desde 1.6.6, con `/` final).
+  Solo las notas `.md` se embeben con su texto; otros archivos y carpetas van como `resource_link`. Las imágenes
+  mencionadas (PNG/JPEG/GIF/WebP ≤ `MAX_IMAGE_BYTES`, sin redimensionar) van como bloque `image` mientras quepan en
+  `MAX_IMAGES_PER_MESSAGE`; si no, como enlace. *CA:* `ClientCommands.test.tsx`, `suggest.test.ts`. Corrige lo que
+  T3.3 prometía («carpetas incluidas»).
+- [ ] **T11.5** Revisión del usuario en Obsidian con Claude, Codex y Copilot (Grok no verificable); release 0.7.0 con su
+  confirmación. README y CHANGELOG (*Unreleased*) ya actualizados.
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1437,6 +1478,7 @@ Codex» y «soporte para Microsoft Copilot y Grok». Decisiones en ADR-036 y ADR
 | ADR-035 | Imágenes en el prompt como bloques `image` de ACP (base64 + `mimeType`), sin escribir archivos en el vault. Se adjuntan al pegar, arrastrar o con un botón; los límites viven en el núcleo (`src/core/images.ts`) y la lectura/redimensionado en la UI (`src/ui/imageFiles.ts`, canvas solo si hace falta). Se guardan en el JSONL del historial como el resto del mensaje (los límites acotan el tamaño) y la exportación a nota las lista sin incrustarlas. Si el agente no anuncia `promptCapabilities.image`, `ChatSession` las quita y lo dice en la conversación en vez de descartarlas en silencio. Un pegado que trae texto plano se trata como texto. | RF-26: pedir sobre capturas sin guardarlas a mano en el vault. Los cuatro agentes incluidos anuncian `image: true` en sus fixtures ACP. | Guardar las imágenes como adjuntos del vault y mandar `resource_link` (ensucia el vault, no todos los agentes leen imágenes por ruta); no guardarlas en el historial (al reabrir se perdería qué se preguntó); redimensionar siempre (pierde detalle que el modelo puede usar). | Aceptada |
 | ADR-036 | Mensajes escritos durante un turno van a una **cola por sesión en el núcleo** (`ChatSession`), uno por turno al terminar el anterior; *Enviar ahora* = detener el turno (`session/cancel`) y enviar ese mensaje; un turno detenido por el usuario o fallido **pausa** la cola y el siguiente envío la reanuda en orden. Los bloques se construyen con el contexto del momento en que se escribió. La cola no se guarda en el historial. | ACP (SDK 1.6.0) no permite inyectar mensajes en un `session/prompt` en curso ✅ (sin método de *steering*), así que la cola es la forma fiel de «seguir escribiendo» como Claude Code/Codex; en el núcleo sirve a todas las vistas y respeta el límite de turnos (ADR-034). | Ignorar envíos mientras trabaja (comportamiento anterior); unir todos los encolados en un solo prompt (transcript menos fiel); vaciar la cola al detener (pierde texto) o enviarla al detener (el usuario quería parar). | Aceptada |
 | ADR-037 | GitHub Copilot y Grok como presets ACP: `copilot --acp` y `grok agent stdio`, activados en instalaciones nuevas y desactivados al migrar (como todo preset nuevo). Monograma en vez de logo. `isDangerousMode(value, optionId?)` cubre el modo `…#autopilot` y los interruptores `allow_all: on`. Grok responde `session/new` con *Authentication required* sin sesión iniciada: hay que ejecutar `grok login` antes (el usuario lo probó en Obsidian el 2026-10-11 y funciona). | Pedido del usuario; ambos hablan ACP por stdio ✅, así que no requieren código de adaptador (objetivo 1.3.2). Autopilot y allow-all eliminan las preguntas de permiso (ADR-030). | Adaptadores directos (Fase 5, innecesario); marcar `on` como peligroso para cualquier opción (rompería interruptores inocuos como *Fast*). **Microsoft Copilot** (el asistente de Microsoft/Microsoft 365, que es lo que pidió el usuario) queda fuera: a 2026-10-11 no tiene CLI ni agente local por ACP, solo web/apps y APIs en la nube, y llamarlas exigiría claves y red propias del plugin (no-objetivo §1.4). **Descartado por decisión del usuario (2026-10-11).** | Aceptada |
+| ADR-038 | Comandos y menciones del compositor (Fase 11): (1) **comandos del cliente** `/new` (`/clear`), `/resume`, `/export`, `/help`, `/model`, `/mode` que AgentHub ejecuta sin enviarlos; **si el agente anuncia el mismo nombre, gana el del agente** (se ocultan los del cliente que choquen). (2) Sugeridor agrupado y con scroll. (3) Prefijo `$` solo para lo que el agente anuncia con `$` (skills de Codex). (4) **Sin `!`** (bash directo): ejecutaría comandos fuera del flujo de permisos del agente (§4.9, §10). (5) `@` acepta cualquier archivo y carpeta. | T11.1: ningún agente anuncia `new`/`resume`/`export`/`help` y esas acciones ya existen en el plugin; los nombres que sí anuncian (`model`, `status`, `rename`…) hacen cosas del agente que el usuario espera igual que en la CLI. Codex manda sus skills como `$skill`. | Replicar todos los comandos de las TUI (muchos no existen por ACP: `/login`, `/config` interactivo); un prefijo propio para los del cliente (`//new`, menos natural); `!` con confirmación (duplica permisos, riesgo). | Aceptada (confirmada por el usuario el 2026-10-28) |
 | ADR-033 | Pestañas en la vista: `AgentHubView` guarda una lista de `ChatSession` (una por pestaña, cada una con su proceso, ADR-005) y la activa; el núcleo no cambia salvo `ChatSession.rename()` y `sessionTitle` en la petición de modo sin restricciones. Todas las pestañas quedan montadas y las ocultas llevan `hidden` (conservan borrador y scroll); `TabActivity` vigila estado y título de cada una para los indicadores y el `Notice` de permisos en segundo plano. Estado de vista `{tabs, activeTab, sessionId}`, compatible con 0.2.x; al restaurar, solo la pestaña visible arranca su agente y el reaper (T4.5) libera las olvidadas. Sin límite de pestañas trabajando a la vez por ahora. *Open AgentHub in a new pane* se mantiene. | Varias conversaciones a la vez sin ocupar más paneles (RF-25, `next.md` §1). | Solo varias vistas (RF-11: ocupa espacio, hay que cambiar de panel para ver quién terminó); montar solo la pestaña activa (pierde borrador y scroll); un `SessionManager` por vista. | Aceptada |
 | ADR-032 | Apariencia configurable: ajustes planos validados campo a campo (`messageStyle`, `density`, `chatFontSize`, `accentColor`, `optionsPlacement`, `expandToolCalls`, `showUsage`) que la vista expone como atributos `data-*` en `.agenthub-app`; `styles.css` solo cambia tokens propios derivados de variables de Obsidian. Formas de componentes según shadcn/ui y las apps oficiales, sin copiar a Claudian: las opciones del agente son pastillas con panel propio (lista con descripciones o medidor de niveles) y se ubican por defecto en el cuadro de mensaje. Amplía ADR-018. | Personalización sin romper temas ni la revisión de la comunidad; menos selectores nativos en el sidebar. | Temas CSS propios (rompen temas de Obsidian); variables CSS editables por el usuario (difícil de mantener); copiar el selector combinado de Claudian. | Aceptada |
 
@@ -1865,3 +1907,6 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-11 · usuario + Claude (Opus 5.5)** — Aclaración del usuario: pidió **Microsoft Copilot**, no GitHub Copilot (se mantiene el preset de GitHub). Búsqueda: Microsoft Copilot no tiene CLI ni agente ACP local (el *Intelligent Terminal* de Windows usa ACP como cliente, con GitHub Copilot por defecto). Sin cambios de código; anotado en ADR-037. El usuario lo descarta.
 
 - **2026-10-11 · usuario + Claude (Opus 5.5)** — **Release 0.6.0 publicada como Latest** con confirmación del usuario («ya está testeado, todo ok, latest»): https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.6.0. Commits por tarea (T10.1–T10.3, cada uno compila y pasa sus tests), `chore(release): 0.6.0 [T10.4]`, tag anotado y push conjunto de `main` y del tag. Workflows Release y CI en verde; SHA-256 de `main.js`, `manifest.json` y `styles.css` del borrador iguales al build local; `gh attestation verify main.js` correcto (firmado por `release.yml` en `refs/tags/0.6.0`). Notas de la release tomadas del CHANGELOG. Pendiente: **Check for new releases** en community.obsidian.md (lo hace el usuario).
+
+- **2026-10-28 · usuario + Claude (Opus 5.5)** — **Fase 11 planificada** a pedido del usuario («agregar las opciones de `/`, `@`, etc. de Codex, Claude Code…»). Análisis: `/` y `@` ya existen (T3.3/T3.4), pero `@` solo lista Markdown (sin carpetas) y `/` solo se activa al inicio y muestra 8 resultados. **T11.1 hecha:** `scripts/spikes/acp-commands.mjs` (solo `initialize` + `session/new`, sin prompts) contra los agentes reales: Claude 328 comandos, Codex 235 (skills con nombre `$skill`), OpenCode 5, Copilot 97; Grok pide `grok login`. Ninguno anuncia `new`/`resume`/`export`/`help`. ADR-038 en estado *Propuesta*. Partida en verde (268 tests, lint con 1 aviso intencionado, build). Falta: confirmar ADR-038, T11.2–T11.5 y repetir Grok tras iniciar sesión.
+- **2026-10-28 · usuario + Claude (Opus 5.5)** — **T11.2–T11.4 hechas**; el usuario confirmó ADR-038 («continúa con la implementación») y aclaró que no tiene cuenta de Grok (T11.1 cerrada sin Grok). Nuevo `src/core/clientCommands.ts`; `suggest.ts` con `$`, grupos, `inputHint` y 50 resultados; `Composer` intercepta los comandos del cliente y `App` los ejecuta; `OptionPicker`/`ConfigOptions`/`Header` aceptan una petición de apertura; `NoteContext.listPaths()` (archivos y carpetas) y `readImage()`; las imágenes mencionadas van como bloque `image`. `StubSession.push()` en los helpers para emitir comandos/opciones fuera de un turno. ESLint: `maximumDefaultProjectFileMatchCount` a 16 por el script nuevo de `scripts/spikes/`. README y CHANGELOG (*Unreleased*). 286 tests, lint (1 aviso intencionado) y build en verde. Falta T11.5 (revisión en Obsidian y release). Sin commits.

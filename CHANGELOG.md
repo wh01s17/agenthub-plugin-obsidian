@@ -4,6 +4,13 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- AgentHub commands in the message box: `/new` (or `/clear`), `/resume`, `/export`, `/help`, and `/model` / `/mode` (opens the option, or sets it: `/model opus`). If the agent has a command with the same name, the agent's command runs instead.
+- The `/` list now scrolls through every command (agents announce hundreds), shows AgentHub's commands first, and shows what each command expects after its name.
+- Type **`$`** to complete skills from agents that name them that way (Codex).
+- **`@`** now lists every file and folder in the vault, not only notes. Mentioned images (PNG, JPEG, GIF, WebP) are sent as images.
+
 ## [0.6.0] - 2026-10-11
 
 ### Added

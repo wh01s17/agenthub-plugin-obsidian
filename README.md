@@ -23,7 +23,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **GitHub 
 - **Tabs:** run several conversations side by side in one view, each with its own agent. A tab shows when its agent is working, waiting for permission, failed, or finished while you were elsewhere, and a notice tells you when a hidden tab asks for permission. Drag tabs (or press **Ctrl/Cmd+Shift+Left/Right**) to reorder them.
 - **Keep writing while the agent works:** messages sent during a turn wait in a queue above the message box and go out, in order, when the turn ends. Edit or remove them, or use **Send now** to stop the current turn and send one right away.
 - **Interactive permissions:** approve once, approve future requests when offered by the agent, or deny. Use **Stop** to cancel a turn.
-- **Note context:** attach the current note, send a selection, or mention notes with **`@`**. Autocomplete agent commands with **`/`**.
+- **Note context:** attach the current note, send a selection, or mention notes, files, and folders with **`@`**. Autocomplete commands with **`/`** and Codex skills with **`$`**.
 - **Images:** paste screenshots, drop image files on the message box, or attach them with the image button. Large images are scaled down to fit the agents' limits.
 - **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
 - **Prompt history:** press **Up** and **Down** in the message box to recall the prompts sent since Obsidian started.
@@ -110,7 +110,8 @@ Back up your vault or keep it under version control before allowing an agent to 
 - Choose an agent in the header and its options with the pills in the message box, type your message, and press **Enter**. Use **Shift+Enter** for a new line. You can configure **Ctrl/Cmd+Enter** to send instead.
 - While the agent works, keep typing and press **Enter** (or **Add to queue**) to queue more instructions. **Stop** pauses the queue; sending another message or **Send now** resumes it.
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
-- Type **`@`** to mention a note, or **`/`** at the start of a message to autocomplete agent commands.
+- Type **`@`** to mention a note, file, or folder (mentioned images are sent as images), or **`/`** at the start of a message to autocomplete commands. **`$`** completes skills from agents that name them that way (Codex).
+- AgentHub's own commands: **`/new`** (or `/clear`), **`/resume`**, **`/export`**, **`/help`**, and **`/model`** / **`/mode`** (`/model opus` sets it directly). A command the agent announces with the same name goes to the agent.
 - Use the **clock icon** for session history and the **pencil icon** for a new session in the current tab.
 - Use **`+`** in the tab bar at the top of the view to open another tab with the default agent. Double-click a tab to rename it, and close it with **×** or the middle mouse button; closing a tab stops its agent (the conversation stays in history). Sessions opened from history get their own tab, and your tabs reopen after restarting Obsidian.
 
