@@ -9,6 +9,7 @@ import type {
   HostBridge,
 } from '../../core/AgentAdapter';
 import { AgentError } from '../../core/errors';
+import { isSlashCommand } from '../../core/PromptBuilder';
 import type { AgentEvent, ConfigOption, PromptBlock, StopReason } from '../../core/types';
 import type { ManagedProcess } from '../../process/ProcessRunner';
 import {
@@ -416,6 +417,10 @@ export class AcpSession implements AgentSession {
   private withInstructions(blocks: PromptBlock[]): PromptBlock[] {
     const instructions = this.init.systemPromptAppend?.trim();
     if (!this.firstPrompt || !instructions) return blocks;
+    // Adapters only see a command in the first text block (codex-acp, claude-agent-acp): the
+    // instructions wait for the next ordinary message.
+    const first = blocks[0];
+    if (first?.type === 'text' && isSlashCommand(first.text)) return blocks;
     this.firstPrompt = false;
     return [{ type: 'text', text: `<instructions>\n${instructions}\n</instructions>` }, ...blocks];
   }

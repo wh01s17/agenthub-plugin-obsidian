@@ -12,6 +12,15 @@ describe('extractMentions', () => {
 });
 
 describe('buildPrompt', () => {
+  it('sends a command without the active note but with explicit context (T11.5)', () => {
+    const note = { path: 'A.md', absPath: '/vault/A.md', text: '# A' };
+    expect(buildPrompt({ text: '/usage', activeNote: note })).toEqual([
+      { type: 'text', text: '/usage' },
+    ]);
+    expect(buildPrompt({ text: '/review @[[A.md]]', mentions: [note] })).toHaveLength(2);
+    expect(buildPrompt({ text: 'a/b', activeNote: note })).toHaveLength(2);
+  });
+
   it('starts with the message and adds selection, mentions and the active note', () => {
     const blocks = buildPrompt({
       text: 'resume',

@@ -105,6 +105,15 @@ describe('AcpAdapter with the fake ACP agent', () => {
     expect(text(events)).toBe('Recibido: dos');
   });
 
+  it('keeps the vault instructions out of a first message that is a command', async () => {
+    const { session, events } = await start('echo', { instructions: 'Usa wikilinks.' });
+    await session.prompt([{ type: 'text', text: '/skills' }]);
+    expect(text(events)).toBe('Recibido: /skills');
+    events.length = 0;
+    await session.prompt([{ type: 'text', text: 'hola' }]);
+    expect(text(events)).toContain('<instructions>\nUsa wikilinks.\n</instructions>');
+  });
+
   it('maps tool calls, terminal output and diffs', async () => {
     const { session, events } = await start('tools');
     await session.prompt([{ type: 'text', text: 'go' }]);

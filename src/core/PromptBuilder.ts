@@ -34,6 +34,11 @@ export interface PromptInput {
 const DEFAULT_BUDGET = 200_000;
 const MENTION = /@\[\[([^\]]+)\]\]/g;
 
+/** A message that runs an agent command (`/name …`): agents only recognize it on its own (T11.5). */
+export function isSlashCommand(text: string): boolean {
+  return /^\/\S/.test(text.trimStart());
+}
+
 /** Vault paths referenced as `@[[path]]` in the message, in order and without duplicates. */
 export function extractMentions(text: string): string[] {
   const found = new Set<string>();
@@ -68,6 +73,7 @@ export function buildPrompt(input: PromptInput): PromptBlock[] {
 
   if (input.selection) blocks.push({ type: 'selection', ...input.selection });
   input.mentions?.forEach(addNote);
-  if (input.activeNote) addNote(input.activeNote);
+  // The active note is implicit context: a command goes without it (Claude's `/usage` needs one block).
+  if (input.activeNote && !isSlashCommand(input.text)) addNote(input.activeNote);
   return blocks;
 }
