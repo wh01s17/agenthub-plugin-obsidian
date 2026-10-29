@@ -209,6 +209,7 @@ export const es: Messages = {
   clientCmdHelp: 'Ver los comandos disponibles',
   clientCmdModel: 'Elegir el modelo, o fijarlo: /model <nombre>',
   clientCmdMode: 'Elegir el modo, o fijarlo: /mode <nombre>',
+  clientCmdSkills: 'Elegir una skill del agente',
   noticeOptionNoMatch: 'Ningún valor de {option} coincide con «{query}».',
   openFile: 'Abrir {path}',
 

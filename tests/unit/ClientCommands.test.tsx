@@ -97,6 +97,33 @@ describe('client commands (T11.2, ADR-038)', () => {
   });
 });
 
+describe('own menus (ADR-039)', () => {
+  it('/model alone opens the picker even if the agent announces /model; with arguments it goes to the agent', async () => {
+    const { agent, seen, send } = await setup();
+    await act(() => agent.push({ type: 'commands', commands: [{ name: 'model' }] }));
+    await act(() => agent.push({ type: 'config', configOptions: [model] }));
+    send('/model');
+    expect(await screen.findByRole('menu', { name: 'Model' })).toBeTruthy();
+    expect(seen).toHaveLength(0);
+    send('/model opus');
+    await waitFor(() => expect(seen).toHaveLength(1));
+    expect(seen[0]).toEqual([{ type: 'text', text: '/model opus' }]);
+  });
+
+  it('/skills lists the $ skills to pick one', async () => {
+    const { agent, seen, send, input } = await setup();
+    await act(() =>
+      agent.push({ type: 'commands', commands: [{ name: 'skills' }, { name: '$anatomy' }] }),
+    );
+    send('/skills');
+    const option = await screen.findByRole('option', { name: /anatomy/ });
+    expect(option).toBeTruthy();
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(input.value).toBe('$anatomy '));
+    expect(seen).toHaveLength(0);
+  });
+});
+
 describe('$ skills (T11.3)', () => {
   it('completes skills announced with $ and keeps them out of /', async () => {
     const { agent, type, input } = await setup();

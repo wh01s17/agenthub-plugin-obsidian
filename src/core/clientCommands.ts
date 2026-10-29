@@ -1,14 +1,22 @@
-// Commands AgentHub runs itself instead of sending them to the agent (plan T11.2, ADR-038). Pure.
+// Commands AgentHub runs itself instead of sending them to the agent (plan T11.2, ADR-038/039). Pure.
 
 import type { ConfigOption, SlashCommand } from './types';
 
-export type ClientCommandId = 'new' | 'resume' | 'export' | 'help' | 'model' | 'mode';
+export type ClientCommandId = 'new' | 'resume' | 'export' | 'help' | 'model' | 'mode' | 'skills';
 
 export interface ClientCommand {
   id: ClientCommandId;
   /** What the user types after `/`. */
   name: string;
+  /** The agent announces the same name: typed alone it opens AgentHub's menu, with arguments it goes to the agent. */
+  sharedWithAgent?: boolean;
 }
+
+/**
+ * Commands whose CLI opens an interactive menu, which does not exist over ACP (the agents answer with
+ * text): AgentHub shows its own menu instead (ADR-039).
+ */
+const MENUS: ReadonlySet<ClientCommandId> = new Set(['model', 'mode', 'skills']);
 
 const COMMANDS: readonly ClientCommand[] = [
   { id: 'new', name: 'new' },
@@ -18,11 +26,13 @@ const COMMANDS: readonly ClientCommand[] = [
   { id: 'help', name: 'help' },
   { id: 'model', name: 'model' },
   { id: 'mode', name: 'mode' },
+  { id: 'skills', name: 'skills' },
 ];
 
 /**
- * The client commands on offer: a name the agent announces belongs to the agent (it does what the user
- * expects from its CLI), and `/model`/`/mode` need an option of that category to act on.
+ * The client commands on offer. A name the agent announces belongs to the agent (it does what the user
+ * expects from its CLI), except the menus, which AgentHub keeps for the bare command (ADR-039).
+ * `/model`/`/mode` need an option of that category and `/skills` skills announced as `$name`.
  */
 export function clientCommands(
   agentCommands: readonly SlashCommand[],
@@ -30,16 +40,21 @@ export function clientCommands(
   canResume: boolean,
 ): ClientCommand[] {
   const taken = new Set(agentCommands.map((command) => command.name));
-  return COMMANDS.filter((command) => {
-    if (taken.has(command.name)) return false;
-    if (command.id === 'resume') return canResume;
-    if (command.id === 'model' || command.id === 'mode')
-      return optionFor(options, command.id) !== null;
-    return true;
+  return COMMANDS.flatMap((command) => {
+    const shared = taken.has(command.name);
+    if (shared && !MENUS.has(command.id)) return [];
+    if (command.id === 'resume' && !canResume) return [];
+    if ((command.id === 'model' || command.id === 'mode') && !optionFor(options, command.id))
+      return [];
+    if (command.id === 'skills' && !agentCommands.some((c) => c.name.startsWith('$'))) return [];
+    return [shared ? { ...command, sharedWithAgent: true } : command];
   });
 }
 
-/** `/name [args]` when `name` is one of `available`; anything else goes to the agent. */
+/**
+ * `/name [args]` when `name` is one of `available`; anything else goes to the agent, as does a command
+ * shared with the agent when it has arguments.
+ */
 export function parseClientCommand(
   text: string,
   available: readonly ClientCommand[],
@@ -47,7 +62,9 @@ export function parseClientCommand(
   const match = /^\/(\S+)(?:\s+([\s\S]*))?$/.exec(text.trim());
   if (!match) return null;
   const command = available.find((candidate) => candidate.name === match[1]);
-  return command ? { command, args: (match[2] ?? '').trim() } : null;
+  const args = (match[2] ?? '').trim();
+  if (!command || (command.sharedWithAgent && args)) return null;
+  return { command, args };
 }
 
 /** The agent option a `/model` or `/mode` command acts on. */

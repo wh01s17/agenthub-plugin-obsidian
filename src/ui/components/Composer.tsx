@@ -63,6 +63,7 @@ const CLIENT_DESCRIPTIONS = {
   help: 'clientCmdHelp',
   model: 'clientCmdModel',
   mode: 'clientCmdMode',
+  skills: 'clientCmdSkills',
 } as const;
 
 const LISTBOX_LABELS = {
@@ -195,10 +196,10 @@ export function Composer(props: ComposerProps) {
     ref.current?.focus();
   };
 
-  /** `/help`: shows every command in the suggestion list. */
-  const showCommands = () => {
-    setText('/');
-    updateSuggestions('/', 1);
+  /** `/help` and `/skills` (ADR-039): the list of commands or skills, to pick one with the keyboard. */
+  const showMenu = (prefix: '/' | '$') => {
+    setText(prefix);
+    updateSuggestions(prefix, 1);
     window.requestAnimationFrame(() => ref.current?.setSelectionRange(1, 1));
   };
 
@@ -211,7 +212,8 @@ export function Composer(props: ComposerProps) {
     const client =
       attached.length === 0 ? parseClientCommand(message, props.clientCommands ?? []) : null;
     if (client) {
-      if (client.command.id === 'help') return showCommands();
+      if (client.command.id === 'help') return showMenu('/');
+      if (client.command.id === 'skills') return showMenu('$');
       props.onClientCommand?.(client.command, client.args);
       setText('');
       setSuggestions(null);

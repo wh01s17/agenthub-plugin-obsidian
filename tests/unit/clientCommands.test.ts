@@ -37,12 +37,27 @@ describe('clientCommands (ADR-038)', () => {
   });
 
   it('leaves a name the agent announces to the agent', () => {
-    const names = clientCommands([{ name: 'model' }, { name: 'clear' }], [model], true).map(
-      (c) => c.name,
-    );
-    expect(names).not.toContain('model');
+    const names = clientCommands([{ name: 'clear' }], [model], true).map((c) => c.name);
     expect(names).not.toContain('clear');
     expect(names).toContain('new');
+  });
+
+  it('keeps the menus when the agent announces them, marked as shared (ADR-039)', () => {
+    const [shared] = clientCommands([{ name: 'model' }], [model], true).filter(
+      (c) => c.id === 'model',
+    );
+    expect(shared).toEqual({ id: 'model', name: 'model', sharedWithAgent: true });
+  });
+
+  it('offers /skills only when the agent announces $ skills', () => {
+    expect(clientCommands([{ name: 'review' }], [], false).map((c) => c.id)).not.toContain(
+      'skills',
+    );
+    expect(
+      clientCommands([{ name: 'skills' }, { name: '$anatomy' }], [], false).find(
+        (c) => c.id === 'skills',
+      ),
+    ).toEqual({ id: 'skills', name: 'skills', sharedWithAgent: true });
   });
 });
 
@@ -62,6 +77,12 @@ describe('parseClientCommand', () => {
     expect(parseClientCommand('/review', available)).toBeNull();
     expect(parseClientCommand('hola /new', available)).toBeNull();
     expect(parseClientCommand('/newer', available)).toBeNull();
+  });
+
+  it('sends a shared menu command with arguments to the agent', () => {
+    const shared = clientCommands([{ name: 'model' }], [model], true);
+    expect(parseClientCommand('/model', shared)?.command.id).toBe('model');
+    expect(parseClientCommand('/model opus', shared)).toBeNull();
   });
 });
 

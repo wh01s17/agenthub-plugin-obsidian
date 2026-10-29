@@ -209,6 +209,7 @@ export const en = {
   clientCmdHelp: 'List the available commands',
   clientCmdModel: 'Choose the model, or set it: /model <name>',
   clientCmdMode: 'Choose the mode, or set it: /mode <name>',
+  clientCmdSkills: "Pick one of the agent's skills",
   noticeOptionNoMatch: 'No {option} matches "{query}".',
   openFile: 'Open {path}',
 
