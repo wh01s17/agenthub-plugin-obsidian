@@ -4,6 +4,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Added
+
+- Usage limits ring at the right of the message box: how much of the 5-hour and weekly limits you have used, alternating every 7 seconds (`5h`, `w`), with both and their reset times on hover. Claude Code reports them during its turns; for Codex, AgentHub asks `codex app-server` (at most once a minute). Hidden when **Show usage** is off.
+
 ## [0.7.0] - 2026-10-28
 
 ### Fixed

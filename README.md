@@ -26,6 +26,7 @@ A desktop Obsidian plugin for working with **Claude Code**, **Codex**, **GitHub 
 - **Note context:** attach the current note, send a selection, or mention notes, files, and folders with **`@`**. Autocomplete commands with **`/`** and Codex skills with **`$`**.
 - **Images:** paste screenshots, drop image files on the message box, or attach them with the image button. Large images are scaled down to fit the agents' limits.
 - **Agent options:** choose the mode, model, reasoning effort, and other options exposed by the agent from pills in the message box. Your choices are kept for new sessions and after restarting Obsidian.
+- **Usage limits:** a small ring at the right of the message box shows how much of your 5-hour and weekly limits you have used, alternating every 7 seconds (`5h`, `w`); hover it to see both with their reset times. Available for Claude Code and Codex.
 - **Prompt history:** press **Up** and **Down** in the message box to recall the prompts sent since Obsidian started.
 - **Session history:** save, search, rename, delete, and resume conversations. Restore your conversation after restarting Obsidian.
 - **Export to Markdown:** save a conversation as a note.
@@ -141,7 +142,7 @@ Commands have no default keyboard shortcuts. Assign them under **Settings → Ho
 
 ### Disclosures
 
-- **External processes:** AgentHub runs the agent commands configured in its settings as local child processes. It does not bundle or run any agent itself.
+- **External processes:** AgentHub runs the agent commands configured in its settings as local child processes. It does not bundle or run any agent itself. To show Codex's usage limits, it also starts `codex app-server` (the `codex` found in your `PATH`) for about a second when a Codex session starts and after its turns, at most once a minute, and asks it only for the account's rate limits. Turn off **Show usage** to stop it.
 - **Network use:** the plugin makes no network requests and sends no telemetry. The agents you run connect to their own providers (for example Anthropic for Claude Code, OpenAI for Codex, GitHub for Copilot, xAI for Grok, Google for Gemini CLI, or the provider configured in OpenCode) to generate responses, under those providers' terms.
 - **Adapter downloads:** AgentHub never installs or updates itself, the agents, or their adapters. The default Claude Code and Codex commands call `npx` with a **pinned adapter version**; on first use, `npx` (not AgentHub) fetches that version from the npm registry. To avoid any download at runtime, install the adapters globally (see [Requirements](#requirements)) and change the command to the installed binary, or use any other command you trust.
 - **Accounts:** an account with each agent's provider is required, signed in through the agent's own CLI. Depending on the provider, this may require a paid subscription or API usage. AgentHub never sees or stores your credentials.
