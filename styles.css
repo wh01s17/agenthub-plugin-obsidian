@@ -900,6 +900,76 @@
   padding: var(--size-4-2) var(--size-4-3) 0;
 }
 
+/* ── Usage limits ring (ADR-040) ────────────────────────────────────────── */
+
+.agenthub-limits {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  /* At the right, next to the send button, even without option pills. */
+  margin-left: auto;
+  border-radius: 50%;
+  color: var(--interactive-accent);
+  cursor: default;
+}
+
+.agenthub-limits + .agenthub-composer-button {
+  margin-left: 0;
+}
+
+.agenthub-limits:focus-visible {
+  box-shadow: 0 0 0 2px var(--background-modifier-border-focus);
+  outline: none;
+}
+
+.agenthub-limits.is-warning {
+  color: var(--color-orange);
+}
+
+.agenthub-limits.is-critical {
+  color: var(--color-red);
+}
+
+.agenthub-limits svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.agenthub-limits-track,
+.agenthub-limits-value {
+  fill: none;
+  stroke-width: 2.5;
+}
+
+.agenthub-limits-track {
+  stroke: var(--background-modifier-border);
+}
+
+.agenthub-limits-value {
+  stroke: currentColor;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.agenthub-limits-label {
+  color: var(--text-muted);
+  font-size: 8px;
+  font-weight: var(--font-semibold);
+  line-height: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agenthub-limits-value {
+    transition: none;
+  }
+}
+
 .agenthub-composer-context:empty {
   display: none;
 }

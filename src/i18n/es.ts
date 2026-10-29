@@ -102,7 +102,8 @@ export const es: Messages = {
   settingsExpandTools: 'Desplegar herramientas',
   settingsExpandToolsDesc: 'Muestra la entrada y la salida de las herramientas sin abrirlas.',
   settingsShowUsage: 'Mostrar consumo',
-  settingsShowUsageDesc: 'Muestra el uso de contexto y el coste en la línea de estado.',
+  settingsShowUsageDesc:
+    'Muestra el uso de contexto y el coste en la línea de estado, y los límites de 5 horas y semanal en el cuadro de mensaje.',
 
   settingsEnvironment: 'Entorno',
   settingsLoginShell: 'Usar el PATH del shell de inicio como respaldo',
@@ -211,6 +212,10 @@ export const es: Messages = {
   clientCmdMode: 'Elegir el modo, o fijarlo: /mode <nombre>',
   clientCmdSkills: 'Elegir una skill del agente',
   noticeOptionNoMatch: 'Ningún valor de {option} coincide con «{query}».',
+  // Usage limits (ADR-040)
+  limitFiveHour: 'Límite de 5 horas: {percent} % usado',
+  limitWeekly: 'Límite semanal: {percent} % usado',
+  limitResets: 'se reinicia {time}',
   openFile: 'Abrir {path}',
 
   // History (Fase 4)

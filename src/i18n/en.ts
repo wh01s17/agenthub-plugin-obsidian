@@ -100,7 +100,8 @@ export const en = {
   settingsExpandTools: 'Expand tool calls',
   settingsExpandToolsDesc: 'Show the input and output of tool calls without opening them.',
   settingsShowUsage: 'Show usage',
-  settingsShowUsageDesc: 'Show context and cost usage in the status line.',
+  settingsShowUsageDesc:
+    'Show context and cost usage in the status line, and the 5-hour and weekly limits in the message box.',
 
   // Settings: environment
   settingsEnvironment: 'Environment',
@@ -211,6 +212,10 @@ export const en = {
   clientCmdMode: 'Choose the mode, or set it: /mode <name>',
   clientCmdSkills: "Pick one of the agent's skills",
   noticeOptionNoMatch: 'No {option} matches "{query}".',
+  // Usage limits (ADR-040)
+  limitFiveHour: '5-hour limit: {percent}% used',
+  limitWeekly: 'Weekly limit: {percent}% used',
+  limitResets: 'resets {time}',
   openFile: 'Open {path}',
 
   // History (Fase 4)

@@ -22,6 +22,7 @@ import { ConfigOptions, optionName } from './components/ConfigOptions';
 import { ContextChips } from './components/ContextChips';
 import { DebugPanel } from './components/DebugPanel';
 import { HistoryPanel } from './components/HistoryPanel';
+import { LimitsRing } from './components/LimitsRing';
 import { Header } from './components/Header';
 import { MessageList } from './components/MessageList';
 import { StatusBar } from './components/StatusBar';
@@ -236,6 +237,9 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         queuePaused={state.queuePaused}
         onSendNow={(id) => void session.sendNow(id)}
         onUnqueue={(id) => session.unqueue(id)}
+        trailing={
+          settings.showUsage && state.limits ? <LimitsRing limits={state.limits} /> : undefined
+        }
         options={
           optionsInComposer ? (
             <ConfigOptions

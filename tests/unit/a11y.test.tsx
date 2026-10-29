@@ -8,6 +8,7 @@ import type { TranscriptItem } from '../../src/core/types';
 import { App } from '../../src/ui/App';
 import { Composer } from '../../src/ui/components/Composer';
 import { HistoryPanel } from '../../src/ui/components/HistoryPanel';
+import { LimitsRing } from '../../src/ui/components/LimitsRing';
 import { TabBar } from '../../src/ui/components/TabBar';
 import { DangerousModeDialog } from '../../src/ui/DangerousModeDialog';
 import { StubAdapter, hostServices } from '../helpers/stubAgent';
@@ -196,6 +197,15 @@ describe('accessibility audit (axe-core)', () => {
     );
     await findByText('Uno');
     await waitFor(async () => expect(await audit(container)).toEqual([]));
+  });
+});
+
+describe('usage limits ring (ADR-040)', () => {
+  it('has no violations', async () => {
+    const { container } = render(
+      <LimitsRing limits={{ fiveHour: { usedPercent: 40 }, weekly: { usedPercent: 10 } }} />,
+    );
+    expect(await audit(container, 1)).toEqual([]);
   });
 });
 

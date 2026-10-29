@@ -46,6 +46,8 @@ interface ComposerProps {
   children?: ComponentChildren;
   /** The agent's options, when they live in the composer (ADR-032). */
   options?: ComponentChildren;
+  /** Shown at the right of the options (usage limits, ADR-040). */
+  trailing?: ComponentChildren;
 }
 
 interface Suggestions {
@@ -433,6 +435,7 @@ export function Composer(props: ComposerProps) {
           <Icon name="image-plus" />
         </button>
         {props.options}
+        {props.trailing}
         {/* Round icon buttons, like the agents' own apps; the name comes from `aria-label`/`title`. */}
         {(!busy || hasDraft) && (
           <button
