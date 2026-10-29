@@ -25,6 +25,20 @@ export const MAX_IMAGE_EDGE = 8000;
 /** Images per message: keeps prompts and the saved history at a sensible size. */
 export const MAX_IMAGES_PER_MESSAGE = 10;
 
+const EXTENSIONS: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+};
+
+/** The image type of a vault file mentioned with `@` (T11.4), from its extension. */
+export function imageMimeType(path: string): string | null {
+  const extension = path.slice(path.lastIndexOf('.') + 1).toLowerCase();
+  return path.includes('.') ? (EXTENSIONS[extension] ?? null) : null;
+}
+
 export function isSupportedImage(mimeType: string): boolean {
   return IMAGE_TYPES.includes(mimeType.toLowerCase());
 }

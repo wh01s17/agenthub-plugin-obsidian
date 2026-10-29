@@ -3,7 +3,16 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { imageDataUrl, MAX_IMAGES_PER_MESSAGE, type ImageBlock } from '../../core/images';
 import type { PromptHistory } from '../../core/PromptHistory';
-import { applySuggestion, findTrigger, rankMatches, type Trigger } from '../../core/suggest';
+import { parseClientCommand, type ClientCommand } from '../../core/clientCommands';
+import {
+  applySuggestion,
+  commandSuggestions,
+  findTrigger,
+  rankMatches,
+  skillSuggestions,
+  type Suggestion,
+  type Trigger,
+} from '../../core/suggest';
 import type { PromptBlock, QueuedMessage, SlashCommand } from '../../core/types';
 import { t } from '../../i18n';
 import { draggingFiles, pastedImages, readImage, type ImageResult } from '../imageFiles';
@@ -15,12 +24,15 @@ interface ComposerProps {
   busy: boolean;
   disabled: boolean;
   sendWith: 'enter' | 'mod-enter';
-  /** Vault note paths for `@` completion (read lazily). */
+  /** Vault file and folder paths (folders end with `/`) for `@` completion, read lazily. */
   notes: () => string[];
   /** Prompts sent earlier, recalled with Up/Down like a shell. */
   history?: PromptHistory;
-  /** Agent slash commands for `/` completion. */
+  /** Agent slash commands for `/` completion (and `$` skills, T11.3). */
   commands: readonly SlashCommand[];
+  /** Commands AgentHub runs itself (ADR-038); `/help` is handled here. */
+  clientCommands?: readonly ClientCommand[];
+  onClientCommand?: (command: ClientCommand, args: string) => void;
   /** The message text (trimmed, may be empty if images go along) and the attached images. */
   onSend: (text: string, images: ImageBlock[]) => void;
   onStop: () => void;
@@ -38,11 +50,26 @@ interface ComposerProps {
 
 interface Suggestions {
   trigger: Trigger;
-  items: { value: string; detail?: string }[];
+  items: Suggestion[];
   active: number;
 }
 
 const LISTBOX_ID = 'agenthub-suggestions';
+
+const CLIENT_DESCRIPTIONS = {
+  new: 'clientCmdNew',
+  resume: 'clientCmdResume',
+  export: 'clientCmdExport',
+  help: 'clientCmdHelp',
+  model: 'clientCmdModel',
+  mode: 'clientCmdMode',
+} as const;
+
+const LISTBOX_LABELS = {
+  note: 'suggestNotes',
+  command: 'suggestCommands',
+  skill: 'suggestSkills',
+} as const;
 
 interface PendingImage {
   key: number;
@@ -83,16 +110,16 @@ export function Composer(props: ComposerProps) {
   const updateSuggestions = (value: string, cursor: number) => {
     const trigger = findTrigger(value, cursor);
     if (!trigger) return setSuggestions(null);
-    const items =
-      trigger.kind === 'note'
-        ? rankMatches(trigger.query, props.notes()).map((value) => ({ value }))
-        : rankMatches(
-            trigger.query,
-            props.commands.map((c) => c.name),
-          ).map((name) => ({
-            value: name,
-            detail: props.commands.find((c) => c.name === name)?.description,
-          }));
+    let items: Suggestion[];
+    if (trigger.kind === 'note') {
+      items = rankMatches(trigger.query, props.notes()).map((path) => ({ value: path }));
+    } else if (trigger.kind === 'skill') {
+      items = skillSuggestions(trigger.query, props.commands);
+    } else {
+      items = commandSuggestions(trigger.query, props.commands, props.clientCommands ?? [], (c) =>
+        t(CLIENT_DESCRIPTIONS[c.id]),
+      );
+    }
     setSuggestions(items.length > 0 ? { trigger, items, active: 0 } : null);
   };
 
@@ -168,12 +195,29 @@ export function Composer(props: ComposerProps) {
     ref.current?.focus();
   };
 
+  /** `/help`: shows every command in the suggestion list. */
+  const showCommands = () => {
+    setText('/');
+    updateSuggestions('/', 1);
+    window.requestAnimationFrame(() => ref.current?.setSelectionRange(1, 1));
+  };
+
   const send = () => {
     const message = text.trim();
     const attached = imagesRef.current.map((image) => image.block);
     if ((!message && attached.length === 0) || disabled) return;
     if (message) props.history?.add(message);
     recall.current = null;
+    const client =
+      attached.length === 0 ? parseClientCommand(message, props.clientCommands ?? []) : null;
+    if (client) {
+      if (client.command.id === 'help') return showCommands();
+      props.onClientCommand?.(client.command, client.args);
+      setText('');
+      setSuggestions(null);
+      ref.current?.focus();
+      return;
+    }
     onSend(message, attached);
     setText('');
     setImages([]);
@@ -263,22 +307,35 @@ export function Composer(props: ComposerProps) {
           id={LISTBOX_ID}
           class="agenthub-suggestions"
           role="listbox"
-          aria-label={t(suggestions.trigger.kind === 'note' ? 'suggestNotes' : 'suggestCommands')}
+          aria-label={t(LISTBOX_LABELS[suggestions.trigger.kind])}
         >
           {suggestions.items.map((item, index) => (
             <li
-              key={item.value}
+              key={`${item.group ?? ''}:${item.value}`}
               id={`${LISTBOX_ID}-${index}`}
               role="option"
               aria-selected={index === suggestions.active}
-              class={`agenthub-suggestion ${index === suggestions.active ? 'is-active' : ''}`}
+              class={[
+                'agenthub-suggestion',
+                index === suggestions.active ? 'is-active' : '',
+                // A line between AgentHub's commands and the agent's.
+                item.group === 'agent' && suggestions.items[index - 1]?.group === 'client'
+                  ? 'is-group-start'
+                  : '',
+              ].join(' ')}
               // Keep focus in the textarea while picking with the mouse.
               onMouseDown={(event) => {
                 event.preventDefault();
                 choose(index);
               }}
             >
-              <span class="agenthub-suggestion-value">{item.value}</span>
+              <span class="agenthub-suggestion-value">
+                {item.value}
+                {item.hint && <span class="agenthub-suggestion-hint"> {item.hint}</span>}
+                {item.group === 'client' && (
+                  <span class="agenthub-suggestion-tag">{t('suggestClientTag')}</span>
+                )}
+              </span>
               {item.detail && <span class="agenthub-suggestion-detail">{item.detail}</span>}
             </li>
           ))}

@@ -198,8 +198,18 @@ export const en = {
   cmdAskAboutNote: 'Ask AgentHub about the current note',
   cmdNewSession: 'Start a new AgentHub session',
   cmdStop: 'Stop the current AgentHub turn',
-  suggestNotes: 'Notes',
-  suggestCommands: 'Agent commands',
+  suggestNotes: 'Files and folders',
+  suggestCommands: 'Commands',
+  suggestSkills: 'Skills',
+  suggestClientTag: 'AgentHub',
+  // Client commands (T11.2, ADR-038)
+  clientCmdNew: 'Start a new session',
+  clientCmdResume: 'Open the session history',
+  clientCmdExport: 'Export this session to a note',
+  clientCmdHelp: 'List the available commands',
+  clientCmdModel: 'Choose the model, or set it: /model <name>',
+  clientCmdMode: 'Choose the mode, or set it: /mode <name>',
+  noticeOptionNoMatch: 'No {option} matches "{query}".',
   openFile: 'Open {path}',
 
   // History (Fase 4)

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'preact/hooks';
 import type { ConfigOption } from '../../core/types';
 import { t } from '../../i18n';
 import { OptionPicker, TogglePill, toggleValues } from './OptionPicker';
@@ -11,6 +12,8 @@ interface ConfigOptionsProps {
    * (`OptionPicker`); the label moves to the panel title and the accessible name.
    */
   variant: 'grid' | 'inline';
+  /** `/model` or `/mode` asked to open this option (ADR-038); `n` grows with each request. */
+  openRequest?: { optionId: string; n: number } | null;
 }
 
 export function optionName(option: ConfigOption): string {
@@ -20,7 +23,23 @@ export function optionName(option: ConfigOption): string {
 }
 
 /** The agent's own options (mode, model, effort…: T2.9). */
-export function ConfigOptions({ options, busy, onChange, variant }: ConfigOptionsProps) {
+export function ConfigOptions({
+  options,
+  busy,
+  onChange,
+  variant,
+  openRequest,
+}: ConfigOptionsProps) {
+  const grid = useRef<HTMLDivElement>(null);
+  // The grid has native selects: a request moves the focus to the one asked for.
+  useEffect(() => {
+    if (!openRequest || variant !== 'grid') return;
+    grid.current
+      ?.querySelector<HTMLSelectElement>(
+        `select[data-option-id="${CSS.escape(openRequest.optionId)}"]`,
+      )
+      ?.focus();
+  }, [openRequest, variant]);
   if (options.length === 0) return null;
   if (variant === 'inline') {
     return (
@@ -34,6 +53,7 @@ export function ConfigOptions({ options, busy, onChange, variant }: ConfigOption
               label={optionName(option)}
               busy={busy}
               onChange={(value) => onChange(option.id, value)}
+              openRequest={openRequest?.optionId === option.id ? openRequest.n : undefined}
             />
           );
         })}
@@ -41,7 +61,7 @@ export function ConfigOptions({ options, busy, onChange, variant }: ConfigOption
     );
   }
   return (
-    <div class={`agenthub-config is-${variant}`}>
+    <div ref={grid} class={`agenthub-config is-${variant}`}>
       {options.map((option) => (
         // The visible name tells what each value means ("Off" alone is ambiguous).
         <div
@@ -55,6 +75,7 @@ export function ConfigOptions({ options, busy, onChange, variant }: ConfigOption
           <select
             class="dropdown agenthub-config-select"
             aria-label={optionName(option)}
+            data-option-id={option.id}
             value={option.currentValue}
             disabled={busy}
             onChange={(event) => {

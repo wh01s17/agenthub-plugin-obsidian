@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { applySuggestion, findTrigger, rankMatches } from '../../src/core/suggest';
+import {
+  applySuggestion,
+  commandSuggestions,
+  findTrigger,
+  rankMatches,
+  skillSuggestions,
+} from '../../src/core/suggest';
 
 describe('findTrigger', () => {
   it('detects @ after a space or at the start', () => {
@@ -44,5 +50,47 @@ describe('applySuggestion', () => {
         cursor: 8,
       },
     );
+  });
+});
+
+describe('$ skills and folders (T11.3, T11.4)', () => {
+  it('detects $ like @, anywhere after a space', () => {
+    expect(findTrigger('usa $ana', 8)).toEqual({ kind: 'skill', query: 'ana', start: 4 });
+    expect(findTrigger('cuesta 5$x', 10)).toBeNull();
+  });
+
+  it('ranks folders by their own name', () => {
+    expect(rankMatches('proy', ['Notas/Proyectos/', 'Otra/Plan.md'])).toEqual(['Notas/Proyectos/']);
+  });
+
+  it('inserts a skill with its $ prefix', () => {
+    expect(applySuggestion('$an', 3, { kind: 'skill', query: 'an', start: 0 }, 'anatomy')).toEqual({
+      text: '$anatomy ',
+      cursor: 9,
+    });
+  });
+});
+
+describe('commandSuggestions (T11.3)', () => {
+  const agent = [
+    { name: 'review', description: 'Review changes', inputHint: 'optional instructions' },
+    { name: '$anatomy', description: 'Skill' },
+  ];
+  const client = [{ id: 'new' as const, name: 'new' }];
+
+  it('puts AgentHub commands first and keeps $ skills out of /', () => {
+    expect(commandSuggestions('', agent, client, () => 'Start')).toEqual([
+      { value: 'new', detail: 'Start', group: 'client' },
+      { value: 'review', detail: 'Review changes', hint: 'optional instructions', group: 'agent' },
+    ]);
+  });
+
+  it('offers $ skills without the prefix', () => {
+    expect(skillSuggestions('ana', agent).map((s) => s.value)).toEqual(['anatomy']);
+  });
+
+  it('shows more than 8 commands', () => {
+    const many = Array.from({ length: 30 }, (_, i) => ({ name: `cmd${i}` }));
+    expect(commandSuggestions('cmd', many, [], String)).toHaveLength(30);
   });
 });

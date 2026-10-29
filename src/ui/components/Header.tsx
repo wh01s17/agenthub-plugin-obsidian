@@ -19,6 +19,8 @@ interface HeaderProps {
   onOpenHistory?: () => void;
   /** False when the options live in the composer instead (ADR-032). */
   showOptions?: boolean;
+  /** `/model` or `/mode` asked for an option (ADR-038). */
+  openRequest?: { optionId: string; n: number } | null;
 }
 
 /** Agent selector, the agent's own options (mode, model…: T2.9) and session actions. */
@@ -92,6 +94,7 @@ export function Header(props: HeaderProps) {
           busy={busy}
           onChange={props.onConfigChange}
           variant="grid"
+          openRequest={props.openRequest}
         />
       )}
     </header>

@@ -43,6 +43,11 @@ export class StubSession implements AgentSession {
     private readonly host: HostBridge,
   ) {}
 
+  /** Emits an event outside a turn, as agents do with commands and options. */
+  push(event: AgentEvent): void {
+    this.listeners.forEach((l) => l(event));
+  }
+
   onEvent(listener: (event: AgentEvent) => void) {
     this.listeners.add(listener);
     return { dispose: () => this.listeners.delete(listener) };

@@ -84,7 +84,7 @@ describe('context in prompts (Fase 3)', () => {
 describe('composer suggestions (T3.3/T3.4)', () => {
   it('completes @ with vault notes using the keyboard', async () => {
     const { host, sessions } = makeViewHost(() => 'end_turn');
-    host.notes.listNotes = () => ['Notas/Ideas.md', 'Bienvenida.md'];
+    host.notes.listPaths = () => ['Notas/Ideas.md', 'Bienvenida.md'];
     render(
       <App
         host={host}
@@ -111,7 +111,7 @@ describe('composer suggestions (T3.3/T3.4)', () => {
     const scroll = vi.fn();
     HTMLElement.prototype.scrollIntoView = scroll;
     const { host, sessions } = makeViewHost(() => 'end_turn');
-    host.notes.listNotes = () => ['Uno.md', 'Dos.md', 'Tres.md'];
+    host.notes.listPaths = () => ['Uno.md', 'Dos.md', 'Tres.md'];
     render(
       <App
         host={host}

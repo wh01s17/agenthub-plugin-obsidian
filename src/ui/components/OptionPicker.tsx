@@ -60,14 +60,20 @@ interface OptionPickerProps {
   label: string;
   busy: boolean;
   onChange: (value: string) => void;
+  /** Opens the panel each time it changes (`/model`, `/mode`: ADR-038). */
+  openRequest?: number;
 }
 
 /**
  * A pill in the message box (icon + current value) that opens a panel rising from the composer:
  * a titled list with descriptions, or a level meter for effort-like options (ADR-032).
  */
-export function OptionPicker({ option, label, busy, onChange }: OptionPickerProps) {
+export function OptionPicker({ option, label, busy, onChange, openRequest }: OptionPickerProps) {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    // Only a new request opens it, not a change of `busy`.
+    if (openRequest && !busy) setOpen(true);
+  }, [openRequest]);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const current = option.options.find((choice) => choice.value === option.currentValue);

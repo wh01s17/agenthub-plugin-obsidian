@@ -1,17 +1,24 @@
+import { Notice } from 'obsidian';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
 import type { ChatSession } from '../core/ChatSession';
+import {
+  clientCommands,
+  matchOptionValue,
+  optionFor,
+  type ClientCommand,
+} from '../core/clientCommands';
 import {
   buildPrompt,
   extractMentions,
   type NoteRef,
   type SelectionRef,
 } from '../core/PromptBuilder';
-import type { ImageBlock } from '../core/images';
+import { imageMimeType, MAX_IMAGES_PER_MESSAGE, type ImageBlock } from '../core/images';
 import { t } from '../i18n';
 import { AgentBadge } from './components/AgentBadge';
 import { Composer } from './components/Composer';
-import { ConfigOptions } from './components/ConfigOptions';
+import { ConfigOptions, optionName } from './components/ConfigOptions';
 import { ContextChips } from './components/ContextChips';
 import { DebugPanel } from './components/DebugPanel';
 import { HistoryPanel } from './components/HistoryPanel';
@@ -72,14 +79,25 @@ async function sendWithContext(
 ): Promise<void> {
   const read = (path: string) => host.notes.readNote(path);
   const isNote = (note: NoteRef | null): note is NoteRef => note !== null;
+  // Mentioned images go as images while there is room (ADR-035); the rest of the mentions as files.
+  const images = [...context.images];
+  const notePaths: string[] = [];
+  for (const path of extractMentions(text)) {
+    const image =
+      imageMimeType(path) && images.length < MAX_IMAGES_PER_MESSAGE
+        ? await host.notes.readImage(path)
+        : null;
+    if (image) images.push(image);
+    else notePaths.push(path);
+  }
   const [mentions, activeNote] = await Promise.all([
-    Promise.all(extractMentions(text).map(read)).then((notes) => notes.filter(isNote)),
+    Promise.all(notePaths.map(read)).then((notes) => notes.filter(isNote)),
     context.activeNotePath ? read(context.activeNotePath) : Promise.resolve(null),
   ]);
   await session.send(
     buildPrompt({
       text,
-      images: context.images,
+      images,
       mentions,
       activeNote: activeNote ?? undefined,
       selection: context.selection ?? undefined,
@@ -118,6 +136,22 @@ function ChatView(props: AppProps & { session: ChatSession }) {
   const { settings } = host;
   const optionsInComposer = settings.optionsPlacement === 'composer';
   const onConfigChange = (id: string, value: string) => void session.setConfigOption(id, value);
+  const client = clientCommands(state.commands, state.configOptions, Boolean(history));
+  const [openRequest, setOpenRequest] = useState<{ optionId: string; n: number } | null>(null);
+
+  /** Commands AgentHub runs instead of the agent (ADR-038); `/help` stays in the composer. */
+  const runClientCommand = (command: ClientCommand, args: string) => {
+    if (command.id === 'new') return onNewSession();
+    if (command.id === 'resume') return setShowHistory(true);
+    if (command.id === 'export') return void host.exportSession(session.getState());
+    if (command.id !== 'model' && command.id !== 'mode') return;
+    const option = optionFor(state.configOptions, command.id);
+    if (!option) return;
+    if (!args) return setOpenRequest((last) => ({ optionId: option.id, n: (last?.n ?? 0) + 1 }));
+    const value = matchOptionValue(option, args);
+    if (value) onConfigChange(option.id, value);
+    else new Notice(t('noticeOptionNoMatch', { option: optionName(option), query: args }));
+  };
 
   const onSend = (text: string, images: ImageBlock[]) => {
     const context = { activeNotePath: includeActive ? activeNotePath : null, selection, images };
@@ -142,6 +176,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         onAgentChange={onAgentChange}
         onConfigChange={onConfigChange}
         showOptions={!optionsInComposer}
+        openRequest={openRequest}
         onNewSession={onNewSession}
         onOpenSettings={() => host.openSettings()}
         onOpenHistory={history ? () => setShowHistory((open) => !open) : undefined}
@@ -191,8 +226,10 @@ function ChatView(props: AppProps & { session: ChatSession }) {
         disabled={state.status === 'closed'}
         sendWith={settings.sendWith}
         history={host.prompts}
-        notes={() => host.notes.listNotes()}
+        notes={() => host.notes.listPaths()}
         commands={state.commands}
+        clientCommands={client}
+        onClientCommand={runClientCommand}
         onSend={onSend}
         onStop={() => void session.cancel()}
         queue={state.queue}
@@ -206,6 +243,7 @@ function ChatView(props: AppProps & { session: ChatSession }) {
               busy={busy}
               onChange={onConfigChange}
               variant="inline"
+              openRequest={openRequest}
             />
           ) : undefined
         }

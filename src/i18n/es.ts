@@ -198,8 +198,18 @@ export const es: Messages = {
   cmdAskAboutNote: 'Preguntar a AgentHub sobre la nota actual',
   cmdNewSession: 'Empezar una sesión nueva de AgentHub',
   cmdStop: 'Detener el turno actual de AgentHub',
-  suggestNotes: 'Notas',
-  suggestCommands: 'Comandos del agente',
+  suggestNotes: 'Archivos y carpetas',
+  suggestCommands: 'Comandos',
+  suggestSkills: 'Skills',
+  suggestClientTag: 'AgentHub',
+  // Client commands (T11.2, ADR-038)
+  clientCmdNew: 'Empezar una sesión nueva',
+  clientCmdResume: 'Abrir el historial de sesiones',
+  clientCmdExport: 'Exportar esta sesión a una nota',
+  clientCmdHelp: 'Ver los comandos disponibles',
+  clientCmdModel: 'Elegir el modelo, o fijarlo: /model <nombre>',
+  clientCmdMode: 'Elegir el modo, o fijarlo: /mode <nombre>',
+  noticeOptionNoMatch: 'Ningún valor de {option} coincide con «{query}».',
   openFile: 'Abrir {path}',
 
   // History (Fase 4)
