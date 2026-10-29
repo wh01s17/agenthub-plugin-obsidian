@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-28
+
 ### Fixed
 
 - A command sent as the first message of a session (such as `/skills`) reached the agent as ordinary text. Commands are now sent on their own: without the vault instructions in front and without the current note.
@@ -177,7 +179,9 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.7.0
+[0.6.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.6.0
 [0.5.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.1
 [0.5.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.0
 [0.4.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.4.1
