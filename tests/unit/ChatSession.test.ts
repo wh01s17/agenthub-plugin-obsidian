@@ -26,6 +26,24 @@ function makeSession(script: StubScript) {
 }
 
 describe('ChatSession', () => {
+  it('reads the usage limits when the agent starts and after each turn (ADR-040)', async () => {
+    const adapter = new StubAdapter(() => 'end_turn');
+    let percent = 0;
+    const readLimits = vi.fn(() => Promise.resolve({ fiveHour: { usedPercent: ++percent } }));
+    const session = new ChatSession({
+      localId: 'l1',
+      adapter,
+      host: hostServices,
+      options: { cwd: '/vault' },
+      readLimits,
+    });
+    await session.prepare();
+    await vi.waitFor(() => expect(session.getState().limits?.fiveHour?.usedPercent).toBe(1));
+    await session.send([{ type: 'text', text: 'hola' }]);
+    await vi.waitFor(() => expect(session.getState().limits?.fiveHour?.usedPercent).toBe(2));
+    expect(readLimits).toHaveBeenCalledTimes(2);
+  });
+
   it('starts the agent lazily, records the turn and titles the session', async () => {
     const { adapter, session } = makeSession(say('Hola'));
     expect(adapter.sessions).toHaveLength(0);

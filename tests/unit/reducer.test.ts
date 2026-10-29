@@ -181,7 +181,10 @@ describe('reduce', () => {
       { type: 'usage', usage: { contextUsed: 10, contextSize: 100 } },
       { type: 'usage', usage: { contextUsed: 20, costUsd: undefined } },
       { type: 'commands', commands: [{ name: 'review' }] },
+      { type: 'limits', limits: { fiveHour: { usedPercent: 10 } } },
+      { type: 'limits', limits: { weekly: { usedPercent: 3 } } },
     );
+    expect(state.limits).toEqual({ fiveHour: { usedPercent: 10 }, weekly: { usedPercent: 3 } });
     expect(state.nativeSessionId).toBe('n1');
     expect(state.currentModeId).toBe('auto');
     expect(state.configOptions[0]?.currentValue).toBe('auto');

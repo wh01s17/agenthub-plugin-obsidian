@@ -1,6 +1,7 @@
 // ACP `session/update` → domain events (plan §5.1). Tolerant by design: agents send extra kinds and
 // fields (S2), so input is treated as untrusted JSON and unknown shapes become `debug` events.
 
+import { claudeLimits } from '../../core/limits';
 import type {
   AgentEvent,
   ConfigOption,
@@ -190,8 +191,11 @@ export class AcpUpdateMapper {
       }
       case 'config_option_update':
         return [{ type: 'config', configOptions: mapConfigOptions(update.configOptions) }];
-      case 'usage_update':
-        return [{ type: 'usage', usage: mapUsage(update) }];
+      case 'usage_update': {
+        const limits = claudeLimits(update._meta);
+        const usage: AgentEvent = { type: 'usage', usage: mapUsage(update) };
+        return limits ? [usage, { type: 'limits', limits }] : [usage];
+      }
       default:
         return [{ type: 'debug', source: 'rpc', line: JSON.stringify(update) }];
     }

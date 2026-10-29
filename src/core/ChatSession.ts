@@ -22,6 +22,7 @@ import type {
   PermissionOutcome,
   PermissionRequest,
   PromptBlock,
+  RateLimits,
   SessionViewState,
   TranscriptItem,
 } from './types';
@@ -45,6 +46,8 @@ export interface ChatSessionInit {
   onConfigChosen?: (id: string, value: string) => void;
   /** Turn slots shared with other sessions (limit of agents working at once, ADR-034). */
   turns?: Pick<TurnLimiter, 'full' | 'acquire'>;
+  /** Usage limits the agent does not report itself, read when it starts and after each turn (ADR-040). */
+  readLimits?: () => Promise<RateLimits | null> | null;
   now?: () => number;
 }
 
@@ -399,6 +402,7 @@ export class ChatSession {
         return null;
       }
       this.agent = agent;
+      this.refreshLimits();
       // Started ahead of a message (prepare): back to "Ready". A message sent meanwhile already
       // switched the status to running, so leave that alone.
       if (this.state.status === 'starting') this.dispatch({ type: 'local.status', status: 'idle' });
@@ -431,7 +435,10 @@ export class ChatSession {
       if (this.debugLines.length > DEBUG_CAPACITY) this.debugLines.shift();
       return;
     }
-    if (event.type === 'turn.end') this.resolveAllPending({ outcome: 'cancelled' });
+    if (event.type === 'turn.end') {
+      this.resolveAllPending({ outcome: 'cancelled' });
+      this.refreshLimits();
+    }
     if (event.type === 'error' && !event.recoverable) {
       // The process is gone; the next message starts a fresh agent.
       const dead = this.agent;
@@ -439,6 +446,16 @@ export class ChatSession {
       void dead?.dispose();
     }
     this.dispatch(event);
+  }
+
+  /** Never fails the session: limits are a nicety. */
+  private refreshLimits(): void {
+    void this.init
+      .readLimits?.()
+      ?.then((limits) => {
+        if (limits && !this.disposed) this.dispatch({ type: 'limits', limits });
+      })
+      .catch(() => undefined);
   }
 
   private requestPermission(request: PermissionRequest): Promise<PermissionOutcome> {

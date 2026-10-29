@@ -37,6 +37,11 @@ describe('AcpUpdateMapper with recorded fixtures', () => {
 
     const usage = ofType(events, 'usage')[0]?.usage;
     expect(usage?.contextSize).toBeGreaterThan(0);
+    // Account limits ride on usage_update `_meta` (ADR-040).
+    expect(ofType(events, 'limits')[0]?.limits).toEqual({
+      fiveHour: { usedPercent: 17, resetsAt: 1790893800000 },
+      weekly: { usedPercent: 2, resetsAt: 1791424800000 },
+    });
     expect(ofType(events, 'commands')[0]?.commands.length).toBeGreaterThan(0);
   });
 

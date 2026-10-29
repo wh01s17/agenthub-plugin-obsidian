@@ -2,7 +2,7 @@
 
 import type { AgentAdapter, SessionOptions } from './AgentAdapter';
 import { ChatSession, type HostServices } from './ChatSession';
-import type { AgentId, ConfigOption, TranscriptItem } from './types';
+import type { AgentId, ConfigOption, RateLimits, TranscriptItem } from './types';
 import type { ConfirmDangerousMode } from './permissionModes';
 import { TurnLimiter } from './TurnLimiter';
 
@@ -21,6 +21,11 @@ export interface SessionManagerDeps {
   confirmDangerousMode?: ConfirmDangerousMode;
   /** Sessions that may run a turn at once; 0 or absent = no limit (ADR-034). */
   maxWorking?: () => number;
+  /**
+   * Account usage limits for agents that do not report them during a turn (Codex, ADR-040);
+   * `null` when unknown or not wanted.
+   */
+  readLimits?: (agentId: AgentId) => Promise<RateLimits | null>;
 }
 
 export class SessionManager {
@@ -85,6 +90,7 @@ export class SessionManager {
         this.deps.rememberConfigOptions?.(agentId, options),
       onConfigChosen: (id: string, value: string) =>
         this.deps.rememberConfigChoice?.(agentId, id, value),
+      readLimits: this.deps.readLimits && (() => this.deps.readLimits?.(agentId) ?? null),
     };
   }
 

@@ -77,6 +77,20 @@ export interface Usage {
   contextSize?: number;
 }
 
+/** One usage limit window of the agent's account (plan T12, ADR-040). */
+export interface LimitWindow {
+  /** 0–100. */
+  usedPercent: number;
+  /** When the window resets, epoch milliseconds. */
+  resetsAt?: number;
+}
+
+/** The account's 5-hour and weekly limits, as far as the agent reports them. */
+export interface RateLimits {
+  fiveHour?: LimitWindow;
+  weekly?: LimitWindow;
+}
+
 export type AgentEvent =
   | {
       type: 'session.ready';
@@ -98,6 +112,7 @@ export type AgentEvent =
   | { type: 'commands'; commands: SlashCommand[] }
   | { type: 'mode'; currentModeId: string }
   | { type: 'usage'; usage: Usage }
+  | { type: 'limits'; limits: RateLimits }
   /** Direct mode without interactive prompts: a tool call the agent was not allowed to run. */
   | { type: 'permission.denied'; toolName: string; toolCallId?: string; input?: unknown }
   | { type: 'turn.end'; stopReason: StopReason }
@@ -119,6 +134,7 @@ export const AGENT_EVENT_TYPES = [
   'commands',
   'mode',
   'usage',
+  'limits',
   'permission.denied',
   'turn.end',
   'error',
@@ -198,6 +214,8 @@ export interface SessionViewState {
   readonly currentModelId?: string;
   readonly commands: readonly SlashCommand[];
   readonly usage?: Usage;
+  /** Account usage limits (5 hours, week); not stored with the session. */
+  readonly limits?: RateLimits;
   /** Messages waiting for the current turn to end, oldest first. */
   readonly queue: readonly QueuedMessage[];
   /** The queue stopped after a stopped or failed turn; the next send resumes it. */

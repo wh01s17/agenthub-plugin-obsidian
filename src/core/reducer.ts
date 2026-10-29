@@ -95,6 +95,8 @@ export function reduce(state: SessionViewState, action: SessionAction): SessionV
       return { ...state, commands: action.commands };
     case 'usage':
       return { ...state, usage: mergeUsage(state.usage, action.usage) };
+    case 'limits':
+      return { ...state, limits: { ...state.limits, ...action.limits } };
 
     case 'message.chunk':
       return action.role === 'assistant'
