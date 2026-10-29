@@ -10,7 +10,8 @@ import { AgentRegistry } from './agents/AgentRegistry';
 import { AGENTHUB_ICON, VIEW_TYPE_AGENTHUB } from './constants';
 import type { DetectionResult, SessionOptions } from './core/AgentAdapter';
 import type { SelectionRef } from './core/PromptBuilder';
-import type { SessionViewState } from './core/types';
+import { codexLimits, isCodexCommand, LimitsCache } from './core/limits';
+import type { RateLimits, SessionViewState } from './core/types';
 import { SessionManager } from './core/SessionManager';
 import { EditConflictWatcher } from './core/EditConflicts';
 import { createNoteContext } from './host/NoteContext';
@@ -18,6 +19,7 @@ import { createObsidianHost, vaultBasePath } from './host/ObsidianHost';
 import { openPluginSettings } from './host/openSettings';
 import { t } from './i18n';
 import { CommandResolver, type ResolvedCommand } from './process/BinaryResolver';
+import { readCodexRateLimits } from './process/codexLimits';
 import { ProcessRegistry } from './process/ProcessRunner';
 import { LoginShellEnv } from './process/ShellEnv';
 import {
@@ -75,6 +77,7 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
       this.editConflicts.track(session);
     },
     maxWorking: () => this.settings.maxWorkingAgents,
+    readLimits: (agentId) => this.readLimits(agentId),
     knownConfigOptions: (agentId) => this.settings.knownConfigOptions[agentId],
     // The options chosen in the view become the agent's initial values (unrestricted modes are
     // still confirmed at every start, ADR-030).
@@ -116,6 +119,18 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
   );
   readonly prompts = new PromptHistory();
   private readonly loginShell = new LoginShellEnv({ shell: process.env.SHELL });
+  /** Codex's account limits, shared by its sessions for a minute (ADR-040). */
+  private readonly codexLimits = new LimitsCache(async () => {
+    const codex = await this.resolveCommand('codex');
+    if (!codex) return null;
+    const result = await readCodexRateLimits({
+      command: codex.path,
+      env: codex.env,
+      cwd: this.workingDirectory(),
+      registry: this.processes,
+    });
+    return codexLimits(result);
+  });
 
   override async onload(): Promise<void> {
     this.settings = migrate(await this.loadData());
@@ -343,6 +358,15 @@ export default class AgentHubPlugin extends Plugin implements SettingsHost, View
         configDir: this.app.vault.configDir,
       }),
     };
+  }
+
+  /** Codex's account limits via `codex app-server` (ADR-040); other agents report theirs in a turn. */
+  private readLimits(agentId: string): Promise<RateLimits | null> {
+    const agent = this.agents.config(agentId);
+    if (!this.settings.showUsage || !agent || !isCodexCommand(agent.command, agent.args)) {
+      return Promise.resolve(null);
+    }
+    return this.codexLimits.get();
   }
 
   /** Built per call so PATH settings apply immediately (ADR-017). */
