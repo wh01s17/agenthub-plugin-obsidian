@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-28
+
 ### Added
 
 - Usage limits ring at the right of the message box: how much of the 5-hour and weekly limits you have used, alternating every 7 seconds (`5h`, `w`), with both and their reset times on hover. Claude Code reports them during its turns; for Codex, AgentHub asks `codex app-server` (at most once a minute). Hidden when **Show usage** is off.
@@ -183,7 +185,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.7.0...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.8.0
 [0.7.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.7.0
 [0.6.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.6.0
 [0.5.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.5.1

@@ -1133,7 +1133,7 @@ fuera a usuarios, quitar una función), **MINOR** para funciones nuevas compatib
    automática analice la versión nueva.
 
 **Historial:** 0.0.1 (scaffolding, sin release) · 0.0.2 (tag; borrador eliminado) · 0.0.3, 0.0.4, 0.0.5, 0.1.0, 0.1.1,
-0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) publicada; 0.4.1 (PATCH: hover y foco de las filas del historial) publicada. 0.5.0 (MINOR: imágenes pegadas, arrastradas o adjuntas en el chat, ADR-035). 0.5.1 (PATCH: scroll horizontal en paneles estrechos). 0.6.0 (MINOR: cola de mensajes mientras el agente trabaja, presets GitHub Copilot y Grok; ADR-036/037). 0.7.0 (MINOR: comandos `/` de AgentHub y menús propios, `$` skills, `@` con archivos/carpetas/imágenes, fix de comandos en el primer mensaje; ADR-038/039).
+0.2.0 y 0.2.1 publicadas; 0.3.0 (MINOR: pestañas, cambio del estado guardado de la vista) publicada; 0.4.0 (MINOR: límite de agentes a la vez, aviso de ediciones compartidas, reordenar pestañas; ajustes nuevos con valores por defecto) publicada; 0.4.1 (PATCH: hover y foco de las filas del historial) publicada. 0.5.0 (MINOR: imágenes pegadas, arrastradas o adjuntas en el chat, ADR-035). 0.5.1 (PATCH: scroll horizontal en paneles estrechos). 0.6.0 (MINOR: cola de mensajes mientras el agente trabaja, presets GitHub Copilot y Grok; ADR-036/037). 0.7.0 (MINOR: comandos `/` de AgentHub y menús propios, `$` skills, `@` con archivos/carpetas/imágenes, fix de comandos en el primer mensaje; ADR-038/039). 0.8.0 (MINOR: anillo de límites de uso 5 h / semana; ADR-040).
 La numeración 0.0.x se preparó sin esta regla; desde aquí se aplica. 0.1.0 y 0.1.1 publicadas; 0.1.1 corrige los avisos de la revisión de la comunidad. 0.2.0 (MINOR): rediseño, ajustes de apariencia, opciones persistentes e historial de prompts.
 
 **Tienda de la comunidad (camino a 1.0.0):** desde 2026 el envío ya no es un PR a `obsidianmd/obsidian-releases`: se hace en
@@ -1457,7 +1457,8 @@ Decisión en ADR-040.
   (fijo si solo hay una ventana), tooltip y nombre accesible con ambas ventanas, porcentaje y reinicio; naranja ≥ 75 %,
   rojo ≥ 90 %; sin animación con *reduced motion*. Oculto si `showUsage` está desactivado. README (también §privacidad:
   proceso `codex app-server`), CHANGELOG, i18n. *CA:* `LimitsRing.test.tsx`, axe.
-- [ ] **T12.5** Revisión del usuario en Obsidian con Claude y Codex; release 0.8.0 con su confirmación.
+- [x] **T12.5** Revisión del usuario en Obsidian con Claude y Codex: aprobada el 2026-10-28 («funciona, haz los commits
+  y lanza la release»); release 0.8.0.
 
 ### Fase 7 — Descartada: modo terminal
 
