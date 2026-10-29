@@ -111,7 +111,7 @@ Back up your vault or keep it under version control before allowing an agent to 
 - While the agent works, keep typing and press **Enter** (or **Add to queue**) to queue more instructions. **Stop** pauses the queue; sending another message or **Send now** resumes it.
 - Press **Up** in an empty or single-line message to recall the prompts you sent since Obsidian started, and **Down** to go forward again.
 - Type **`@`** to mention a note, file, or folder (mentioned images are sent as images), or **`/`** at the start of a message to autocomplete commands. **`$`** completes skills from agents that name them that way (Codex).
-- AgentHub's own commands: **`/new`** (or `/clear`), **`/resume`**, **`/export`**, **`/help`**, and **`/model`** / **`/mode`** (`/model opus` sets it directly). A command the agent announces with the same name goes to the agent.
+- AgentHub's own commands: **`/new`** (or `/clear`), **`/resume`**, **`/export`**, **`/help`**, **`/model`** / **`/mode`** (`/model opus` sets it directly), and **`/skills`** (pick one of Codex's skills). A command the agent announces with the same name goes to the agent, except `/model`, `/mode` and `/skills` typed alone, which open AgentHub's menu.
 - Use the **clock icon** for session history and the **pencil icon** for a new session in the current tab.
 - Use **`+`** in the tab bar at the top of the view to open another tab with the default agent. Double-click a tab to rename it, and close it with **×** or the middle mouse button; closing a tab stops its agent (the conversation stays in history). Sessions opened from history get their own tab, and your tabs reopen after restarting Obsidian.
 

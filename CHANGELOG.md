@@ -4,9 +4,14 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Fixed
+
+- A command sent as the first message of a session (such as `/skills`) reached the agent as ordinary text. Commands are now sent on their own: without the vault instructions in front and without the current note.
+
 ### Added
 
-- AgentHub commands in the message box: `/new` (or `/clear`), `/resume`, `/export`, `/help`, and `/model` / `/mode` (opens the option, or sets it: `/model opus`). If the agent has a command with the same name, the agent's command runs instead.
+- AgentHub commands in the message box: `/new` (or `/clear`), `/resume`, `/export`, `/help`, and `/model` / `/mode` (opens the option, or sets it: `/model opus`). If the agent has a command with the same name, the agent's command runs instead, except that `/model`, `/mode` and `/skills` typed alone always open AgentHub's menu (agents only answer them with text in AgentHub).
+- `/skills` opens a list of the agent's skills to pick one (Codex).
 - The `/` list now scrolls through every command (agents announce hundreds), shows AgentHub's commands first, and shows what each command expects after its name.
 - Type **`$`** to complete skills from agents that name them that way (Codex).
 - **`@`** now lists every file and folder in the vault, not only notes. Mentioned images (PNG, JPEG, GIF, WebP) are sent as images.
