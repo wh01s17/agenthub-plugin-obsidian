@@ -35,6 +35,8 @@ export default defineConfig([
       // `tests/setup.ts` crea `window` en los tests que corren en Node.
       'obsidianmd/no-global-this': 'off',
       'obsidianmd/prefer-window-timers': 'off',
+      // `requestUrl` only exists inside Obsidian.
+      'no-restricted-globals': 'off',
     },
   },
   {

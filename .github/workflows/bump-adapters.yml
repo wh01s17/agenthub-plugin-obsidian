@@ -1,0 +1,57 @@
+name: Bump ACP adapters
+
+# Daily check for new stable versions of the ACP adapters pinned in the presets (ADR-041). When there
+# is one, moves the pin, runs lint/tests/build and opens (or updates) the `bot/bump-adapters` PR.
+# Pull requests opened with GITHUB_TOKEN do not trigger ci.yml, so the checks run here.
+on:
+  schedule:
+    - cron: '23 9 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: bump-adapters
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Look for new adapter versions
+        id: bump
+        run: node scripts/bump-adapters.mjs "$RUNNER_TEMP/body.md"
+      - if: steps.bump.outputs.changed == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.bump.outputs.changed == 'true'
+        run: pnpm lint
+      - if: steps.bump.outputs.changed == 'true'
+        run: pnpm test
+      - if: steps.bump.outputs.changed == 'true'
+        run: pnpm build
+      - name: Open or update the pull request
+        if: steps.bump.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.bump.outputs.title }}
+          BRANCH: bot/bump-adapters
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -C "$BRANCH"
+          git commit -am "$TITLE"
+          git push --force origin "$BRANCH"
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')"
+          if [ -n "$pr" ]; then
+            gh pr edit "$pr" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/body.md"
+          fi

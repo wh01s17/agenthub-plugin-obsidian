@@ -1,0 +1,93 @@
+name: Release on label
+
+# One-click release (plan §8.4, ADR-041). Adding the `release` label (PATCH) or `release:minor` to an
+# open PR into main is the user's confirmation: the workflow rebases the PR on main, bumps the
+# version, moves [Unreleased] of CHANGELOG.md, runs lint/tests/build, commits `chore(release)`, tags,
+# publishes the release as Latest (release.yml) and only then fast-forwards main, so the manifest on
+# main never names a version without its release. Only people with triage access can add labels.
+# To retry after a failure, remove the label and add it again.
+on:
+  pull_request:
+    types: [labeled]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  prepare:
+    if: >-
+      (github.event.label.name == 'release' || github.event.label.name == 'release:minor') &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.prepare.outputs.version }}
+    env:
+      BRANCH: ${{ github.event.pull_request.head.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Rebase on main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rebase origin/main
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Bump the version
+        id: prepare
+        env:
+          KIND: ${{ github.event.label.name == 'release:minor' && 'minor' || 'patch' }}
+        run: node scripts/release.mjs prepare "$KIND"
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - name: Commit, tag and push the branch and the tag
+        env:
+          VERSION: ${{ steps.prepare.outputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" > /dev/null; then
+            echo "Tag $VERSION already exists" >&2
+            exit 1
+          fi
+          git commit -am "chore(release): $VERSION [T13.3]"
+          git tag -a "$VERSION" -m "AgentHub $VERSION"
+          git push --force-with-lease="$BRANCH" origin "HEAD:refs/heads/$BRANCH" "refs/tags/$VERSION"
+
+  release:
+    needs: prepare
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.prepare.outputs.version }}
+      publish: true
+
+  merge:
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.version }}
+          fetch-depth: 0
+      # Fast-forward only: the PR's head is now the release commit, so GitHub marks it as merged.
+      - name: Fast-forward main to the release
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: git push origin "$(git rev-parse "$VERSION^{commit}"):refs/heads/main"

@@ -2,10 +2,20 @@ name: Release
 
 # Push a tag equal to the manifest version (e.g. `0.1.0`, no "v" prefix: Obsidian requires it)
 # Update package.json, then run `npm_package_version=X.Y.Z node scripts/version-bump.mjs` (plan §8.4).
+# Also called by release-on-label.yml (one-click release, ADR-041) with `publish: true`: the label is
+# the user's confirmation, so the release goes out as Latest with the CHANGELOG notes.
 on:
   push:
     tags:
       - '*'
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      publish:
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -16,8 +26,12 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -30,8 +44,8 @@ jobs:
       - name: Check that the tag matches manifest.json
         run: |
           version="$(node -p "require('./manifest.json').version")"
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match manifest version $version" >&2
+          if [ "$version" != "$TAG" ]; then
+            echo "Tag $TAG does not match manifest version $version" >&2
             exit 1
           fi
       - name: Attest the release assets
@@ -41,9 +55,18 @@ jobs:
             main.js
             manifest.json
             styles.css
-      - name: Create the GitHub release
+      - name: Create the GitHub release (draft)
+        if: ${{ !inputs.publish }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" main.js manifest.json styles.css \
-            --title "$GITHUB_REF_NAME" --generate-notes --draft
+          gh release create "$TAG" main.js manifest.json styles.css \
+            --title "$TAG" --generate-notes --draft
+      - name: Publish the GitHub release
+        if: ${{ inputs.publish }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/release.mjs notes "$TAG" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" main.js manifest.json styles.css \
+            --title "$TAG" --notes-file "$RUNNER_TEMP/notes.md" --verify-tag --latest

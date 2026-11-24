@@ -194,6 +194,8 @@ Follow the version policy in [`plan.md` §8.4](plan.md#84-versionado-y-releases)
 4. The release workflow validates and builds the plugin, then creates a **draft** containing `main.js`, `manifest.json`, and `styles.css`, with GitHub artifact attestations for their provenance.
 5. Publish after the maintainer confirms, using the changelog notes. Record the release in the development log, then select **Check for new releases** on the [community directory listing](https://community.obsidian.md/plugins/agenthub) so the automated review checks the new version. Beta versions (`X.Y.Z-beta.N`) are **prereleases**, are not marked **Latest**, and are tested with BRAT.
 
+**One-click release.** Add the `release` label (PATCH) or `release:minor` (MINOR) to a pull request into `main` that has its `[Unreleased]` changelog entry. The `release-on-label` workflow rebases it on `main`, bumps the version, runs lint, tests and build, tags, publishes the release as **Latest** with the changelog notes, and then fast-forwards `main`. A daily workflow (`bump-adapters`) opens a pull request when a pinned ACP adapter has a new stable version; run `AGENTHUB_E2E=1 pnpm test tests/e2e` locally before labelling it.
+
 ## License
 
 MIT. Agent logos come from [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT). Trademarks belong to their respective owners and are used to identify the corresponding tools.
