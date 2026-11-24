@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **0.8.0 publicada como Latest** (Fase 12: anillo de límites de uso 5 h / semana, ADR-040). |
-| Próxima tarea | **T13.4** (ajustes del repo); luego revisar el PR diario `bot/bump-adapters` (e2e local) y etiquetar `release` para publicar 0.8.1 con el fix de Codex. Tras cada release, el usuario pulsa **Check for new releases**. |
+| Próxima tarea | Revisar el PR diario `bot/bump-adapters` (e2e local) y etiquetar `release` para publicar 0.8.1 con el fix de Codex. Tras cada release, el usuario pulsa **Check for new releases**. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
 | Última actualización | 2026-11-24 — codex-acp 2.12.0 (modelos 6.2). Claude (Opus 5.5). |
@@ -1484,7 +1484,8 @@ el plugin, corran los tests y se lance la release», «con la etiqueta release, 
 - [x] **T13.3** `release-on-label.yml`: la etiqueta `release` (PATCH) o `release:minor` en un PR sube la versión, mueve
   `[Unreleased]` del CHANGELOG, valida, fusiona el PR (rebase), crea el tag y llama a `release.yml` (ahora también
   `workflow_call`), que publica la release como *Latest* con las notas del CHANGELOG. El push del tag sigue creando un borrador.
-- [ ] **T13.4** Ajustes del repo (Actions puede crear PR; etiquetas `release` y `release:minor`), §8.4, README de desarrollo.
+- [x] **T13.4** Ajustes del repo (Actions puede crear PR, permisos por defecto de solo lectura; etiquetas `release` y
+  `release:minor`), §8.4, README de desarrollo. Hecho por el usuario el 2026-11-24.
 
 ### Fase 7 — Descartada: modo terminal
 
