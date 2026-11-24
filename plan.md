@@ -281,7 +281,7 @@ Agentes con ACP ✅ (2026-10-01):
 
 | Agente | Comando ACP | Notas |
 |---|---|---|
-| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0` | ✅ Reutiliza el login existente (sin API key). Pide permisos (`allow_once`, `allow_always`, `reject_once`). Modo por defecto `default` (Manual). ~20 s para la tarea de prueba. |
+| Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.112.0` | ✅ Reutiliza el login existente (sin API key). Pide permisos (`allow_once`, `allow_always`, `reject_once`). Modo por defecto `default` (Manual). ~20 s para la tarea de prueba. |
 | Codex | `npx -y @agentclientprotocol/codex-acp@2.12.0` (antes 2.1.1) | ✅ Reutiliza el login de ChatGPT. Modo por defecto `agent` (*Auto review*: no pidió permisos para escribir). ~45 s. |
 | Gemini CLI | `gemini --acp` | ⚠️ Handshake OK, pero con la cuenta personal de este equipo la sesión falla: *"no longer supported for Gemini Code Assist for individuals… migrate to Antigravity"*. Preset deshabilitado por defecto. |
 | OpenCode | `opencode acp` | ✅ Nativo. No pidió permisos para escribir. Modelo vía `configOptions`. ~19 s. |
@@ -344,7 +344,7 @@ con `--include-partial-messages`), `result` (subtype, `is_error`, `result`, `ses
 |---|---|---|
 | `obsidian` | 1.13.1 | Tipos de la API (devDependency). |
 | `@agentclientprotocol/sdk` | 1.6.0 | Cliente ACP (`ClientSideConnection`, `ndJsonStream`). |
-| `@agentclientprotocol/claude-agent-acp` | 0.85.0 | Adaptador ACP de Claude (lo instala el usuario o se usa vía `npx`). |
+| `@agentclientprotocol/claude-agent-acp` | 0.112.0 | Adaptador ACP de Claude (lo instala el usuario o se usa vía `npx`). |
 | `@agentclientprotocol/codex-acp` | 2.12.0 | Adaptador ACP de Codex. El catálogo de modelos depende de la versión del cliente: subir el pin cuando falten modelos nuevos. |
 | `@anthropic-ai/claude-agent-sdk` | 0.3.287 | Alternativa evaluable (no prevista en el MVP). |
 | `@openai/codex-sdk` | 0.159.3 | Alternativa evaluable (no prevista en el MVP). |

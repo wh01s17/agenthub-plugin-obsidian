@@ -90,7 +90,7 @@ export const AGENT_PRESETS: readonly AgentConfig[] = [
     enabled: true,
     transport: 'acp',
     command: 'npx',
-    args: ['-y', '@agentclientprotocol/claude-agent-acp@0.85.0'],
+    args: ['-y', '@agentclientprotocol/claude-agent-acp@0.112.0'],
     env: {},
     config: {},
     installCommand: 'npm i -g @agentclientprotocol/claude-agent-acp',
