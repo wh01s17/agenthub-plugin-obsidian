@@ -4,6 +4,10 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Fixed
+
+- Codex did not list the newest models (such as GPT-6.2). The Codex adapter is updated to 2.12.0, and saved Codex settings that still pin an older adapter version move to the new one (commands you changed are kept).
+
 ## [0.8.0] - 2026-10-28
 
 ### Added

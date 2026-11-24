@@ -103,7 +103,7 @@ export const AGENT_PRESETS: readonly AgentConfig[] = [
     enabled: true,
     transport: 'acp',
     command: 'npx',
-    args: ['-y', '@agentclientprotocol/codex-acp@2.1.1'],
+    args: ['-y', '@agentclientprotocol/codex-acp@2.12.0'],
     env: {},
     config: {},
     installCommand: 'npm i -g @agentclientprotocol/codex-acp',
@@ -213,6 +213,34 @@ export function defaultSettings(): AgentHubSettings {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** `@scope/name@1.2.3` → `['@scope/name', '1.2.3']`; anything else → undefined. */
+function pinnedPackage(arg: string): [string, string] | undefined {
+  const match = /^(@?[^@\s]+)@(\d+\.\d+\.\d+(?:-[\w.]+)?)$/.exec(arg);
+  return match ? [match[1] ?? '', match[2] ?? ''] : undefined;
+}
+
+/**
+ * Saved built-in agents keep the adapter version they were created with, so a newer pin in
+ * `AGENT_PRESETS` would never reach them. When the saved command differs from the preset only in
+ * that pinned version, take the preset's (e.g. codex-acp 2.1.1 → 2.12.0: the model catalog the
+ * server sends depends on the client version). Customised commands are left alone.
+ */
+function upgradePinnedAdapter(agent: AgentConfig): AgentConfig {
+  const preset = AGENT_PRESETS.find((p) => p.id === agent.id);
+  if (!agent.builtin || !preset || agent.command !== preset.command) return agent;
+  if (agent.args.length !== preset.args.length) return agent;
+  let changed = false;
+  for (const [i, arg] of agent.args.entries()) {
+    const target = preset.args[i] ?? '';
+    if (arg === target) continue;
+    const saved = pinnedPackage(arg);
+    const pinned = pinnedPackage(target);
+    if (!saved || !pinned || saved[0] !== pinned[0]) return agent;
+    changed = true;
+  }
+  return changed ? { ...agent, args: [...preset.args] } : agent;
+}
+
 /**
  * Turns whatever `loadData()` returned into valid settings. Invalid fields fall back to their
  * default, invalid agents are dropped, and presets added by newer plugin versions appear disabled.
@@ -230,7 +258,7 @@ export function migrate(raw: unknown): AgentHubSettings {
   const savedAgents = Array.isArray(raw.agents)
     ? raw.agents.flatMap((agent) => {
         const parsed = AgentConfigSchema.safeParse(agent);
-        return parsed.success ? [parsed.data] : [];
+        return parsed.success ? [upgradePinnedAdapter(parsed.data)] : [];
       })
     : defaults.agents;
   const known = new Set(savedAgents.map((agent) => agent.id));

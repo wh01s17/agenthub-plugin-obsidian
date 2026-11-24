@@ -59,6 +59,21 @@ describe('migrate', () => {
     expect(settings.agents.find((a) => a.id === 'codex-acp')?.enabled).toBe(false);
   });
 
+  it('moves built-in agents pinned to an older adapter to the current pin', () => {
+    const codex = AGENT_PRESETS.find((p) => p.id === 'codex-acp');
+    if (!codex) throw new Error('missing preset');
+    const old = { ...codex, enabled: true, args: ['-y', '@agentclientprotocol/codex-acp@2.1.1'] };
+    const custom = { ...codex, args: ['-y', '@agentclientprotocol/codex-acp@2.1.1', '--x'] };
+    const local = { ...codex, command: 'codex-acp', args: [] };
+    const [upgraded] = migrate({ agents: [old] }).agents;
+    expect(upgraded?.args).toEqual(codex.args);
+    expect(upgraded?.enabled).toBe(true);
+    expect(migrate({ agents: [custom] }).agents[0]?.args).toEqual(custom.args);
+    expect(migrate({ agents: [local] }).agents[0]?.args).toEqual([]);
+    const forked = { ...old, args: ['-y', '@someone/codex-acp@2.1.1'] };
+    expect(migrate({ agents: [forked] }).agents[0]?.args).toEqual(forked.args);
+  });
+
   it('repairs a default agent that no longer exists', () => {
     const settings = migrate({ ...defaultSettings(), defaultAgentId: 'gone' });
     expect(settings.defaultAgentId).toBe('claude-acp');

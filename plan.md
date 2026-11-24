@@ -41,10 +41,10 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **0.8.0 publicada como Latest** (Fase 12: anillo de límites de uso 5 h / semana, ADR-040). |
-| Próxima tarea | El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.8.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
+| Próxima tarea | Fix sin publicar: codex-acp 2.12.0 + migración de pines (bitácora 2026-11-24); publicar 0.8.1 solo con confirmación. El usuario pulsa **Check for new releases** en community.obsidian.md para que se revise 0.8.0. Sin tareas abiertas. Fase 5 condicional y Fase 7 descartada. |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
-| Última actualización | 2026-10-28 — Release 0.8.0 (Fase 12). Claude (Haiku 5.5). |
+| Última actualización | 2026-11-24 — codex-acp 2.12.0 (modelos 6.2). Claude (Opus 5.5). |
 | Código existente | Núcleo + ACP + UI + contexto de Obsidian (Fases 0–3 cerradas); guardado automático de sesiones con índice/JSONL, debounce, retención y ajustes de historial. Confirmación de modos sin restricciones, Codex en solo lectura y respaldo de opciones Gemini. Rediseño con pastillas de opciones, ajustes de apariencia, opciones persistentes por agente e historial de prompts (0.2.0). Pestañas con varias conversaciones en una vista (Fase 8, 0.3.0–0.4.1). Imágenes en el cuadro de mensaje (Fase 9, 0.5.0). Cola de mensajes y presets Copilot/Grok (Fase 10, 0.6.0). Lint y build pasan (1 aviso intencionado: `display()`, ADR-027); 268 tests pasan, 2 e2e omitidos. Rama `main`. |
 
 ### 0.2 Protocolo para un agente que retoma el trabajo
@@ -282,7 +282,7 @@ Agentes con ACP ✅ (2026-10-01):
 | Agente | Comando ACP | Notas |
 |---|---|---|
 | Claude Code | `npx -y @agentclientprotocol/claude-agent-acp@0.85.0` | ✅ Reutiliza el login existente (sin API key). Pide permisos (`allow_once`, `allow_always`, `reject_once`). Modo por defecto `default` (Manual). ~20 s para la tarea de prueba. |
-| Codex | `npx -y @agentclientprotocol/codex-acp@2.1.1` | ✅ Reutiliza el login de ChatGPT. Modo por defecto `agent` (*Auto review*: no pidió permisos para escribir). ~45 s. |
+| Codex | `npx -y @agentclientprotocol/codex-acp@2.12.0` (antes 2.1.1) | ✅ Reutiliza el login de ChatGPT. Modo por defecto `agent` (*Auto review*: no pidió permisos para escribir). ~45 s. |
 | Gemini CLI | `gemini --acp` | ⚠️ Handshake OK, pero con la cuenta personal de este equipo la sesión falla: *"no longer supported for Gemini Code Assist for individuals… migrate to Antigravity"*. Preset deshabilitado por defecto. |
 | OpenCode | `opencode acp` | ✅ Nativo. No pidió permisos para escribir. Modelo vía `configOptions`. ~19 s. |
 
@@ -345,7 +345,7 @@ con `--include-partial-messages`), `result` (subtype, `is_error`, `result`, `ses
 | `obsidian` | 1.13.1 | Tipos de la API (devDependency). |
 | `@agentclientprotocol/sdk` | 1.6.0 | Cliente ACP (`ClientSideConnection`, `ndJsonStream`). |
 | `@agentclientprotocol/claude-agent-acp` | 0.85.0 | Adaptador ACP de Claude (lo instala el usuario o se usa vía `npx`). |
-| `@agentclientprotocol/codex-acp` | 2.1.1 | Adaptador ACP de Codex. |
+| `@agentclientprotocol/codex-acp` | 2.12.0 | Adaptador ACP de Codex. El catálogo de modelos depende de la versión del cliente: subir el pin cuando falten modelos nuevos. |
 | `@anthropic-ai/claude-agent-sdk` | 0.3.287 | Alternativa evaluable (no prevista en el MVP). |
 | `@openai/codex-sdk` | 0.159.3 | Alternativa evaluable (no prevista en el MVP). |
 | `preact` | 11.0.0 | UI. |
@@ -1460,6 +1460,22 @@ Decisión en ADR-040.
 - [x] **T12.5** Revisión del usuario en Obsidian con Claude y Codex: aprobada el 2026-10-28 («funciona, haz los commits
   y lanza la release»); release 0.8.0.
 
+### Fase 13 — Adaptadores al día y release con un clic
+
+Origen: pedido del usuario (2026-11-24): Codex no mostraba los modelos 6.2; «si sale una nueva versión que se actualice
+el plugin, corran los tests y se lance la release», «con la etiqueta release, que sea con un solo clic». Decisión en ADR-041.
+
+- [x] **T13.1** Codex a `codex-acp@2.12.0` (el catálogo de modelos depende de la versión del cliente) y migración de pines:
+  `upgradePinnedAdapter` en `migrate()` lleva los agentes integrados guardados a la versión fijada del preset si su comando
+  solo difiere en esa versión. *CA:* `settings.test.ts`; e2e de Codex con 2.12.0.
+- [ ] **T13.2** `bump-adapters.yml` (diario + manual): `scripts/bump-adapters.mjs` consulta el dist-tag `latest` de npm de
+  cada adaptador fijado, cambia el pin en `settings.ts`, las tablas de `plan.md` y `[Unreleased]` del CHANGELOG; lint,
+  tests y build; abre o actualiza el PR `bot/bump-adapters`.
+- [ ] **T13.3** `release-on-label.yml`: la etiqueta `release` (PATCH) o `release:minor` en un PR sube la versión, mueve
+  `[Unreleased]` del CHANGELOG, valida, fusiona el PR (rebase), crea el tag y llama a `release.yml` (ahora también
+  `workflow_call`), que publica la release como *Latest* con las notas del CHANGELOG. El push del tag sigue creando un borrador.
+- [ ] **T13.4** Ajustes del repo (Actions puede crear PR; etiquetas `release` y `release:minor`), §8.4, README de desarrollo.
+
 ### Fase 7 — Descartada: modo terminal
 
 **Fuera del alcance por decisión del usuario (ADR-029).** Estas tareas quedan canceladas y no cuentan como pendientes.
@@ -1947,3 +1963,4 @@ llegar al límite. No aplica a este plan, a archivos generados (`pnpm-lock.yaml`
 - **2026-10-28 · usuario + Claude (Opus 5.5)** — **Release 0.7.0 publicada como Latest** con confirmación del usuario («ahora sii, sube todo y lanza la release»): https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.7.0. T11.5 cerrada. Lint, 293 tests y build en verde; `chore(release): 0.7.0 [T11.5]`, tag anotado y push conjunto de `main` y del tag. Workflows Release y CI en verde; SHA-256 de `main.js`, `manifest.json` y `styles.css` del borrador iguales al build local; `gh attestation verify main.js` correcto (código 0). Notas tomadas del CHANGELOG. De paso, los enlaces del pie del CHANGELOG (faltaba 0.6.0; `[Unreleased]` comparaba desde 0.5.1). Pendiente: **Check for new releases** en community.obsidian.md (lo hace el usuario).
 - **2026-10-28 · usuario + Claude (Opus 5.5)** — **Fase 12 (T12.1–T12.4): anillo de límites de uso** a pedido del usuario. Verificado contra las herramientas reales (sin coste salvo dos prompts mínimos «ok» a Claude para comparar con `/usage`): Claude manda `unifiedWindows` en `usage_update._meta` (fracción, s); `codex-acp` no envía límites, pero `codex app-server` → `account/rateLimits/read` sí (300/10080 min). Nuevo `core/limits.ts`, `process/codexLimits.ts`, `LimitsRing.tsx`; `ChatSession.readLimits` al arrancar y tras cada turno; caché de 1 min en el plugin. ADR-040. README (incluye el proceso extra en privacidad), CHANGELOG, i18n. 308 tests + axe, lint (1 aviso intencionado) y build en verde. Falta T12.5. Sin commits.
 - **2026-10-28 · usuario + Claude (Haiku 5.5)** — **Release 0.8.0 publicada como Latest** con confirmación del usuario («funciona, haz los commits y lanza la release»): https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.8.0. T12.5 cerrada. Commits por tarea (T12.2–T12.4 y docs), `chore(release): 0.8.0 [T12.5]`, tag anotado y push conjunto de `main` y del tag. Lint, 309 tests y build en verde; workflows Release y CI en verde; SHA-256 de `main.js`, `manifest.json` y `styles.css` del borrador iguales al build local; `gh attestation verify main.js` correcto. Notas tomadas del CHANGELOG. Pendiente: **Check for new releases** en community.obsidian.md (lo hace el usuario).
+- **2026-11-24 · usuario + Claude (Opus 5.5)** — **Fix: Codex no mostraba los modelos nuevos** (6.2 Sol/Astra). Causa verificada: el servidor devuelve el catálogo según la versión del cliente; `codex-acp@2.1.1` incluye codex 0.159.3 y su `~/.codex/models_cache.json` no trae la familia 6.2 (2.1.1 solo mostraba `gpt-6.2-sol` en `configOptions` porque es el `model` de `config.toml`). Con `codex-acp@2.12.0`, `session/new` ofrece `gpt-6.2-sol` y `gpt-6.2-astra`. Cambios: pin del preset a 2.12.0 y `upgradePinnedAdapter` en `migrate()`: los agentes integrados guardados cuyo comando solo difiere del preset en la versión fijada del mismo paquete pasan al pin actual (los comandos personalizados no se tocan). 310 tests, lint (1 aviso intencionado), build y e2e de Codex con 2.12.0 en verde. Sin commit ni release.
