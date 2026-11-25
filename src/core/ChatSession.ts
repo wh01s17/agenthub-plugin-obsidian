@@ -9,6 +9,7 @@ import type {
   SessionOptions,
 } from './AgentAdapter';
 import { AgentError } from './errors';
+import { shortenMentions } from './PromptBuilder';
 import {
   dangerousModeOptions,
   isDangerousMode,
@@ -514,9 +515,9 @@ export class ChatSession {
 }
 
 function titleFrom(blocks: PromptBlock[]): string {
-  const text = blocks
-    .flatMap((block) => (block.type === 'text' ? [block.text] : []))
-    .join(' ')
+  const text = shortenMentions(
+    blocks.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join(' '),
+  )
     .replace(/\s+/g, ' ')
     .trim();
   return text.length > TITLE_LENGTH ? `${text.slice(0, TITLE_LENGTH - 1)}…` : text;

@@ -49,6 +49,22 @@ export function extractMentions(text: string): string[] {
   return [...found];
 }
 
+/** File name shown for a cited note: the last path segment, without `.md`. */
+export function noteName(path: string): string {
+  const name = path.split('/').pop() || path;
+  return name.endsWith('.md') ? name.slice(0, -3) : name;
+}
+
+/** The text with each `@[[path]]` replaced by `@name`, for titles and other short labels. */
+export function shortenMentions(text: string): string {
+  return text.replace(MENTION, (_, path: string) => `@${noteName(path.trim())}`);
+}
+
+/** A message cut into plain text (even indices) and `@[[path]]` mentions (odd indices). */
+export function splitMentions(text: string): string[] {
+  return text.split(/@\[\[([^\]]+)\]\]/);
+}
+
 export function buildPrompt(input: PromptInput): PromptBlock[] {
   const images = input.images ?? [];
   // A message made only of images needs no empty text block.

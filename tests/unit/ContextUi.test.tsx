@@ -46,7 +46,11 @@ describe('context in prompts (Fase 3)', () => {
       'Otra.md',
       'Activa.md',
     ]);
-    expect(screen.getByText('Note: Activa.md')).toBeTruthy();
+    // The mention shows as a chip in the text; the active note as a chip below, without repeats.
+    const message = document.querySelector('.agenthub-message.is-user');
+    expect(message?.querySelector('.agenthub-message-text')?.textContent).toBe('compara con Otra');
+    expect(screen.getAllByRole('link', { name: 'Note: Otra.md' })).toHaveLength(1);
+    expect(screen.getAllByRole('link', { name: 'Note: Activa.md' })).toHaveLength(1);
   });
 
   it('lets the user leave the active note out', async () => {

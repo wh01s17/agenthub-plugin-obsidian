@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { imageDataUrl } from '../../core/images';
+import { extractMentions, noteName, splitMentions } from '../../core/PromptBuilder';
 import type { PermissionOutcome, PromptBlock, TranscriptItem } from '../../core/types';
 import { t } from '../../i18n';
 import { Icon } from './Icon';
@@ -35,22 +36,95 @@ function userText(blocks: readonly PromptBlock[]): string {
   return blocks.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join('\n\n');
 }
 
-function Attachments({ blocks }: { blocks: readonly PromptBlock[] }) {
-  const labels = blocks.flatMap((block) => {
-    if (block.type === 'file') return [t('attachedNote', { path: block.path })];
+interface NoteChipProps {
+  path: string;
+  label: string;
+  title: string;
+  icon: string;
+  onOpenPath: (path: string) => boolean;
+}
+
+/** A compact, clickable reference to a vault note; the full path shows on hover. */
+function NoteChip({ path, label, title, icon, onOpenPath }: NoteChipProps) {
+  return (
+    <a
+      href="#"
+      class="agenthub-note-chip"
+      title={title}
+      aria-label={title}
+      onClick={(event) => {
+        event.preventDefault();
+        onOpenPath(path);
+      }}
+    >
+      <Icon name={icon} />
+      <span class="agenthub-note-chip-label">{label}</span>
+    </a>
+  );
+}
+
+/** The user's text with each `@[[path]]` shown as a note chip instead of raw markup. */
+function UserText({ text, onOpenPath }: { text: string; onOpenPath: (path: string) => boolean }) {
+  return (
+    <div class="agenthub-message-text">
+      {splitMentions(text).map((part, index) => {
+        if (index % 2 === 0) return part;
+        const path = part.trim();
+        return (
+          <NoteChip
+            key={index}
+            path={path}
+            label={noteName(path)}
+            title={t('attachedNote', { path })}
+            icon="file-text"
+            onOpenPath={onOpenPath}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+/** Context sent with the message that the text does not already show (active note, selection). */
+function Attachments({
+  blocks,
+  mentioned,
+  onOpenPath,
+}: {
+  blocks: readonly PromptBlock[];
+  mentioned: ReadonlySet<string>;
+  onOpenPath: (path: string) => boolean;
+}) {
+  const chips = blocks.flatMap((block) => {
+    if (block.type === 'file' && !mentioned.has(block.path)) {
+      return [
+        <NoteChip
+          key={`file:${block.path}`}
+          path={block.path}
+          label={noteName(block.path)}
+          title={t('attachedNote', { path: block.path })}
+          icon="file-text"
+          onOpenPath={onOpenPath}
+        />,
+      ];
+    }
     if (block.type === 'selection') {
-      return [t('attachedSelection', { path: block.path, from: block.fromLine, to: block.toLine })];
+      const range = { path: block.path, from: block.fromLine, to: block.toLine };
+      return [
+        <NoteChip
+          key={`selection:${block.path}:${block.fromLine}`}
+          path={block.path}
+          label={`${noteName(block.path)} (${block.fromLine}–${block.toLine})`}
+          title={t('attachedSelection', range)}
+          icon="text-select"
+          onOpenPath={onOpenPath}
+        />,
+      ];
     }
     return [];
   });
-  if (labels.length === 0) return null;
-  return (
-    <ul class="agenthub-attachments">
-      {labels.map((label) => (
-        <li key={label}>{label}</li>
-      ))}
-    </ul>
-  );
+  if (chips.length === 0) return null;
+  return <div class="agenthub-attachments">{chips}</div>;
 }
 
 /** Images sent with a message (ADR-035); a click shows one at full width. */
@@ -95,9 +169,13 @@ function Item({
       return (
         <div class="agenthub-message is-user">
           <div class="agenthub-message-author">{t('you')}</div>
-          {text && <div class="agenthub-message-text">{text}</div>}
+          {text && <UserText text={text} onOpenPath={onOpenPath} />}
           <Images blocks={item.blocks} />
-          <Attachments blocks={item.blocks} />
+          <Attachments
+            blocks={item.blocks}
+            mentioned={new Set(extractMentions(text))}
+            onOpenPath={onOpenPath}
+          />
         </div>
       );
     }

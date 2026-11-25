@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPrompt, extractMentions } from '../../src/core/PromptBuilder';
+import { buildPrompt, extractMentions, shortenMentions } from '../../src/core/PromptBuilder';
 
 const note = (path: string, text?: string) => ({ path, absPath: `/v/${path}`, text });
 
@@ -55,5 +55,13 @@ describe('buildPrompt', () => {
       { type: 'file', path: 'Big.md', absPath: '/v/Big.md', text: undefined },
       { type: 'file', path: 'Small.md', absPath: '/v/Small.md', text: 'yy' },
     ]);
+  });
+});
+
+describe('shortenMentions', () => {
+  it('replaces each @[[path]] with the note name', () => {
+    expect(shortenMentions('@[[Meetings/Kickoff.md]] y @[[a/informe.pdf]] hola')).toBe(
+      '@Kickoff y @informe.pdf hola',
+    );
   });
 });

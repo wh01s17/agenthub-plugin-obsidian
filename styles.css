@@ -453,10 +453,6 @@
   font-weight: var(--font-semibold);
 }
 
-.agenthub-message.is-user .agenthub-attachments {
-  color: var(--text-muted);
-}
-
 .agenthub-message-text {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -466,18 +462,36 @@
 .agenthub-attachments {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--size-4-2);
-  margin: var(--size-4-1) 0 0;
-  padding: 0;
-  list-style: none;
-  color: var(--text-faint);
-  font-size: var(--font-ui-smaller);
+  gap: var(--size-4-1);
+  margin-top: var(--size-4-2);
 }
 
-/* Long note paths wrap instead of widening the message. */
-.agenthub-attachments > li {
-  min-width: 0;
-  overflow-wrap: anywhere;
+/* A cited note: a pill with the file name; the full path is in the tooltip. It stays inline (not
+   flex) so it sits on the text baseline instead of the icon's. */
+.agenthub-note-chip {
+  padding: 0.05em 0.35em;
+  border-radius: var(--radius-s);
+  background-color: var(--background-modifier-hover);
+  color: var(--text-accent);
+  text-decoration: none;
+  box-decoration-break: clone;
+}
+
+.agenthub-note-chip:hover {
+  background-color: var(--background-modifier-active-hover);
+  color: var(--text-accent-hover);
+}
+
+.agenthub-note-chip .agenthub-icon {
+  display: inline-block;
+  margin-right: 0.25em;
+  vertical-align: -0.15em;
+}
+
+.agenthub-note-chip .agenthub-icon svg {
+  display: block;
+  width: 1em;
+  height: 1em;
 }
 
 .agenthub-markdown {
