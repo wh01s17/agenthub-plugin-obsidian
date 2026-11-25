@@ -5,6 +5,12 @@ import { imageDataUrl, MAX_IMAGES_PER_MESSAGE, type ImageBlock } from '../../cor
 import type { PromptHistory } from '../../core/PromptHistory';
 import { parseClientCommand, type ClientCommand } from '../../core/clientCommands';
 import {
+  compactMentions,
+  expandMentions,
+  mentionLabel,
+  mentionSegments,
+} from '../../core/mentions';
+import {
   applySuggestion,
   commandSuggestions,
   findTrigger,
@@ -107,8 +113,11 @@ export function Composer(props: ComposerProps) {
   const imageKey = useRef(0);
   const ref = useRef<HTMLTextAreaElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const highlight = useRef<HTMLDivElement>(null);
   // Position while browsing the history (`null`: editing a new prompt) and the text it replaced.
   const recall = useRef<{ index: number; draft: string } | null>(null);
+  // Notes picked with `@` in this draft: label shown in the box → vault path (ADR-042).
+  const mentions = useRef(new Map<string, string>());
 
   const updateSuggestions = (value: string, cursor: number) => {
     const trigger = findTrigger(value, cursor);
@@ -130,7 +139,12 @@ export function Composer(props: ComposerProps) {
     const el = ref.current;
     const item = suggestions?.items[index];
     if (!el || !suggestions || !item) return;
-    const next = applySuggestion(text, el.selectionStart, suggestions.trigger, item.value);
+    let label: string | undefined;
+    if (suggestions.trigger.kind === 'note') {
+      label = mentionLabel(item.value, mentions.current, props.notes());
+      mentions.current.set(label, item.value);
+    }
+    const next = applySuggestion(text, el.selectionStart, suggestions.trigger, item.value, label);
     setText(next.text);
     setSuggestions(null);
     // Restore the caret after Preact updates the value.
@@ -140,8 +154,15 @@ export function Composer(props: ComposerProps) {
     });
   };
 
-  /** Shows a history entry (or the draft) with the caret at its end. */
-  const showRecalled = (value: string) => {
+  /** Shows a history entry (or the draft) with the caret at its end; `@[[path]]` become `@label`. */
+  const showRecalled = (raw: string) => {
+    const known = expandMentions(raw, mentions.current);
+    // Listing the vault is only worth it when there is a mention to shorten.
+    const compact = known.includes('@[[')
+      ? compactMentions(known, props.notes())
+      : { text: known, mentions: new Map<string, string>() };
+    mentions.current = compact.mentions;
+    const value = compact.text;
     setText(value);
     const el = ref.current;
     window.requestAnimationFrame(() => el?.setSelectionRange(value.length, value.length));
@@ -156,7 +177,7 @@ export function Composer(props: ComposerProps) {
     const state = recall.current;
     if (event.key === 'ArrowUp' && !el.value.slice(0, el.selectionStart).includes('\n')) {
       const index = state ? Math.max(0, state.index - 1) : entries.length - 1;
-      recall.current = { index, draft: state?.draft ?? text };
+      recall.current = { index, draft: state?.draft ?? expandMentions(text, mentions.current) };
       showRecalled(entries[index] ?? '');
       return true;
     }
@@ -206,7 +227,7 @@ export function Composer(props: ComposerProps) {
   };
 
   const send = () => {
-    const message = text.trim();
+    const message = expandMentions(text, mentions.current).trim();
     const attached = imagesRef.current.map((image) => image.block);
     if ((!message && attached.length === 0) || disabled) return;
     if (message) props.history?.add(message);
@@ -217,12 +238,14 @@ export function Composer(props: ComposerProps) {
       if (client.command.id === 'help') return showMenu('/');
       if (client.command.id === 'skills') return showMenu('$');
       props.onClientCommand?.(client.command, client.args);
+      mentions.current = new Map();
       setText('');
       setSuggestions(null);
       ref.current?.focus();
       return;
     }
     onSend(message, attached);
+    mentions.current = new Map();
     setText('');
     setImages([]);
     setSuggestions(null);
@@ -234,7 +257,7 @@ export function Composer(props: ComposerProps) {
     const blocks = props.onUnqueue?.(id);
     if (!blocks) return;
     const queued = typedText(blocks);
-    const draft = text.trim();
+    const draft = expandMentions(text, mentions.current).trim();
     const value = queued && draft ? `${queued}\n\n${draft}` : queued || draft;
     recall.current = null;
     showRecalled(value);
@@ -381,35 +404,47 @@ export function Composer(props: ComposerProps) {
           )}
         </div>
       )}
-      <textarea
-        ref={ref}
-        class="agenthub-composer-input"
-        rows={3}
-        value={text}
-        disabled={disabled}
-        aria-autocomplete="list"
-        aria-controls={suggestions ? LISTBOX_ID : undefined}
-        aria-activedescendant={activeId}
-        aria-label={t('composerLabel')}
-        placeholder={t(busy ? 'composerPlaceholderBusy' : 'composerPlaceholder', {
-          agent: agentLabel,
-        })}
-        onInput={(event) => {
-          const el = event.currentTarget;
-          // Editing a recalled prompt makes it the new draft.
-          recall.current = null;
-          setText(el.value);
-          updateSuggestions(el.value, el.selectionStart);
-        }}
-        onKeyDown={onKeyDown}
-        onPaste={(event) => {
-          const files = pastedImages(event.clipboardData);
-          if (files.length === 0) return;
-          event.preventDefault();
-          void attach(files);
-        }}
-        onBlur={() => setSuggestions(null)}
-      />
+      <div class="agenthub-composer-field">
+        {/* Draws a tint behind each mention; the textarea above keeps the text, caret and selection. */}
+        <div ref={highlight} class="agenthub-composer-highlight" aria-hidden="true">
+          {mentionSegments(text, mentions.current).map((part, index) =>
+            index % 2 === 0 ? part : <mark key={index}>{part}</mark>,
+          )}
+          {/* A trailing newline only takes up a line when something follows it. */}{' '}
+        </div>
+        <textarea
+          ref={ref}
+          class="agenthub-composer-input"
+          rows={3}
+          value={text}
+          disabled={disabled}
+          aria-autocomplete="list"
+          aria-controls={suggestions ? LISTBOX_ID : undefined}
+          aria-activedescendant={activeId}
+          aria-label={t('composerLabel')}
+          placeholder={t(busy ? 'composerPlaceholderBusy' : 'composerPlaceholder', {
+            agent: agentLabel,
+          })}
+          onInput={(event) => {
+            const el = event.currentTarget;
+            // Editing a recalled prompt makes it the new draft.
+            recall.current = null;
+            setText(el.value);
+            updateSuggestions(el.value, el.selectionStart);
+          }}
+          onKeyDown={onKeyDown}
+          onPaste={(event) => {
+            const files = pastedImages(event.clipboardData);
+            if (files.length === 0) return;
+            event.preventDefault();
+            void attach(files);
+          }}
+          onScroll={(event) => {
+            if (highlight.current) highlight.current.scrollTop = event.currentTarget.scrollTop;
+          }}
+          onBlur={() => setSuggestions(null)}
+        />
+      </div>
       <div class="agenthub-composer-toolbar">
         <input
           ref={fileInput}

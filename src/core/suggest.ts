@@ -121,15 +121,24 @@ function agentSuggestions(
   });
 }
 
-/** Replaces the trigger token with the chosen value; returns the new text and cursor position. */
+/**
+ * Replaces the trigger token with the chosen value; returns the new text and cursor position. A
+ * note goes in as `@[[path]]`, or as `@label` when a short label is given (ADR-042).
+ */
 export function applySuggestion(
   text: string,
   cursor: number,
   trigger: Trigger,
   value: string,
+  label?: string,
 ): { text: string; cursor: number } {
   const prefix = { note: '@[[', command: '/', skill: '$' }[trigger.kind];
-  const insert = trigger.kind === 'note' ? `${prefix}${value}]] ` : `${prefix}${value} `;
+  const insert =
+    trigger.kind !== 'note'
+      ? `${prefix}${value} `
+      : label !== undefined
+        ? `@${label} `
+        : `${prefix}${value}]] `;
   const next = text.slice(0, trigger.start) + insert + text.slice(cursor);
   return { text: next, cursor: trigger.start + insert.length };
 }

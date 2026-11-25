@@ -1,3 +1,4 @@
+import { shortenMentions } from '../../core/PromptBuilder';
 import type { PromptBlock, QueuedMessage } from '../../core/types';
 import { t } from '../../i18n';
 import { Icon } from './Icon';
@@ -32,7 +33,7 @@ export function QueuedMessages({
       </p>
       <ol class="agenthub-queue-list">
         {queue.map((message, index) => {
-          const text = typedText(message.blocks);
+          const text = shortenMentions(typedText(message.blocks));
           const images = message.blocks.filter((block) => block.type === 'image').length;
           const n = index + 1;
           return (

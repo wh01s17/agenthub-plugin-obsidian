@@ -107,8 +107,43 @@ describe('composer suggestions (T3.3/T3.4)', () => {
     expect(option.getAttribute('aria-selected')).toBe('true');
     expect(input.getAttribute('aria-activedescendant')).toBe(option.id);
     fireEvent.keyDown(input, { key: 'Enter' });
-    await waitFor(() => expect(input.value).toBe('mira @[[Notas/Ideas.md]] '));
+    // The box shows a short label (ADR-042); the agent gets the full mention.
+    await waitFor(() => expect(input.value).toBe('mira @Ideas '));
     expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
+  it('sends a short @label as the full mention and recalls it short', async () => {
+    const seen: PromptBlock[][] = [];
+    const { host, sessions } = makeViewHost(({ blocks }) => {
+      seen.push(blocks);
+      return 'end_turn';
+    });
+    host.notes.listPaths = () => ['Notas/Ideas.md', 'Bienvenida.md'];
+    render(
+      <App
+        host={host}
+        session={sessions.create('claude-acp') ?? null}
+        onAgentChange={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    const input = screen.getByRole<HTMLTextAreaElement>('textbox', {
+      name: 'Message to the agent',
+    });
+    input.value = 'mira @ide';
+    input.setSelectionRange(9, 9);
+    fireEvent.input(input);
+    await screen.findByRole('option', { name: 'Notas/Ideas.md' });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(input.value).toBe('mira @Ideas '));
+    expect(document.querySelector('.agenthub-composer-highlight mark')?.textContent).toBe('@Ideas');
+    fireEvent.input(input, { target: { value: 'mira @Ideas y resume' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() => expect(seen).toHaveLength(1));
+    expect(seen[0]?.[0]).toEqual({ type: 'text', text: 'mira @[[Notas/Ideas.md]] y resume' });
+    // Up brings the prompt back with the short label, and it still sends the full mention.
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
+    await waitFor(() => expect(input.value).toBe('mira @Ideas y resume'));
   });
 
   it('scrolls the highlighted suggestion into view while moving with the arrows', async () => {

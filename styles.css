@@ -880,8 +880,42 @@
     box-shadow 120ms ease;
 }
 
+/* The textarea and the mention highlight behind it share the box and the text metrics. */
+.agenthub-composer-field {
+  position: relative;
+}
+
+.agenthub-app .agenthub-composer :is(.agenthub-composer-input, .agenthub-composer-highlight) {
+  padding: var(--size-4-3) var(--size-4-3) var(--size-4-1);
+  border: none;
+  font-family: inherit;
+  font-size: var(--agenthub-text);
+  line-height: var(--line-height-normal);
+  letter-spacing: normal;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  /* Same wrap width whether or not the textarea shows a scrollbar. */
+  scrollbar-gutter: stable;
+}
+
+/* Only the tint of each mention shows: its text stays transparent under the textarea's. */
+.agenthub-composer-highlight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: transparent;
+  pointer-events: none;
+}
+
+.agenthub-composer-highlight mark {
+  border-radius: var(--radius-s);
+  background-color: color-mix(in srgb, var(--agenthub-accent) 28%, transparent);
+  color: transparent;
+}
+
 /* The box shows focus; the textarea inside stays flat and grows with its content. */
 .agenthub-app .agenthub-composer .agenthub-composer-input {
+  position: relative;
   display: block;
   width: 100%;
   min-height: 2.5rem;
