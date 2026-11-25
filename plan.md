@@ -41,7 +41,7 @@
 | Campo | Valor |
 |---|---|
 | Fase actual | **0.9.0 publicada como Latest** (Fase 14: menciones de notas legibles, ADR-042). |
-| Próxima tarea | revisar los PR diarios `bot/bump-adapters` (e2e local) y etiquetar `release`. Opcional: actualizar las acciones `@v4` (Node 20 obsoleto). |
+| Próxima tarea | Revisar los PR diarios `bot/bump-adapters` (e2e local) y etiquetar `release`. Opcional: actualizar las acciones `@v4` (Node 20 obsoleto). |
 | Tareas en paralelo posibles | Fase 5 solo si aparece una limitación real de ACP (ADR-025). |
 | Bloqueos | Ninguno. |
 | Última actualización | 2026-11-25 — Release 0.9.0 (Fase 14). Claude (Opus 5.5). |
