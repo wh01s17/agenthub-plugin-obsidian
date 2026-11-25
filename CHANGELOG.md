@@ -4,6 +4,8 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-25
+
 ### Changed
 
 - Notes cited in a message show as compact chips with the file name (full path on hover, click to open) instead of the raw `@[[path]]` text and a "Note: …" line for each one.
@@ -200,7 +202,9 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 Version 0.0.1 was scaffolding. Version 0.0.2 had a tag and a draft that was later deleted. Neither was a public release.
 
-[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/wh01s17/agenthub-plugin-obsidian/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.9.0
+[0.8.1]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.8.1
 [0.8.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.8.0
 [0.7.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.7.0
 [0.6.0]: https://github.com/wh01s17/agenthub-plugin-obsidian/releases/tag/0.6.0
