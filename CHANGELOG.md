@@ -4,6 +4,11 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Changed
+
+- Notes cited in a message show as compact chips with the file name (full path on hover, click to open) instead of the raw `@[[path]]` text and a "Note: …" line for each one.
+- Picking a note with `@` writes a short `@name` in the message box (the full path only when two notes share a name); the agent still gets the full link. Mentions are highlighted in the box. Tab titles use the short name too.
+
 ## [0.8.1] - 2026-11-24
 
 ### Fixed
