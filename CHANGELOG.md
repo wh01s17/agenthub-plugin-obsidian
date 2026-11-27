@@ -4,6 +4,11 @@ Notable changes to AgentHub. Versions follow the release policy in `plan.md` §8
 
 ## [Unreleased]
 
+### Changed
+
+- Codex adapter (`@agentclientprotocol/codex-acp`) updated to 2.12.1.
+- Claude Code adapter (`@agentclientprotocol/claude-agent-acp`) updated to 0.113.0.
+
 ## [0.9.0] - 2026-11-25
 
 ### Changed
